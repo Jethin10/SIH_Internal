@@ -10,7 +10,7 @@ This file maps the architecture document to the code that exists. It separates t
 | DOM, form, ARIA, open Shadow DOM, and permitted iframe perception | Implemented | `content/content-script.js`, `background/service-worker.js` |
 | Incremental privacy graph, mutation tracking, IDs, hashes, versions | Implemented | `content/content-script.js` |
 | Immediate pending-mutation flush before context or action use | Implemented | `content/content-script.js` |
-| Deterministic PII and Indian identifier rules | Implemented subset suitable for MVP | `lib/pii.js` |
+| Deterministic PII and Indian identifier rules | Implemented subset with contextual/OCR normalization and frozen external regression baselines | `lib/pii.js`, `tests/pii-contextual.json`, `tests/pii-independent.json` |
 | User vault matching and blind private-value execution | Implemented | `lib/pii.js`, `content/content-script.js` |
 | Random 96-bit, origin and task-scoped capabilities with field, action, expiry, and use checks | Implemented | `lib/pii.js`, `background/service-worker.js` |
 | Task relevance and local disclosure policy | Implemented heuristic | `content/content-script.js` |
@@ -24,7 +24,7 @@ This file maps the architecture document to the code that exists. It separates t
 | Audit/privacy receipt panel | Implemented | `sidepanel`, `GET_AUDIT` flow |
 | Latency and context-size instrumentation | Implemented for scan, mutation, context build, and OCR | `content/content-script.js`, `background/service-worker.js` |
 | One local visual fallback demonstration | Implemented and tested with Canvas OCR and a visibly masked local screenshot | `visual`, `tests/integration.html` |
-| Five SIH evaluation criteria | Implemented as reproducible synthetic/local measurements with explicit limitations | `tests/run-evaluation.js`, `artifacts/` |
+| Five SIH evaluation criteria | Implemented as reproducible generated, external-synthetic, and local measurements with explicit limitations | `tests/run-evaluation.js`, `artifacts/` |
 
 ## Implemented defenses beyond the first prototype
 

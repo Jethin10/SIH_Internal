@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-05T05:44:39.172Z",
+  "generatedAt": "2026-09-05T06:17:40.659Z",
   "environment": {
     "platform": "darwin",
     "arch": "arm64",
-    "node": "v22.23.2",
+    "node": "v25.8.1",
     "cpu": "Apple M4",
     "logicalCpus": 10,
     "systemMemoryGb": 16
   },
   "scope": {
-    "pii": "Generated synthetic regression corpus. Not a real-world accuracy estimate.",
+    "pii": "Generated regression corpus plus a separately reported external synthetic test split. Neither is a real-world population estimate.",
     "browser": "Local deterministic fixtures in a clean temporary Chromium profile.",
     "latency": "Warm runtime-message round trip measured inside the browser with performance.now(). Debugger discovery/result transfer, cold initial scan and OCR are reported separately."
   },
@@ -77,6 +77,471 @@
     },
     "note": "Generated synthetic regression corpus. This proves deterministic rule coverage, not real-world PII accuracy."
   },
+  "independentPii": {
+    "generatedAt": "2026-09-05T06:17:10.377Z",
+    "provenance": {
+      "dataset": "gretelai/synthetic_pii_finance_multilingual",
+      "url": "https://huggingface.co/datasets/gretelai/synthetic_pii_finance_multilingual",
+      "revision": "7b844d16738527a04264f50214cb426a4cea0897",
+      "config": "default",
+      "split": "test",
+      "license": "Apache-2.0",
+      "authorship": "Created independently by Gretel; no project-generated examples are included.",
+      "selection": "Deterministic scan of source rows 1000-1999; English only; earliest non-empty labelled spans up to fixed per-label quotas. Rows 0-499 were used only to understand source conventions and are excluded from this evaluation fixture.",
+      "transformation": "Each positive is a whitespace-normalized source excerpt with up to 96 Unicode code points of context on either side. Negatives are the first 20 English source rows with no labelled spans, truncated to 240 code points.",
+      "scope": "Labels are mapped only where this detector has a corresponding privacy type. Unmapped dataset labels are excluded. PHONE and PASSPORT retain the project's India-specific validation, and CARD retains Luhn validation, so misses outside those formats remain visible.",
+      "importedAt": "2026-09-05T06:07:50.301Z"
+    },
+    "cases": 119,
+    "positives": 99,
+    "negativeDocuments": 20,
+    "tp": 42,
+    "fn": 57,
+    "recall": 0.42424242424242425,
+    "negativeFalsePositives": 0,
+    "negativeDocumentsWithFindings": 0,
+    "cleanNegativeRate": 1,
+    "perType": {
+      "ADDRESS": {
+        "expected": 20,
+        "detected": 1,
+        "missed": 19
+      },
+      "IP": {
+        "expected": 8,
+        "detected": 8,
+        "missed": 0
+      },
+      "PERSON": {
+        "expected": 25,
+        "detected": 4,
+        "missed": 21
+      },
+      "PHONE": {
+        "expected": 15,
+        "detected": 6,
+        "missed": 9
+      },
+      "EMAIL": {
+        "expected": 15,
+        "detected": 14,
+        "missed": 1
+      },
+      "CARD": {
+        "expected": 8,
+        "detected": 6,
+        "missed": 2
+      },
+      "PASSPORT": {
+        "expected": 8,
+        "detected": 3,
+        "missed": 5
+      }
+    },
+    "misses": [
+      {
+        "id": "gretel-test-1000-1",
+        "sourceRow": 1000,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "Toronto, Canada"
+      },
+      {
+        "id": "gretel-test-1012-1",
+        "sourceRow": 1012,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Alessia V. Roccabonella"
+      },
+      {
+        "id": "gretel-test-1012-2",
+        "sourceRow": 1012,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "9494 Tammy Forest, 95521, Seanville"
+      },
+      {
+        "id": "gretel-test-1013-1",
+        "sourceRow": 1013,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "893 Franco Plains, Apt. 277"
+      },
+      {
+        "id": "gretel-test-1013-2",
+        "sourceRow": 1013,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Giuseppina I. Sforza"
+      },
+      {
+        "id": "gretel-test-1016-0",
+        "sourceRow": 1016,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Florencia R. Huertas"
+      },
+      {
+        "id": "gretel-test-1016-1",
+        "sourceRow": 1016,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "959 Matthew Forge, Apt. 1676"
+      },
+      {
+        "id": "gretel-test-1016-2",
+        "sourceRow": 1016,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "001-397-680-4345 x3930"
+      },
+      {
+        "id": "gretel-test-1018-1",
+        "sourceRow": 1018,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Renée Wagner-Langlois"
+      },
+      {
+        "id": "gretel-test-1018-4",
+        "sourceRow": 1018,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "6905 Emily Mountain, 24041, Port Jeffrey"
+      },
+      {
+        "id": "gretel-test-1019-1",
+        "sourceRow": 1019,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "3838 David Ville"
+      },
+      {
+        "id": "gretel-test-1019-3",
+        "sourceRow": 1019,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Lorraine Lagarde-Cost"
+      },
+      {
+        "id": "gretel-test-1020-2",
+        "sourceRow": 1020,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "45, Baker Street, London, NW1 6XE"
+      },
+      {
+        "id": "gretel-test-1022-1",
+        "sourceRow": 1022,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "775 Rodriguez Creek, Brittanyhaven"
+      },
+      {
+        "id": "gretel-test-1025-4",
+        "sourceRow": 1025,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "123, High Street, London, UK"
+      },
+      {
+        "id": "gretel-test-1026-0",
+        "sourceRow": 1026,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Adélaïde Dupont-Boucher"
+      },
+      {
+        "id": "gretel-test-1026-1",
+        "sourceRow": 1026,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "15267 Michael Locks, 07193, Fergusonton"
+      },
+      {
+        "id": "gretel-test-1026-9",
+        "sourceRow": 1026,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "1-8"
+      },
+      {
+        "id": "gretel-test-1029-0",
+        "sourceRow": 1029,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "John Doe"
+      },
+      {
+        "id": "gretel-test-1029-6",
+        "sourceRow": 1029,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "(123) 456-7890"
+      },
+      {
+        "id": "gretel-test-1029-7",
+        "sourceRow": 1029,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "123456789"
+      },
+      {
+        "id": "gretel-test-1034-1",
+        "sourceRow": 1034,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Severiano O. Porcel"
+      },
+      {
+        "id": "gretel-test-1034-2",
+        "sourceRow": 1034,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "48 Vicolo Segrè, Moio Alcantara"
+      },
+      {
+        "id": "gretel-test-1038-2",
+        "sourceRow": 1038,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "123 Main Street, Toronto, Ontario, Canada"
+      },
+      {
+        "id": "gretel-test-1039-0",
+        "sourceRow": 1039,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Silvestro Mannoia-Scotti"
+      },
+      {
+        "id": "gretel-test-1044-1",
+        "sourceRow": 1044,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "123 Main Street, Toronto, ON, Canada, M5J 1E3"
+      },
+      {
+        "id": "gretel-test-1044-2",
+        "sourceRow": 1044,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "John Doe"
+      },
+      {
+        "id": "gretel-test-1044-6",
+        "sourceRow": 1044,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "456 Park Lane, London, UK, W1A 2AB"
+      },
+      {
+        "id": "gretel-test-1044-7",
+        "sourceRow": 1044,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Jane Smith"
+      },
+      {
+        "id": "gretel-test-1045-2",
+        "sourceRow": 1045,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Malena C. Ferrándiz"
+      },
+      {
+        "id": "gretel-test-1045-3",
+        "sourceRow": 1045,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "7404 Burch Pass, 30095, Kimberlyburgh"
+      },
+      {
+        "id": "gretel-test-1045-4",
+        "sourceRow": 1045,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "1-800-123-4567"
+      },
+      {
+        "id": "gretel-test-1049-0",
+        "sourceRow": 1049,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Eduard Reuter"
+      },
+      {
+        "id": "gretel-test-1049-1",
+        "sourceRow": 1049,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "Vicolo Lucio, 2"
+      },
+      {
+        "id": "gretel-test-1049-2",
+        "sourceRow": 1049,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Confirmor"
+      },
+      {
+        "id": "gretel-test-1050-3",
+        "sourceRow": 1050,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Célina Renard-Muller"
+      },
+      {
+        "id": "gretel-test-1050-4",
+        "sourceRow": 1050,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "7827 Crawford Alley, 83924, West Jonathanton"
+      },
+      {
+        "id": "gretel-test-1051-1",
+        "sourceRow": 1051,
+        "sourceLabel": "name",
+        "type": "PERSON",
+        "entity": "Amico Antonietta Loredan"
+      },
+      {
+        "id": "gretel-test-1051-2",
+        "sourceRow": 1051,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "0667 Scott Brooks, 40509, East Lindseyborough"
+      },
+      {
+        "id": "gretel-test-1052-1",
+        "sourceRow": 1052,
+        "sourceLabel": "street_address",
+        "type": "ADDRESS",
+        "entity": "6040 John Spring"
+      },
+      {
+        "id": "gretel-test-1068-4",
+        "sourceRow": 1068,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "(+44) 123-456-7890"
+      },
+      {
+        "id": "gretel-test-1075-4",
+        "sourceRow": 1075,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "1-800-123-4567"
+      },
+      {
+        "id": "gretel-test-1084-2",
+        "sourceRow": 1084,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "+1-800-123-4567"
+      },
+      {
+        "id": "gretel-test-1085-1",
+        "sourceRow": 1085,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "+1-800-123-4567"
+      },
+      {
+        "id": "gretel-test-1095-0",
+        "sourceRow": 1095,
+        "sourceLabel": "first_name",
+        "type": "PERSON",
+        "entity": "Inmaculada"
+      },
+      {
+        "id": "gretel-test-1095-3",
+        "sourceRow": 1095,
+        "sourceLabel": "phone_number",
+        "type": "PHONE",
+        "entity": "1-800-123-4567"
+      },
+      {
+        "id": "gretel-test-1174-1",
+        "sourceRow": 1174,
+        "sourceLabel": "email",
+        "type": "EMAIL",
+        "entity": "[xcastelli@vasari.it]"
+      },
+      {
+        "id": "gretel-test-1293-0",
+        "sourceRow": 1293,
+        "sourceLabel": "passport_number",
+        "type": "PASSPORT",
+        "entity": "379530845"
+      },
+      {
+        "id": "gretel-test-1302-0",
+        "sourceRow": 1302,
+        "sourceLabel": "first_name",
+        "type": "PERSON",
+        "entity": "Michele"
+      },
+      {
+        "id": "gretel-test-1316-10",
+        "sourceRow": 1316,
+        "sourceLabel": "credit_card_number",
+        "type": "CARD",
+        "entity": "3022 3330 5753"
+      },
+      {
+        "id": "gretel-test-1335-1",
+        "sourceRow": 1335,
+        "sourceLabel": "first_name",
+        "type": "PERSON",
+        "entity": "Andreas"
+      },
+      {
+        "id": "gretel-test-1426-3",
+        "sourceRow": 1426,
+        "sourceLabel": "credit_card_number",
+        "type": "CARD",
+        "entity": "3455-7250-6677-742"
+      },
+      {
+        "id": "gretel-test-1470-4",
+        "sourceRow": 1470,
+        "sourceLabel": "passport_number",
+        "type": "PASSPORT",
+        "entity": "489290094"
+      },
+      {
+        "id": "gretel-test-1482-1",
+        "sourceRow": 1482,
+        "sourceLabel": "first_name",
+        "type": "PERSON",
+        "entity": "Roy"
+      },
+      {
+        "id": "gretel-test-1530-4",
+        "sourceRow": 1530,
+        "sourceLabel": "passport_number",
+        "type": "PASSPORT",
+        "entity": "970787082"
+      },
+      {
+        "id": "gretel-test-1573-2",
+        "sourceRow": 1573,
+        "sourceLabel": "passport_number",
+        "type": "PASSPORT",
+        "entity": "211786459"
+      },
+      {
+        "id": "gretel-test-1767-0",
+        "sourceRow": 1767,
+        "sourceLabel": "passport_number",
+        "type": "PASSPORT",
+        "entity": "573126808"
+      }
+    ],
+    "negativeFindings": [],
+    "note": "External independently authored synthetic test data. Recall is exact type-and-value recall on mapped labels; clean-negative rate is the share of source documents labelled with no PII where the detector also returns no findings. It is reported separately from the generated regression corpus."
+  },
   "e2e": {
     "ok": true,
     "extensionContext": "StrawHats Privacy Gateway",
@@ -84,15 +549,15 @@
     "sensitiveNodes": 4,
     "safeElements": 18,
     "rawBytes": 2384,
-    "safeBytes": 6705,
+    "safeBytes": 6673,
     "visualLines": 7,
-    "visualOcrMs": 647,
+    "visualOcrMs": 650,
     "visualRedactions": 2,
     "visualExpectedTargets": 3,
     "visualRecoveredTargets": 3,
     "visualDetectedSensitiveLines": 2,
     "visualMaskCoveragePct": 100,
-    "mockTaskLatencyMs": 91.1,
+    "mockTaskLatencyMs": 86.1,
     "searchFilled": "privacy gateway",
     "privateCapabilityFilled": "vault.user@example.com",
     "userEditVersionAdvanced": 3,
@@ -110,28 +575,28 @@
     "egressStatus": "verified_zero"
   },
   "benchmarks": {
-    "generatedAt": "2026-09-05T05:44:39.164Z",
+    "generatedAt": "2026-09-05T06:17:40.653Z",
     "platform": "darwin",
     "arch": "arm64",
-    "node": "v22.23.2",
+    "node": "v25.8.1",
     "results": [
       {
         "nodes": 1000,
         "graphNodes": 1003,
         "graphComplete": true,
         "pendingScanNodes": 0,
-        "initialScanMs": 31,
-        "contextBuildMs": 1,
-        "warmP50Ms": 4.4000000059604645,
-        "warmP95Ms": 4.800000011920929,
-        "warmP99Ms": 5.199999988079071,
-        "debuggerRoundTripP95Ms": 9.493708999999996,
+        "initialScanMs": 77.5,
+        "contextBuildMs": 1.0999999940395355,
+        "warmP50Ms": 4.5999999940395355,
+        "warmP95Ms": 5.600000023841858,
+        "warmP99Ms": 13.300000011920929,
+        "debuggerRoundTripP95Ms": 9.982167000000004,
         "timingScope": "Browser-clock runtime message round trip; debugger discovery and result transfer reported separately",
-        "mutationMs": 0.5,
+        "mutationMs": 0.5999999940395355,
         "changed": 10,
         "reprocessed": 10,
         "rawBytes": 133294,
-        "safeBytes": 63040,
+        "safeBytes": 63057,
         "graphApproxBytes": 207516,
         "reductionPct": 52.7,
         "trials": 25
@@ -141,18 +606,18 @@
         "graphNodes": 5003,
         "graphComplete": true,
         "pendingScanNodes": 0,
-        "initialScanMs": 117.30000001192093,
-        "contextBuildMs": 3.7999999821186066,
-        "warmP50Ms": 4.5,
-        "warmP95Ms": 4.799999982118607,
-        "warmP99Ms": 4.800000011920929,
-        "debuggerRoundTripP95Ms": 9.070457999999974,
+        "initialScanMs": 181.5,
+        "contextBuildMs": 6.5,
+        "warmP50Ms": 5.199999988079071,
+        "warmP95Ms": 8.699999988079071,
+        "warmP99Ms": 8.800000011920929,
+        "debuggerRoundTripP95Ms": 16.482250000000022,
         "timingScope": "Browser-clock runtime message round trip; debugger discovery and result transfer reported separately",
-        "mutationMs": 0.800000011920929,
+        "mutationMs": 1.199999988079071,
         "changed": 10,
         "reprocessed": 10,
         "rawBytes": 673294,
-        "safeBytes": 63556,
+        "safeBytes": 63528,
         "graphApproxBytes": 1043516,
         "reductionPct": 90.6,
         "trials": 25
@@ -162,18 +627,18 @@
         "graphNodes": 10003,
         "graphComplete": true,
         "pendingScanNodes": 0,
-        "initialScanMs": 238.39999997615814,
-        "contextBuildMs": 6.800000011920929,
-        "warmP50Ms": 4.300000011920929,
-        "warmP95Ms": 4.699999988079071,
-        "warmP99Ms": 5,
-        "debuggerRoundTripP95Ms": 9.076790999999957,
+        "initialScanMs": 681.8999999761581,
+        "contextBuildMs": 8.300000011920929,
+        "warmP50Ms": 7.5999999940395355,
+        "warmP95Ms": 9.5,
+        "warmP99Ms": 9.599999994039536,
+        "debuggerRoundTripP95Ms": 17.052999999999884,
         "timingScope": "Browser-clock runtime message round trip; debugger discovery and result transfer reported separately",
-        "mutationMs": 0.7000000178813934,
+        "mutationMs": 1.800000011920929,
         "changed": 10,
         "reprocessed": 10,
         "rawBytes": 1350294,
-        "safeBytes": 63742,
+        "safeBytes": 63755,
         "graphApproxBytes": 2090516,
         "reductionPct": 95.3,
         "trials": 25
@@ -183,14 +648,14 @@
         "graphNodes": 20003,
         "graphComplete": true,
         "pendingScanNodes": 0,
-        "initialScanMs": 280.80000001192093,
-        "contextBuildMs": 14,
-        "warmP50Ms": 4.4000000059604645,
-        "warmP95Ms": 5.200000017881393,
-        "warmP99Ms": 5.299999982118607,
-        "debuggerRoundTripP95Ms": 9.869709000000057,
+        "initialScanMs": 497.40000000596046,
+        "contextBuildMs": 20.700000017881393,
+        "warmP50Ms": 8.700000017881393,
+        "warmP95Ms": 9.699999988079071,
+        "warmP99Ms": 9.800000011920929,
+        "debuggerRoundTripP95Ms": 18.115334000000075,
         "timingScope": "Browser-clock runtime message round trip; debugger discovery and result transfer reported separately",
-        "mutationMs": 0.800000011920929,
+        "mutationMs": 1.699999988079071,
         "changed": 10,
         "reprocessed": 10,
         "rawBytes": 2740294,
@@ -203,14 +668,21 @@
   },
   "sihCriteria": {
     "piiDetection": {
-      "metric": "precision / recall / F1 on generated held-out regression cases",
+      "metric": "generated regression score and external exact entity recall, reported separately",
       "value": {
-        "precision": 1,
-        "recall": 1,
-        "f1": 1,
-        "cases": 1254
+        "generated": {
+          "precision": 1,
+          "recall": 1,
+          "f1": 1,
+          "cases": 1254
+        },
+        "independent": {
+          "recall": 0.42424242424242425,
+          "cleanNegativeRate": 1,
+          "cases": 119
+        }
       },
-      "limitation": "Synthetic deterministic corpus; not a real-world population estimate."
+      "limitation": "Both corpora are synthetic. The external score uses only mapped Gretel test labels and exposes current deterministic-rule limits for arbitrary names, addresses, and non-Indian formats."
     },
     "visualContextAccuracy": {
       "metric": "labelled canvas text targets recovered by local OCR",
@@ -233,10 +705,10 @@
     "latency": {
       "metric": "warm context p95 / local OCR / mock-provider task loop",
       "value": {
-        "warmContextP95Ms": 5.2,
+        "warmContextP95Ms": 9.7,
         "warmP95BudgetMs": 50,
-        "visualOcrMs": 647,
-        "mockTaskLatencyMs": 91.1
+        "visualOcrMs": 650,
+        "mockTaskLatencyMs": 86.1
       },
       "limitation": "Local machine and deterministic fixtures; network and debugger transport are excluded. Hosted CI retains a 300 ms scheduling budget; developer runs use 50 ms."
     },
@@ -250,15 +722,16 @@
     }
   },
   "summary": {
-    "maxWarmP95Ms": 5.2,
+    "maxWarmP95Ms": 9.7,
     "warmP95BudgetMs": 50,
-    "maxContextBuildMs": 14,
+    "maxContextBuildMs": 20.7,
     "minLargePageReductionPct": 90.6,
     "maxGraphApproxMb": 4.02,
     "allGatesPassed": true
   },
   "gates": {
     "syntheticPiiRegression": true,
+    "independentPiiBaseline": true,
     "adversarialBrowserE2E": true,
     "zeroKnownRawPiiEgress": true,
     "dangerousTaskScopeFalseAllows": true,

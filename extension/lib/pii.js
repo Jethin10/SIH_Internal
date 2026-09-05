@@ -2,8 +2,8 @@
   "use strict";
 
   const TYPE_DEFS = [
-    { type: "EMAIL", regex: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi },
-    { type: "PAN", regex: /\b[A-Z]{5}[0-9]{4}[A-Z]\b/g },
+    { type: "EMAIL", regex: /\b[A-Z0-9._%+-]+[ \t]*@[ \t]*[A-Z0-9.-]+\.[A-Z]{2,}\b/gi },
+    { type: "PAN", regex: /\b[A-Z]{5}[ \t-]*[0-9]{4}[ \t-]*[A-Z]\b/gi },
     { type: "IFSC", regex: /\b[A-Z]{4}0[A-Z0-9]{6}\b/g },
     { type: "PASSPORT", regex: /\b[A-Z][1-9][0-9]{6}\b/g },
     { type: "VOTER_ID", regex: /\b[A-Z]{3}[0-9]{7}\b/g },
@@ -27,8 +27,12 @@
     [2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]
   ];
 
+  function normalizeDetectionText(value) {
+    return String(value || "").replace(/[०-९]/g, (digit) => String(digit.charCodeAt(0) - 0x0966));
+  }
+
   function normalizeDigits(value) {
-    return String(value || "").replace(/\D/g, "");
+    return normalizeDetectionText(value).replace(/\D/g, "");
   }
 
   function luhn(value) {
@@ -198,32 +202,128 @@
     }
   }
 
-  function addMatch(matches, type, value, index, priority) {
-    if (!value || index < 0 || !validMatch(type, value)) return;
+  function addMatch(matches, type, value, index, priority, labelledOverride) {
+    if (!value || index < 0 || (!labelledOverride && !validMatch(type, value))) return;
     const end = index + value.length;
     const overlaps = matches.some((item) => index < item.end && end > item.index);
     if (overlaps) return;
     matches.push({ type, value, index, end, priority: priority || 0 });
   }
 
+  function phoneLooksLikeCount(input, index, end) {
+    const before = input.slice(Math.max(0, index - 48), index).toLocaleLowerCase();
+    const after = input.slice(end, Math.min(input.length, end + 32)).toLocaleLowerCase();
+    const phoneCue = /(?:phone|mobile|contact|call|tel|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)?\s*$/iu.test(before);
+    if (phoneCue) return false;
+    return /(?:dataset|table|report|count|contains?)\s*$/iu.test(before)
+      || /^\s*(?:records?|rows?|entries|items|samples|users)\b/iu.test(after);
+  }
+
+  function addContextualMatches(input, normalizedInput, candidates) {
+    const ocrPhone = /(?:phone|mobile|contact|call|tel(?:ephone)?|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)?\s*(?:\+?91[ -]?)?([6-9][0-9ILO]{4}[ -]?[0-9ILO]{5})/giu;
+    let match;
+    while ((match = ocrPhone.exec(normalizedInput)) !== null) {
+      const normalized = match[1].replace(/[ILO]/gi, (value) => ({ I: "1", L: "1", O: "0" })[value.toUpperCase()]).replace(/\D/g, "");
+      const ambiguous = (match[1].match(/[ILO]/gi) || []).length;
+      if (normalized.length === 10 && /^[6-9]/.test(normalized) && ambiguous > 0 && ambiguous <= 2) {
+        const index = match.index + match[0].lastIndexOf(match[1]);
+        candidates.push({ type: "PHONE", value: input.slice(index, index + match[1].length), index, end: index + match[1].length, priority: 7 });
+      }
+      if (match.index === ocrPhone.lastIndex) ocrPhone.lastIndex += 1;
+    }
+
+    const labelledPhone = /(?:phone(?:\s+number)?|mobile(?:\s+number)?|telephone|contact(?:\s+number)?|tel|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)\s*(\+?(?:\(\d{2,4}\)|\d)[\d(). -]{4,}\d)/giu;
+    while ((match = labelledPhone.exec(normalizedInput)) !== null) {
+      const value = match[1].trim();
+      const digits = value.replace(/\D/g, "");
+      if (digits.length >= 7 && digits.length <= 15) {
+        const index = match.index + match[0].lastIndexOf(match[1]) + match[1].indexOf(value);
+        candidates.push({ type: "PHONE", value: input.slice(index, index + value.length), index, end: index + value.length, priority: 7 });
+      }
+      if (match.index === labelledPhone.lastIndex) labelledPhone.lastIndex += 1;
+    }
+
+    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?))?|travel\s+document)\s*(?::|is|-)\s*([A-Z0-9][A-Z0-9-]{5,11})\b/giu;
+    while ((match = labelledPassport.exec(input)) !== null) {
+      const value = match[1];
+      const index = match.index + match[0].lastIndexOf(value);
+      candidates.push({ type: "PASSPORT", value, index, end: index + value.length, priority: 7 });
+      if (match.index === labelledPassport.lastIndex) labelledPassport.lastIndex += 1;
+    }
+
+    const labelledCard = /(?:credit\s+card|payment\s+card|card)(?:\s+(?:number|no\.?))?\s*(?::|is|-)\s*((?:\d[ -]?){11,18}\d)/giu;
+    while ((match = labelledCard.exec(input)) !== null) {
+      const value = match[1].trim();
+      const index = match.index + match[0].lastIndexOf(match[1]);
+      candidates.push({ type: "CARD", value, index, end: index + value.length, priority: 7, labelledOverride: true });
+      if (match.index === labelledCard.lastIndex) labelledCard.lastIndex += 1;
+    }
+
+    const streetAddress = /\b\d{1,6}\s+[\p{L}\p{M}0-9.'’/-]+(?:\s+[\p{L}\p{M}0-9.'’/-]+){0,5}\s+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Terrace|Way|Boulevard|Blvd|Highway|Hwy|Motorway|Bypass|Lodge|Lakes|Villages|Parkways|Throughway|Tunnel|Path|Trafficway|Valley|Plains|Mission|Pines|Forks?|Circles?|Drives?|Union|Hill|Crest|Course|Extensions?|Gardens?|Groves?|Manor|Meadows|Junctions?|Centers?|Trace|Summit|Trail|Turnpike|Station|Plaza|Square|Key|Cape|Isle|Locks?|Shoals?|Ports?|Views?|Heights?|Corners?|Club)(?:,?\s+(?:Apt|Apartment|Suite|Unit)\.?\s*[A-Z0-9-]+)?(?:,\s*[\p{L}\p{M}.'’ -]{2,32}){0,2}\b/giu;
+    while ((match = streetAddress.exec(input)) !== null) {
+      candidates.push({ type: "ADDRESS", value: match[0], index: match.index, end: match.index + match[0].length, priority: 6 });
+      if (match.index === streetAddress.lastIndex) streetAddress.lastIndex += 1;
+    }
+
+    const labelledValues = [
+      ["PERSON", /(?:[Pp]atient|[Bb]eneficiary|[Rr]ecipient|[Aa]ccount [Hh]older|Full Legal Name|Full Name|Applicant Name|Provider Name|Account Name|Cardholder Name|Customer Name|[Bb]orrower|[Ss]hipper|[Uu]ser|[Ss]ignature)\s*(?:name\s*)?(?:is|:|-)\s*((?:Dr\.?\s+)?[\p{Lu}][\p{L}\p{M}'’-]{1,}(?:[ \t]+[\p{Lu}][\p{L}\p{M}'’-]{1,}){0,3}?)(?=[ \t]+(?:Date|Address|Phone|Email|Account|Policy|Street|Property|New Loan)\b\s*:|[.,;|\n]|$)/gu],
+      ["PERSON", /\bmy\s+name\s+is\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})/giu],
+      ["PERSON", /\bDear\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})(?=,)/gu],
+      ["PERSON", /(?:मरीज|रोगी|लाभार्थी|प्राप्तकर्ता)\s*(?:का नाम\s*)?(?:है|:|-)\s*([\p{L}\p{M}'’-]{2,}(?:\s+[\p{L}\p{M}'’-]{2,}){1,3})/gu],
+      ["ADDRESS", /(?:Residential address|residential address|Delivery address|delivery address|Home address|home address)\s*(?:is|:|-)\s*([^.;\n]{8,100})/gu],
+      ["ADDRESS", /(?:घर का पता|डिलीवरी पता|आवासीय पता)\s*(?:है|:|-)?\s*([^.;\n]{5,100})/gu],
+      ["HEALTH", /(?:Diagnosis|diagnosis|Medical condition|medical condition|Health condition|health condition|Allergy|allergy)\s*(?:is|:|-)\s*([^.;\n]{3,100})/gu],
+      ["HEALTH", /(?:बीमारी|रोग|स्वास्थ्य स्थिति|एलर्जी)\s*(?:है|:|-)?\s*([^.;\n]{3,100})/gu]
+    ];
+    for (const [type, regex] of labelledValues) {
+      regex.lastIndex = 0;
+      while ((match = regex.exec(input)) !== null) {
+        const value = match[1].trim();
+        if (/^<[A-Z0-9_]+(?::[A-F0-9]{6,})?>/i.test(value)) continue;
+        if (type === "PERSON" && /^(?:policyholder|borrower|customer|applicant|recipient|beneficiary|patient|user)$/i.test(value)) continue;
+        const index = match.index + match[0].lastIndexOf(match[1]) + match[1].indexOf(value);
+        candidates.push({ type, value, index, end: index + value.length, priority: 6 });
+        if (match.index === regex.lastIndex) regex.lastIndex += 1;
+      }
+    }
+  }
+
   function findPII(text, vault) {
     const input = String(text == null ? "" : text);
     if (!input) return [];
+    const normalizedInput = normalizeDetectionText(input);
     const candidates = [];
     for (const def of TYPE_DEFS) {
       def.regex.lastIndex = 0;
       let match;
-      while ((match = def.regex.exec(input)) !== null) {
+      while ((match = def.regex.exec(normalizedInput)) !== null) {
         if (validMatch(def.type, match[0])) {
+          const end = match.index + match[0].length;
+          if (def.type === "PHONE" && phoneLooksLikeCount(input, match.index, end)) continue;
           candidates.push({
             type: def.type,
-            value: match[0],
+            value: input.slice(match.index, end),
             index: match.index,
-            end: match.index + match[0].length,
+            end,
             priority: def.type === "CARD" || def.type === "AADHAAR" ? 5 : 3
           });
         }
         if (match.index === def.regex.lastIndex) def.regex.lastIndex += 1;
+      }
+    }
+    addContextualMatches(input, normalizedInput, candidates);
+
+    const contextualValues = candidates.filter((item) => item.priority >= 6 && ["PERSON", "ADDRESS", "HEALTH"].includes(item.type));
+    const lowerInput = input.toLocaleLowerCase();
+    for (const item of contextualValues) {
+      const lowerValue = item.value.toLocaleLowerCase();
+      if (lowerValue.length < 3) continue;
+      let from = 0;
+      while (from < lowerInput.length) {
+        const index = lowerInput.indexOf(lowerValue, from);
+        if (index === -1) break;
+        candidates.push({ ...item, value: input.slice(index, index + item.value.length), index, end: index + item.value.length });
+        from = index + item.value.length;
       }
     }
 
@@ -251,7 +351,7 @@
 
     candidates.sort((a, b) => b.priority - a.priority || b.value.length - a.value.length || a.index - b.index);
     const accepted = [];
-    for (const item of candidates) addMatch(accepted, item.type, item.value, item.index, item.priority);
+    for (const item of candidates) addMatch(accepted, item.type, item.value, item.index, item.priority, item.labelledOverride);
     accepted.sort((a, b) => a.index - b.index);
     return accepted;
   }

@@ -65,7 +65,7 @@ npm run test:firefox
 
 Release, checksum verification, and Firefox lint now use Node scripts. `RELEASE_DIR` optionally selects another artifact output directory. Firefox runtime testing requires a release package and downloads Firefox/geckodriver to Selenium's cache when needed; `FIREFOX_PATH` can select an installed executable. See [DEVELOPMENT.md](DEVELOPMENT.md) for setup, privacy challenge results, and real-model verification.
 
-The end-to-end test covers local secret storage, structured extraction, PII redaction, private-capability filling, user-input freshness, visual OCR and masking, browser actions, incremental mutations, high-risk block and allow-once paths, form-semantic risk detection, strict egress, adversarial task scope, cross-origin isolation, and audit receipt retrieval. `npm run evaluate` produces the five SIH evaluation criteria and all release gates in `artifacts/`.
+The end-to-end test covers local secret storage, structured extraction, PII redaction, private-capability filling, user-input freshness, visual OCR and masking, browser actions, incremental mutations, high-risk block and allow-once paths, form-semantic risk detection, strict egress, adversarial task scope, cross-origin isolation, and audit receipt retrieval. `npm run evaluate` produces the five SIH evaluation criteria and all release gates in `artifacts/`. PII evidence keeps the generated regression, hand-authored contextual development corpus, and independently authored Gretel test subset as separate measurements.
 
 For presentation day, use [DEMO.md](DEMO.md), [SIH-EVALUATION.md](SIH-EVALUATION.md), and [TEAM-RESPONSIBILITIES.md](TEAM-RESPONSIBILITIES.md).
 

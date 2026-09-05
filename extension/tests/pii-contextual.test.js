@@ -7,8 +7,14 @@ const corpus = require("./pii-contextual.json");
 let tp = 0, fp = 0, fn = 0;
 const results = corpus.cases.map((item) => {
   const detected = PII.findPII(item.text).map((entity) => entity.value.trim());
-  const missed = item.entities.filter((value) => !detected.includes(value));
-  const extra = detected.filter((value) => !item.entities.includes(value));
+  const unmatched = detected.slice();
+  const missed = item.entities.filter((value) => {
+    const index = unmatched.indexOf(value);
+    if (index < 0) return true;
+    unmatched.splice(index, 1);
+    return false;
+  });
+  const extra = unmatched;
   tp += item.entities.length - missed.length; fn += missed.length; fp += extra.length;
   if (!item.knownGap) {
     assert.deepEqual(missed, [], `${item.id}: missed entity`);
