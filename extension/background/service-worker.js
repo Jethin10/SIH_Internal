@@ -1222,7 +1222,8 @@ async function startFlightDemo(input) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(parsed.getTime()) || parsed < today || parsed.getMonth() + 1 !== Number(date.slice(5, 7)) || parsed.getDate() !== Number(date.slice(8, 10))) throw new Error("Choose a valid departure date today or later.");
   const settings = await getSettings();
   if (!settings.policy.cloudEnabled || !settings.provider.model.trim() || !settings.provider.apiKey.trim()) throw new Error("Add your provider endpoint, model ID, and key in Settings, then save. The offline planner cannot run live flight bookings.");
-  const endpoint = new URL(settings.provider.endpoint);
+  let endpoint;
+  try { endpoint = new URL(String(settings.provider.endpoint || "").trim()); } catch (_) { throw new Error("Enter a valid HTTPS model endpoint URL in Settings."); }
   if (endpoint.protocol !== "https:") throw new Error("Use an HTTPS model endpoint for the live demo.");
   const url = "https://www.google.com/travel/flights?hl=en";
   const permission = DomainPolicy.evaluate(url, settings.policy);

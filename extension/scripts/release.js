@@ -26,7 +26,9 @@ const sourceArtifacts = new Set([
   "artifacts/evaluation-report.json",
   "artifacts/firefox-runtime.json",
   "artifacts/pii-contextual.json",
+  "artifacts/pii-independent.json",
   "artifacts/product-ui.png",
+  "artifacts/provider-live.json",
   "artifacts/provider-harness.json",
   "artifacts/StrawHats_SIH26171_Internal_Presentation_Final.pptx",
   "artifacts/StrawHats_SIH26171_Internal_Presentation_Ready.pptx"

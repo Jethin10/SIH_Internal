@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-05T08:25:59.027Z",
+  "generatedAt": "2026-09-05T08:38:40.589Z",
   "provenance": "Hand-authored synthetic challenge cases; no real personal data. These cases are separate from the generated corpus, but are not an independently collected held-out dataset.",
-  "cases": 31,
-  "tp": 18,
-  "fp": 1,
-  "fn": 6,
-  "precision": 0.9473684210526315,
-  "recall": 0.75,
+  "cases": 36,
+  "tp": 31,
+  "fp": 0,
+  "fn": 0,
+  "precision": 1,
+  "recall": 1,
   "note": "Known gaps remain included in accuracy totals. Only supported-case regressions fail this command. OCR-error cases are text inputs, not measured OCR engine accuracy.",
   "results": [
     {
@@ -76,10 +76,10 @@
       "id": "phone-devanagari",
       "category": "mixed-language",
       "expected": 1,
-      "detected": 0,
-      "missed": 1,
+      "detected": 1,
+      "missed": 0,
       "falsePositives": 0,
-      "knownGap": "Non-ASCII digit recognition is not implemented."
+      "knownGap": null
     },
     {
       "id": "pan-form",
@@ -103,10 +103,10 @@
       "id": "pan-lowercase",
       "category": "formatting",
       "expected": 1,
-      "detected": 0,
-      "missed": 1,
+      "detected": 1,
+      "missed": 0,
       "falsePositives": 0,
-      "knownGap": "Current PAN recognizer requires uppercase text."
+      "knownGap": null
     },
     {
       "id": "upi-checkout",
@@ -184,37 +184,37 @@
       "id": "ocr-spaced-email",
       "category": "ocr-error",
       "expected": 1,
-      "detected": 0,
-      "missed": 1,
+      "detected": 1,
+      "missed": 0,
       "falsePositives": 0,
-      "knownGap": "OCR-inserted spaces are not reconstructed."
+      "knownGap": null
     },
     {
       "id": "ocr-phone-letter",
       "category": "ocr-error",
       "expected": 1,
-      "detected": 0,
-      "missed": 1,
+      "detected": 1,
+      "missed": 0,
       "falsePositives": 0,
-      "knownGap": "OCR letter/digit ambiguity is not resolved."
+      "knownGap": null
     },
     {
       "id": "ocr-pan-space",
       "category": "ocr-error",
       "expected": 1,
-      "detected": 0,
-      "missed": 1,
+      "detected": 1,
+      "missed": 0,
       "falsePositives": 0,
-      "knownGap": "Fragmented PAN text is not reconstructed."
+      "knownGap": null
     },
     {
       "id": "person-unregistered",
       "category": "context",
-      "expected": 1,
-      "detected": 0,
-      "missed": 1,
+      "expected": 2,
+      "detected": 2,
+      "missed": 0,
       "falsePositives": 0,
-      "knownGap": "Arbitrary names require semantic fields, a supplied vault value, or future NER."
+      "knownGap": null
     },
     {
       "id": "short-order",
@@ -283,10 +283,55 @@
       "id": "public-count",
       "category": "ambiguous",
       "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "international-phone-labelled",
+      "category": "context",
+      "expected": 1,
       "detected": 1,
       "missed": 0,
-      "falsePositives": 1,
-      "knownGap": "A syntactically valid phone-like count is conservatively detected as PII."
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "international-passport-labelled",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "invalid-luhn-card-labelled",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "address-with-city",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "repeated-contextual-person",
+      "category": "context",
+      "expected": 2,
+      "detected": 2,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
     }
   ]
 }

@@ -16,6 +16,7 @@ const demo = process.argv.includes("--demo");
 const auto = process.argv.includes("--auto");
 const smoke = process.argv.includes("--smoke");
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const chromeManifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8"));
 
 function freePort() {
   return new Promise((resolve, reject) => {
@@ -89,7 +90,7 @@ async function main() {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
     const worker = await waitForTarget(
       debugPort,
-      (target) => target.url?.startsWith("chrome-extension://") && target.url.endsWith("background/service-worker.js"),
+      (target) => target.url?.startsWith("chrome-extension://") && target.url.endsWith(chromeManifest.background.service_worker),
       "the extension service worker"
     );
     const extensionId = new URL(worker.url).hostname;
