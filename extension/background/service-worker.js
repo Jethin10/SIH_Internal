@@ -528,7 +528,13 @@ function recordAudit(tabId, session, safeContext, action, result, userDecision) 
 function compactForPlanner(safeContext) {
   return {
     page: safeContext.page,
-    visual: safeContext.visual || null,
+    // Confidence and timing are local diagnostics, not planner inputs. Long
+    // fractional values can resemble phone/card numbers in the egress check.
+    visual: safeContext.visual ? {
+      scanned: safeContext.visual.scanned,
+      lineCount: safeContext.visual.lineCount,
+      epoch: safeContext.visual.epoch
+    } : null,
     opaqueRegions: safeContext.opaqueRegions || [],
     vaultCapabilities: safeContext.vaultCapabilities,
     elements: safeContext.elements.map((element) => ({
@@ -550,9 +556,17 @@ function compactForPlanner(safeContext) {
   };
 }
 
+function compactPlannerHistory(history) {
+  return (history || []).slice(-6).map(({ action, result, userDecision }) => ({
+    action,
+    result: { status: result?.status, reason: result?.reason, risk: result?.risk, usedPrivateToken: result?.usedPrivateToken },
+    userDecision
+  }));
+}
+
 function assertEgressSafe(safeContext, egressInventory, settings, safeTask, history) {
   const payload = compactForPlanner(safeContext);
-  const outbound = { task: safeTask, context: payload, history: (history || []).slice(-6) };
+  const outbound = { task: safeTask, context: payload, history: compactPlannerHistory(history) };
   const serialized = JSON.stringify(outbound).toLocaleLowerCase();
   function locateExactValue(value, node, path) {
     if (typeof node === "string") return node.toLocaleLowerCase().includes(value.toLocaleLowerCase()) ? path : null;
@@ -607,6 +621,8 @@ function extractJSON(text) {
 }
 
 async function remotePlan(tabId, task, safeContext, history, settings, egressInventory) {
+  // Receipts and measurement data stay local; only action outcomes help planning.
+  history = compactPlannerHistory(history);
   const endpoint = settings.provider.endpoint.trim();
   const apiKey = settings.provider.apiKey.trim();
   const model = settings.provider.model.trim();

@@ -4,7 +4,7 @@
   "private": true,
   "description": "Local-first privacy mediation and action control for browser agents.",
   "scripts": {
-    "test": "node tests/capture-queue.test.js && node tests/pii.test.js && node tests/action-policy.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
+    "test": "node tests/capture-queue.test.js && node tests/planner-egress.test.js && node tests/pii.test.js && node tests/action-policy.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
     "demo": "node scripts/demo.js",
     "test:ui": "node scripts/capture-product-ui.js",
     "server": "node server/server.js",
