@@ -11,3 +11,5 @@ Use the generated values in `artifacts/EVALUATION-SUMMARY.md` during judging. Ru
 | Resource use | Estimated privacy-graph memory through a 20,000-node page | CDP benchmark | Graph estimate, not whole-browser process memory |
 
 Do not say “100% real-world accuracy,” “zero data can ever leak,” or “production ready.” Say: “All automated release gates pass on our controlled evaluation; the limitations are stated beside every metric.”
+
+The separate contextual challenge (`npm run test:privacy`) reports all misses and false positives in `artifacts/pii-contextual.json`. It currently contains 31 synthetic English/Hindi, formatting, OCR-error-text, and negative cases, with 94.7% precision and 75% recall. This score is not combined with the generated 1,254-case regression score and is not a real-world population estimate. A genuine held-out dataset, OCR engine evaluation across varied images, and whole-browser CPU/memory measurements on a second machine remain future evidence work.

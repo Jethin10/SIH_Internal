@@ -194,6 +194,10 @@
   }
 
   function rawValueOf(el) {
+    // A label is the caption of its associated control, not a second private
+    // value. In particular, the public caption "Password" must not enter the
+    // sensitive inventory and block OCR text or alias type names later.
+    if (el instanceof HTMLLabelElement && el.control) return "";
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
       if (el.type === "checkbox" || el.type === "radio") return el.checked ? "checked" : "unchecked";
       return String(el.value || "").slice(0, 400);

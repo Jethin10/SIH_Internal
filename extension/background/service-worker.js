@@ -227,12 +227,15 @@ async function runVisualOperation(type, payload) {
   return BrowserAdapter.runVisualOperation(type, payload);
 }
 
-function parseOCRLines(tsv, imageWidth, imageHeight, safeContext, settings, taskScope) {
+function parseOCRLines(tsv, imageWidth, imageHeight, safeContext, settings, taskScope, sensitiveInventory = []) {
   const viewport = safeContext.page?.viewport || { width: imageWidth, height: imageHeight };
   const scaleX = Number(viewport.width || imageWidth) / Math.max(1, Number(imageWidth || 1));
   const scaleY = Number(viewport.height || imageHeight) / Math.max(1, Number(imageHeight || 1));
   const vault = new PII.AliasVault(`${settings.aliasSeed}|${safeContext.page.origin}|${taskScope || crypto.randomUUID()}`);
   vault.registerUserProfile(settings.userProfile || {});
+  for (const item of sensitiveInventory) {
+    if (String(item.value || "").trim().length >= 3) vault.register(item.type || "PRIVATE", item.value, { source: "page" });
+  }
   const lines = new Map();
   const rows = String(tsv || "").split(/\r?\n/);
 
@@ -326,7 +329,11 @@ function parseOCRLines(tsv, imageWidth, imageHeight, safeContext, settings, task
   };
 }
 
-async function captureVisualContext(tabId, safeContext) {
+async function visualPrivacyKey(settings, sensitiveInventory) {
+  return hashDataUrl(JSON.stringify({ profile: settings.userProfile || {}, inventory: sensitiveInventory || [] }));
+}
+
+async function captureVisualContext(tabId, safeContext, sensitiveInventory = []) {
   const settings = await getSettings();
   if (!settings.policy.visualEnabled) throw new Error("Local visual perception is disabled by policy");
   const tab = await chrome.tabs.get(tabId);
@@ -334,12 +341,13 @@ async function captureVisualContext(tabId, safeContext) {
   broadcast({ type: "VISUAL_OCR_PROGRESS", status: "capturing visible page locally", progress: 0 });
   const dataUrl = await captureTab(tabId);
   const screenshotHash = await hashDataUrl(dataUrl);
+  const privacyKey = await visualPrivacyKey(settings, sensitiveInventory);
   const cached = visualCache.get(tabId);
-  if (cached && cached.screenshotHash === screenshotHash && Number(cached.epoch) === Number(safeContext.page?.epoch || 0)) return cached;
+  if (cached && cached.privacyKey === privacyKey && cached.screenshotHash === screenshotHash && Number(cached.epoch) === Number(safeContext.page?.epoch || 0)) return cached;
   const result = await runVisualOperation("OCR_IMAGE", { dataUrl });
   if (!result?.ok) throw new Error(result?.error || "Local OCR failed");
   const taskScope = sessions.get(tabId)?.taskScope || crypto.randomUUID();
-  const parsed = parseOCRLines(result.tsv, result.imageWidth, result.imageHeight, safeContext, settings, taskScope);
+  const parsed = parseOCRLines(result.tsv, result.imageWidth, result.imageHeight, safeContext, settings, taskScope, sensitiveInventory);
   let redactedPreview = null;
   if (parsed.redactionBoxes.length) {
     const redacted = await runVisualOperation("REDACT_IMAGE", { dataUrl, boxes: parsed.redactionBoxes });
@@ -357,7 +365,8 @@ async function captureVisualContext(tabId, safeContext) {
     imageHeight: Number(result.imageHeight || 0),
     redactionCount: parsed.redactionBoxes.length,
     redactedPreviewDataUrl: redactedPreview,
-    screenshotHash
+    screenshotHash,
+    privacyKey
   };
   visualCache.set(tabId, visual);
   broadcast({
@@ -846,12 +855,12 @@ async function runSession(tabId) {
       const collected = await collectContext(tabId);
       session.elementFrames = collected.elementFrames;
       let visual = visualCache.get(tabId) || null;
-      if (visual && Number(visual.epoch) !== Number(collected.safeContext.page?.epoch)) {
+      if (visual && (Number(visual.epoch) !== Number(collected.safeContext.page?.epoch) || visual.privacyKey !== await visualPrivacyKey(settings, collected.egressInventory))) {
         visualCache.delete(tabId);
         visual = null;
       }
       if (!visual && settings.policy.visualEnabled && shouldAutoVisualScan(collected.safeContext)) {
-        visual = await captureVisualContext(tabId, collected.safeContext);
+        visual = await captureVisualContext(tabId, collected.safeContext, collected.egressInventory);
       }
       const safeContext = augmentWithVisual(collected.safeContext, visual);
       const localPreview = visual
@@ -884,7 +893,7 @@ async function runSession(tabId) {
       }
 
       if (action.type === "visual_scan") {
-        const captured = await captureVisualContext(tabId, collected.safeContext);
+        const captured = await captureVisualContext(tabId, collected.safeContext, collected.egressInventory);
         session.history.push({
           action,
           result: { status: "executed", localOnly: true, visualLines: captured.elements.length, ocrMs: captured.ocrMs }
@@ -1089,7 +1098,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       await assertDomainAllowed(tabId, await getSettings());
       await syncSettings(tabId);
       const collected = await collectContext(tabId);
-      const visual = await captureVisualContext(tabId, collected.safeContext);
+      const visual = await captureVisualContext(tabId, collected.safeContext, collected.egressInventory);
       const context = augmentWithVisual(collected.safeContext, visual);
       const localPreview = [...collected.localPreview, ...(visual.localPreview || [])].slice(0, 24);
       broadcast({ type: "CONTEXT", tabId, context, localPreview });

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "mode": "offline-harness-only",
+  "generatedAt": "2026-09-05T04:42:11.689Z",
+  "platform": "darwin",
+  "providerHost": "offline",
+  "model": "local-demo",
+  "taskMs": 441,
+  "requests": [
+    {
+      "status": 200,
+      "providerRoundTripMs": 1
+    },
+    {
+      "status": 200,
+      "providerRoundTripMs": 0
+    }
+  ],
+  "checks": {
+    "privateFill": true,
+    "rawSyntheticValuesAbsent": true,
+    "screenshotAbsent": true
+  },
+  "limitation": "One synthetic email-fill task. Provider round-trip includes proxy, network and inference; it does not isolate model inference time."
+}

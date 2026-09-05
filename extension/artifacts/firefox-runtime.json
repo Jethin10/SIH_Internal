@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "generatedAt": "2026-09-05T04:45:00.571Z",
+  "platform": "darwin",
+  "browserVersion": "155.0.1",
+  "checks": [
+    "safe context",
+    "public captions versus private values",
+    "private fill",
+    "cross-origin capability exclusion",
+    "local OCR masks",
+    "submit block/allow once",
+    "visual block/allow once",
+    "clear secrets",
+    "clear receipts"
+  ]
+}

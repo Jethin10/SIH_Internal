@@ -2,17 +2,29 @@
   "name": "strawhats-privacy-gateway",
   "version": "1.0.0",
   "private": true,
+  "engines": { "node": ">=22.13.0 <23" },
+  "devDependencies": {
+    "adm-zip": "0.6.0",
+    "playwright": "1.58.2",
+    "selenium-webdriver": "4.48.0",
+    "web-ext": "10.6.0"
+  },
   "description": "Local-first privacy mediation and action control for browser agents.",
   "scripts": {
-    "test": "node tests/capture-queue.test.js && node tests/planner-egress.test.js && node tests/pii.test.js && node tests/action-policy.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
+    "test": "node tests/tooling.test.js && node tests/capture-queue.test.js && node tests/planner-egress.test.js && node tests/visual-privacy.test.js && node tests/field-label.test.js && node tests/pii.test.js && node tests/pii-contextual.test.js && node tests/action-policy.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
     "demo": "node scripts/demo.js",
     "test:ui": "node scripts/capture-product-ui.js",
+    "test:firefox": "node tests/run-firefox.js",
+    "test:privacy": "node tests/pii-contextual.test.js",
+    "test:provider": "node tests/run-provider.js",
+    "test:provider:harness": "node tests/run-provider.js --offline-harness",
     "server": "node server/server.js",
     "benchmark": "node tests/run-benchmarks.js",
     "evaluate": "node tests/run-evaluation.js",
-    "release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1",
-    "verify:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1",
-    "lint:firefox": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/lint-firefox.ps1",
+    "setup:browsers": "playwright install chromium",
+    "release": "node scripts/release.js package",
+    "verify:release": "node scripts/release.js verify",
+    "lint:firefox": "node scripts/release.js lint",
     "capture:ui": "node scripts/capture-product-ui.js"
   }
 }

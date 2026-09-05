@@ -4,7 +4,11 @@ permissions:
   contents: read
 jobs:
   extension:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: extension
@@ -13,18 +17,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Chromium with extension support
-        run: npx --yes playwright@1.58.2 install chromium
+      - run: npm ci
+      - name: Install pinned Chromium with extension support
+        run: npx playwright install --with-deps chromium
       - run: npm test
       - run: npm run test:ui
+      - run: npm run test:provider:harness
       - run: npm run evaluate
       - run: npm run release
       - run: npm run verify:release
       - run: npm run lint:firefox
+      - name: Verify Firefox runtime on macOS
+        if: runner.os == 'macOS'
+        run: npm run test:firefox
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: demo-evidence
+          name: demo-evidence-${{ matrix.os }}
           path: extension/artifacts/
   team-hub:
     runs-on: windows-latest

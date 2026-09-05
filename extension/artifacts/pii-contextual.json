@@ -1,0 +1,292 @@
+{
+  "generatedAt": "2026-09-05T04:40:20.006Z",
+  "provenance": "Hand-authored synthetic challenge cases; no real personal data. These cases are separate from the generated corpus, but are not an independently collected held-out dataset.",
+  "cases": 31,
+  "tp": 18,
+  "fp": 1,
+  "fn": 6,
+  "precision": 0.9473684210526315,
+  "recall": 0.75,
+  "note": "Known gaps remain included in accuracy totals. Only supported-case regressions fail this command. OCR-error cases are text inputs, not measured OCR engine accuracy.",
+  "results": [
+    {
+      "id": "support-email",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "plus-email",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "mixed-email",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "mixed-phone",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "phone-country",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "phone-spaced",
+      "category": "formatting",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "phone-hyphen",
+      "category": "formatting",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "phone-devanagari",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 0,
+      "missed": 1,
+      "falsePositives": 0,
+      "knownGap": "Non-ASCII digit recognition is not implemented."
+    },
+    {
+      "id": "pan-form",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "pan-mixed",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "pan-lowercase",
+      "category": "formatting",
+      "expected": 1,
+      "detected": 0,
+      "missed": 1,
+      "falsePositives": 0,
+      "knownGap": "Current PAN recognizer requires uppercase text."
+    },
+    {
+      "id": "upi-checkout",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "ifsc-form",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "passport-form",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "voter-form",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "card-spaces",
+      "category": "formatting",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "card-hyphens",
+      "category": "formatting",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "private-ip",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "two-emails",
+      "category": "context",
+      "expected": 2,
+      "detected": 2,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "ocr-spaced-email",
+      "category": "ocr-error",
+      "expected": 1,
+      "detected": 0,
+      "missed": 1,
+      "falsePositives": 0,
+      "knownGap": "OCR-inserted spaces are not reconstructed."
+    },
+    {
+      "id": "ocr-phone-letter",
+      "category": "ocr-error",
+      "expected": 1,
+      "detected": 0,
+      "missed": 1,
+      "falsePositives": 0,
+      "knownGap": "OCR letter/digit ambiguity is not resolved."
+    },
+    {
+      "id": "ocr-pan-space",
+      "category": "ocr-error",
+      "expected": 1,
+      "detected": 0,
+      "missed": 1,
+      "falsePositives": 0,
+      "knownGap": "Fragmented PAN text is not reconstructed."
+    },
+    {
+      "id": "person-unregistered",
+      "category": "context",
+      "expected": 1,
+      "detected": 0,
+      "missed": 1,
+      "falsePositives": 0,
+      "knownGap": "Arbitrary names require semantic fields, a supplied vault value, or future NER."
+    },
+    {
+      "id": "short-order",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "price",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "product-code",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "invalid-ip",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "invalid-card",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "invalid-aadhaar",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "date",
+      "category": "negative",
+      "expected": 0,
+      "detected": 0,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "public-count",
+      "category": "ambiguous",
+      "expected": 0,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 1,
+      "knownGap": "A syntactically valid phone-like count is conservatively detected as PII."
+    }
+  ]
+}

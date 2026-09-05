@@ -1,0 +1,24 @@
+"use strict";
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const vm = require("node:vm");
+const PII = require("../lib/pii.js");
+const source = fs.readFileSync(require.resolve("../background/service-worker.js"), "utf8");
+const context = { PII, crypto: globalThis.crypto, TextEncoder };
+vm.createContext(context);
+vm.runInContext(source.slice(source.indexOf("function parseOCRLines("), source.indexOf("async function captureVisualContext(")), context);
+vm.runInContext(source.slice(source.indexOf("async function hashDataUrl("), source.indexOf("async function visualObservationIsCurrent(")), context);
+const tsv = 'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n5\t1\t1\t1\t1\t1\t10\t10\t100\t20\t99\tswordfish42';
+const safe = { page: { origin: "https://example.test", epoch: 1, viewport: { width: 200, height: 200 } }, opaqueRegions: [{ bbox: { x: 0, y: 0, width: 200, height: 200 } }] };
+const inventory = [{ type: "password", field: "value", value: "swordfish42" }];
+const parsed = context.parseOCRLines(tsv, 200, 200, safe, { userProfile: {} }, "test", inventory);
+assert(!parsed.elements[0].label.includes("swordfish42"), "Known non-regex secret must be redacted in OCR");
+assert.equal(parsed.elements[0].actionable, false, "Private OCR text must never become an actionable target");
+assert.equal(parsed.redactionBoxes.length, 1, "Known secret must be masked locally");
+(async () => {
+  const first = await context.visualPrivacyKey({ userProfile: {} }, inventory);
+  assert.equal(first, await context.visualPrivacyKey({ userProfile: {} }, inventory));
+  assert.notEqual(first, await context.visualPrivacyKey({ userProfile: {} }, []));
+  assert.notEqual(first, await context.visualPrivacyKey({ userProfile: { name: "Example Person" } }, inventory));
+  console.log("Known DOM secrets are masked in OCR; inventory/profile changes invalidate visual cache");
+})().catch((error) => { console.error(error); process.exitCode = 1; });
