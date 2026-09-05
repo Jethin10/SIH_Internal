@@ -107,7 +107,7 @@
     if (submitsForm && input.formHasPaymentField) return decide("critical", "Submits a form carrying payment or credential fields");
     // An ordinary GET search is the one form submission a research task cannot work
     // without, so it is recognised ahead of the consequential word list.
-    if (submitsForm && input.formIsSearch && (!name || SEARCH_SUBMIT_NAME.test(name) || NAVIGATION_INTENT.test(name))) {
+    if (submitsForm && input.formIsSearch && ((type === "press" && input.isTextInput) || !name || SEARCH_SUBMIT_NAME.test(name) || NAVIGATION_INTENT.test(name))) {
       return decide("low", "Ordinary search submission");
     }
     if (CONSEQUENTIAL.test(name)) return decide("high", "Control performs a consequential action");

@@ -116,6 +116,7 @@
           <label>Endpoint<input id="endpointInput" placeholder="https://openrouter.ai/api/v1/chat/completions" /></label>
           <label>Model<input id="modelInput" placeholder="provider/model" /></label>
           <label>API key<input id="apiKeyInput" type="password" placeholder="Kept only for this browser session" /></label>
+          <label>Fallback API keys<input id="fallbackKeysInput" type="password" placeholder="Separate keys with commas; session only" /></label>
           <p class="hint">The key and private profile stay in session memory. Localhost endpoints do not require a key; other endpoints do.</p>
           <p class="hint">Add your own key later. Free model availability and quotas depend on the provider. Changing providers clears the unsaved key so it cannot be sent to the wrong host.</p>
           <label>Maximum agent steps<select id="maxStepsInput"><option value="10">10 steps</option><option value="30">30 steps</option><option value="50">50 steps</option></select></label>

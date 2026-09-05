@@ -45,3 +45,12 @@ assert.deepEqual(tuned.response_format, { type: "json_object" });
 assert.equal(tuned.reasoning_effort, "low");
 
 console.log("Agent runtime budget, Groq defaults, and flight fast-path tests passed");
+
+const crowded = Runtime.compactPlannerContext({page:{viewport:{height:800}},elements:[
+  ...Array.from({length:70},(_,i)=>({id:`nav-${i}`,role:'link',label:`Department ${i}`,actionable:true,bbox:{y:10,height:20}})),
+  {id:'search',role:'searchbox',label:'Search Amazon.in',actionable:true,bbox:{y:10,height:20}},
+  {id:'go',role:'button',label:'Go',actionable:true,bbox:{y:10,height:20}},
+  {id:'product',role:'link',label:'Running shoe ₹2,400',actionable:true,bbox:{y:400,height:80}},
+  {id:'cart',role:'button',label:'Add to cart',actionable:true,bbox:{y:600,height:30}}
+]},2000);
+for (const id of ['search','go','product','cart']) assert(crowded.elements.some(e=>e.id===id),`${id} must survive crowded navigation`);

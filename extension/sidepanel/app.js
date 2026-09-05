@@ -142,6 +142,7 @@ async function loadSettings() {
   $("endpointInput").value = provider.endpoint || "";
   $("modelInput").value = provider.model || "";
   $("apiKeyInput").value = provider.apiKey || "";
+  $("fallbackKeysInput").value = (provider.fallbackApiKeys || []).join(', ');
   $("nameInput").value = profile.name || "";
   $("emailInput").value = profile.email || "";
   $("phoneInput").value = profile.phone || "";
@@ -162,7 +163,8 @@ async function saveSettings() {
     provider: {
       endpoint: $("endpointInput").value.trim(),
       model: $("modelInput").value.trim(),
-      apiKey: $("apiKeyInput").value.trim()
+      apiKey: $("apiKeyInput").value.trim(),
+      fallbackApiKeys: $("fallbackKeysInput").value.split(',').map(key=>key.trim()).filter(Boolean)
     },
     userProfile: {
       name: $("nameInput").value.trim(),
@@ -258,7 +260,7 @@ chrome.runtime.onMessage.addListener((message) => {
     $("stepBadge").textContent = `vision ${pct}%`;
   } else if (message.type === "PLANNER_WAIT") {
     $("stepBadge").textContent = "provider wait";
-    appendLog(`Provider rate limit. Waiting ${message.seconds} seconds before retrying. Stop remains available.`);
+    appendLog(message.message || `Provider rate limit. Waiting ${message.seconds} seconds before retrying. Stop remains available.`);
   } else if (message.type === "VISUAL_CONTEXT") {
     appendLog(`<b>Local vision ready.</b> ${Number(message.lineCount || 0)} safe OCR regions · ${Number(message.ocrMs || 0).toFixed(0)} ms.`);
   } else if (message.type === "CONFIRMATION_REQUIRED") {
@@ -301,7 +303,7 @@ $("clearPrivateButton").addEventListener("click", async () => {
   await request({ type: "CLEAR_PRIVATE_SESSION" });
   if (state.settings) { state.settings.provider.apiKey = ""; state.settings.userProfile = {}; }
   setProviderLine();
-  for (const id of ["apiKeyInput", "nameInput", "emailInput", "phoneInput", "addressInput", "upiInput"]) $(id).value = "";
+  for (const id of ["apiKeyInput", "fallbackKeysInput", "nameInput", "emailInput", "phoneInput", "addressInput", "upiInput"]) $(id).value = "";
   appendLog("<b>Session secrets cleared.</b> API key and private profile were removed.", "ok");
 });
 $("clearAuditButton").addEventListener("click", async () => {
@@ -389,9 +391,10 @@ $("providerPreset").addEventListener("change", () => {
   $("endpointInput").value = preset[0];
   $("modelInput").value = preset[1];
   $("apiKeyInput").value = "";
+  $("fallbackKeysInput").value = "";
   $("modelInput").placeholder = "Enter a model ID from your provider's catalog";
 });
-$("endpointInput").addEventListener("input", () => { $("apiKeyInput").value = ""; $("providerPreset").value = "custom"; });
+$("endpointInput").addEventListener("input", () => { $("apiKeyInput").value = ""; $("fallbackKeysInput").value = ""; $("providerPreset").value = "custom"; });
 const departure = new Date();
 departure.setDate(departure.getDate() + 14);
 const localDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;

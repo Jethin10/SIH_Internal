@@ -651,10 +651,11 @@
     return ActionRisk.classify({
       actionType: action.type,
       key: action.key,
+      isTextInput: el instanceof HTMLInputElement && !["submit", "button", "reset"].includes(el.type),
       label: record ? record.rawLabel : "",
       semanticType: record ? record.semanticType : null,
       sensitivity: record ? record.sensitivity : "none",
-      isSubmitControl: submitControl(el),
+      isSubmitControl: submitControl(el) || (action.type === "press" && String(action.key || "Enter") === "Enter" && Boolean(el.form) && el instanceof HTMLInputElement),
       alwaysConfirmSensitiveFill: Boolean(settings.policy && settings.policy.alwaysConfirmSensitiveFill),
       ...formDescriptor(el)
     });
@@ -763,16 +764,26 @@
       el.dispatchEvent(new Event("change", { bubbles: true }));
     } else if (action.type === "press") {
       const key = String(action.key || "Enter");
-      el.dispatchEvent(new KeyboardEvent("keydown", { key, code: key === "Enter" ? "Enter" : key, bubbles: true }));
-      el.dispatchEvent(new KeyboardEvent("keyup", { key, code: key === "Enter" ? "Enter" : key, bubbles: true }));
-      if (key === "Enter" && el.form && typeof el.form.requestSubmit === "function") {
-        const submitAssessment = ActionRisk.classify({
-          actionType: "click",
-          label: "",
-          isSubmitControl: true,
-          ...formDescriptor(el)
-        });
-        if (["low", "medium"].includes(submitAssessment.risk) || confirmed) el.form.requestSubmit();
+      const activatesControl = key === "Enter" && (el instanceof HTMLButtonElement || el instanceof HTMLAnchorElement || (el instanceof HTMLInputElement && ["submit", "button", "reset"].includes(el.type)));
+      if (activatesControl) {
+        // Scripted keyboard events have no browser default activation behavior.
+        if (el instanceof HTMLAnchorElement && el.target && el.target !== '_self') el.target = '_self';
+        el.click();
+      } else {
+        const defaultAllowed = el.dispatchEvent(new KeyboardEvent("keydown", { key, code: key === "Enter" ? "Enter" : key, bubbles: true, cancelable: true }));
+        el.dispatchEvent(new KeyboardEvent("keyup", { key, code: key === "Enter" ? "Enter" : key, bubbles: true }));
+        if (defaultAllowed && key === "Enter" && el instanceof HTMLInputElement && el.form && typeof el.form.requestSubmit === "function") {
+          const submitAssessment = ActionRisk.classify({
+            actionType: "click",
+            label: "",
+            isSubmitControl: true,
+            ...formDescriptor(el)
+          });
+          if (!["low", "medium"].includes(submitAssessment.risk) && !confirmed) {
+            return { status: "needs_confirmation", risk: submitAssessment.risk, reason: submitAssessment.reason };
+          }
+          el.form.requestSubmit();
+        }
       }
     } else if (action.type === "focus") {
       // scrollIntoView and focus above are the complete operation.
@@ -915,7 +926,7 @@
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message || typeof message.type !== "string") return undefined;
     if (message.type === "PING") {
-      sendResponse({ ok: true, framePrefix, origin: location.origin });
+      sendResponse({ ok: true, framePrefix, origin: location.origin, url: location.href, readyState: document.readyState });
       return undefined;
     }
     if (message.type === "SET_TASK") {

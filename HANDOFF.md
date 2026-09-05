@@ -1,5 +1,7 @@
 # General browser agent handoff
 
+Latest update: see **Amazon shopping follow-up** at the end of this file. The new Enter/search, document-readiness, Gemini schema, and session-key fallback fixes are tested. The live browser is waiting at Amazon sign-in; real cart and delivery completion are still unverified. All personal data and provider keys are held only in the demo browser session. The current interactive runner is `node tests/run-web-agent.js --keep` (tool session 1310); do not close it while the user signs in.
+
 Updated 2026-09-05, approximately 13:14 Asia/Calcutta. Work resumed at the user's request. The requested product is unfinished. Continue implementation from this working tree.
 
 ## Latest continuation, read first
@@ -108,3 +110,18 @@ User authorized browser-agent implementation and testing, including reusing open
 Keep routine browsing autonomous. Preserve meaningful local control for consequential actions and capability isolation. Do not silently turn the synthetic demo's automatic Allow once click into a real-web auto-approval policy. The latest user request does not supply authorization for actual purchases or outbound messages during testing.
 
 Use PowerShell-safe literal paths for the apostrophe in the repository name. No background browser or test process from this session is intentionally left running. The subagent is complete. The current dirty tree is the handoff; no patch cherry-picking is needed.
+# Amazon shopping follow-up — 2026-09-05 (latest state)
+
+This section supersedes older verification/status notes below.
+
+- User priority remains Windows Chrome, autonomous Amazon shopping with local privacy mediation, and a fast judges' demo.
+- Fixed Enter activation for native buttons/links and risk-gated implicit form submission. Added Amazon-style search submission to the shopping E2E.
+- Added readiness checks for interactive documents while third-party resources remain loading, and retries during document replacement.
+- Planner context preserves product controls/variants and priced results ahead of crowded navigation. Gemini receives per-action JSON schemas.
+- Added fallback API keys in Settings, restricted to browser-session secret storage. Requests try the next key on 401/403/429; secrets are excluded from persistent public settings and model context. Keys and the user's personal profile must never go into this file, Git, or release evidence.
+- Gemini 2.5 Flash returned HTTP 404 for the new account. Gemini 3.6 responded but timed out on a later run. Gemini 3.1 Flash Lite passed a provider probe and drives real Amazon searches and product navigation.
+- Live Amazon has reached product pages but previously restarted search instead of completing cart addition. The last retest stopped at Amazon sign-in. The user has been asked to sign in in the open demo browser. Do not claim a verified live cart/order/address completion without page evidence.
+- Synthetic shopping E2E passes search, Enter, product selection, variant selection, cart addition, and local capability fills for name/email/phone/address, with no order submitted. Outbound payloads are asserted free of those seeded values and images.
+- Final `npm test`, `npm run test:agent`, `npm run test:demo`, release generation and release verification passed. A test fixture initially assumed exactly two chat messages; shopping instructions now stay within the existing system message to preserve that contract. These runs use bundled Chromium 145 on Windows, not installed Google Chrome.
+- User supplied an incomplete delivery address. Never invent the building/flat, postal code, city/state components, or login credentials. The live test is in an isolated browser session.
+- Branch is codex/voice-live-agent, PR #2. This follow-up builds on 00994e4. Existing untracked live captures stay local; check Git history for the publication commit.

@@ -2,7 +2,7 @@
   "ok": true,
   "platform": "win32",
   "executable": "C:\\Users\\jethi\\AppData\\Local\\ms-playwright\\chromium-1208\\chrome-win64\\chrome.exe",
-  "seconds": 1.442,
+  "seconds": 1.337,
   "offline": true,
   "prewarmed": true,
   "privateFill": true,

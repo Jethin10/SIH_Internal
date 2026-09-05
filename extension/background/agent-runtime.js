@@ -23,7 +23,12 @@
     const elements = Array.isArray(context.elements) ? context.elements : [];
     const viewportHeight = Number(context.page?.viewport?.height || Infinity);
     const ranked = elements.map((element, index) => ({ element, index })).sort((left, right) => {
-      const rank = ({ element }) => (isVisible(element, viewportHeight) ? 0 : 2) + (element?.actionable ? 0 : 1);
+      const rank = ({ element }) => {
+        const control = element?.actionable && ['button','textbox','searchbox','combobox','checkbox','radio','spinbutton'].includes(element.role);
+        if (control && !element.disabled && /\/(?:dp|gp\/(?:aw\/)?d)\//.test(context.page?.path || '') && /\b(?:add to (?:cart|bag|basket)|size|quantity|colou?r)\b/i.test(element.label || '')) return 0;
+        const pricedResult = /₹|\b(?:Rs\.?|INR)\s*\d|\$\s*\d/.test(element?.label || '');
+        return (isVisible(element, viewportHeight) ? 0 : 4) + (control || pricedResult ? 0 : element?.actionable ? 1 : 2);
+      };
       return rank(left) - rank(right) || left.index - right.index;
     });
 
@@ -40,7 +45,12 @@
       omittedElements: elements.length
     };
 
+    const labelCounts = new Map();
     for (const { element } of ranked) {
+      const signature = `${element.role}:${element.label}`;
+      const count = labelCounts.get(signature) || 0;
+      if (count >= 2) continue;
+      labelCounts.set(signature, count+1);
       const item = {
         id: element.id,
         frameId: Number(element.frameId || 0) || undefined,

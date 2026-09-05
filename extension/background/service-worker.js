@@ -33,6 +33,7 @@ const DEFAULT_SETTINGS = {
   provider: {
     endpoint: "https://openrouter.ai/api/v1/chat/completions",
     apiKey: "",
+    fallbackApiKeys: [],
     model: ""
   },
   userProfile: {
@@ -87,7 +88,7 @@ async function getSettings() {
   const secrets = secretStore.gatewaySecrets || legacySecrets;
   const settings = mergeSettings({
     ...persisted,
-    provider: { ...persisted.provider, apiKey: secrets.apiKey || "" },
+    provider: { ...persisted.provider, apiKey: secrets.apiKey || "", fallbackApiKeys: secrets.fallbackApiKeys || [] },
     userProfile: { ...DEFAULT_SETTINGS.userProfile, ...(secrets.userProfile || {}) }
   });
   if (!settings.aliasSeed) {
@@ -128,7 +129,7 @@ async function saveSettings(settings) {
   const merged = mergeSettings(settings);
   await Promise.all([
     chrome.storage.local.set({ gatewaySettings: publicSettings(merged) }),
-    chrome.storage.session.set({ gatewaySecrets: { apiKey: merged.provider.apiKey, userProfile: { ...merged.userProfile } } })
+    chrome.storage.session.set({ gatewaySecrets: { apiKey: merged.provider.apiKey, fallbackApiKeys: merged.provider.fallbackApiKeys || [], userProfile: { ...merged.userProfile } } })
   ]);
   return merged;
 }
@@ -232,12 +233,18 @@ async function prepareTaskPrivacy(tabId, task, settings, taskScope) {
 async function assertSessionBoundary(session, settings) {
   let tab = await assertDomainAllowed(session.tabId, settings);
   const deadline = Date.now() + 15000;
+  let documentReady = false;
   while (tab.status === "loading" && Date.now() < deadline) {
     if (session.cancelled || sessions.get(session.tabId) !== session) return false;
+    try {
+      const ping = await sendFrame(session.tabId, 0, { type: "PING" });
+      documentReady = ping?.ok && ping.url === tab.url && (!tab.pendingUrl || tab.pendingUrl === tab.url) && ['interactive','complete'].includes(ping.readyState);
+      if (documentReady) break;
+    } catch (_) { /* The previous document may have just detached. */ }
     await new Promise((resolve) => setTimeout(resolve, 250));
     tab = await assertDomainAllowed(session.tabId, settings);
   }
-  if (tab.status === "loading") throw new Error("The page is still loading. Wait for it to finish, then run the task again.");
+  if (tab.status === "loading" && !documentReady) throw new Error("The page is still loading. Wait for it to finish, then run the task again.");
   const origin = new URL(tab.url).origin;
   if (!session.origin) {
     session.origin = origin;
@@ -698,6 +705,8 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
   history = compactPlannerHistory(history);
   const endpoint = settings.provider.endpoint.trim();
   const apiKey = settings.provider.apiKey.trim();
+  const keys = [...new Set([apiKey, ...(Array.isArray(settings.provider.fallbackApiKeys) ? settings.provider.fallbackApiKeys : [])].map(key => String(key).trim()).filter(Boolean))].slice(0, 8);
+  let keyIndex = 0;
   const model = settings.provider.model.trim();
   if (!endpoint || !model) return null;
   const endpointUrl = new URL(endpoint);
@@ -727,7 +736,7 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
   const body = {
     model,
     temperature: 0,
-    ...(gemini ? {response_format:{type:'json_object'},max_tokens:1800,...(model.startsWith('gemini-2.5-flash') ? {reasoning_effort:'none'} : {})} : {}),
+    ...(gemini ? {response_format:{type:'json_schema',json_schema:{name:'browser_action',schema:ActionPolicy.responseSchema}},max_tokens:1800,...(model.startsWith('gemini-2.5-flash') ? {reasoning_effort:'none'} : {})} : {}),
     ...(groq ? { max_completion_tokens: 1024, response_format: { type: "json_object" } } : {}),
     ...(groq && model.startsWith("openai/gpt-oss-") ? { reasoning_effort: "low" } : {}),
     messages: [
@@ -736,6 +745,7 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
     ]
   };
 
+  body.messages[0].content += '\nShopping: after filling search, click Search/Go or press Enter and verify results. Compare products against the budget, open a suitable option, select required variants, add to cart when requested, and verify the cart item. On a product detail page, use its size/variant and Add to cart controls; scroll to find them instead of restarting search. Do not add bundles or extra products. Fill contact/delivery fields only with matching saved capabilities. Never invent missing details or put a complete address into separate address components. Scroll to expose omitted controls.';
   const bodyText = JSON.stringify(body);
   const knownPrivateValues = [
     ...(egressInventory || []).map((item) => item.value),
@@ -763,13 +773,13 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
   let response;
   let responseText;
   const planningSession = sessions.get(tabId);
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < Math.max(3, keys.length); attempt++) {
   const controller = new AbortController();
   if (planningSession) planningSession.requestController = controller;
   const timeoutId = setTimeout(() => controller.abort(), 30_000);
   try {
     const headers = { "Content-Type": "application/json", "Accept": "application/json" };
-    if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+    if (keys[keyIndex]) headers.Authorization = `Bearer ${keys[keyIndex]}`;
     response = await fetch(endpoint, {
       method: "POST",
       headers,
@@ -789,7 +799,12 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
     clearTimeout(timeoutId);
     if (planningSession?.requestController === controller) planningSession.requestController = null;
   }
-  if (response.status !== 429 || attempt === 2) break;
+  if ([401,403,429].includes(response.status) && keyIndex + 1 < keys.length) {
+    keyIndex++;
+    broadcast({type:'PLANNER_WAIT',tabId,message:'Trying the next locally saved provider key'});
+    continue;
+  }
+  if (response.status !== 429 || attempt >= 2) break;
   const retryHeader = response.headers.get("retry-after");
   const seconds = retryHeader == null ? 60 : Number.isFinite(Number(retryHeader)) ? Number(retryHeader) : (Date.parse(retryHeader) - Date.now()) / 1000;
   if (!Number.isFinite(seconds) || seconds > 60) break;
@@ -953,11 +968,22 @@ async function runSession(tabId) {
       if (!(await assertSessionBoundary(session, settings))) {
         continue;
       }
-      let collected = await collectContext(tabId);
-      const contextDeadline = Date.now() + 8000;
-      while (collected.safeContext.page?.origin && !collected.safeContext.elements.length && Date.now() < contextDeadline && !session.cancelled) {
-        await new Promise(resolve => setTimeout(resolve, 250));
-        collected = await collectContext(tabId);
+      let collected;
+      const collectionDeadline = Date.now() + 10000;
+      while (!collected) {
+        if (session.cancelled || sessions.get(tabId) !== session) return;
+        try {
+          collected = await collectContext(tabId);
+          if (collected.safeContext.page?.origin && !collected.safeContext.elements.length && Date.now() < collectionDeadline) {
+            collected = null;
+            await new Promise(resolve => setTimeout(resolve,250));
+          }
+        }
+        catch (error) {
+          if (Date.now() >= collectionDeadline || !/not available on this page/.test(error.message)) throw error;
+          await new Promise(resolve => setTimeout(resolve,250));
+          await assertSessionBoundary(session,settings);
+        }
       }
       if (session.cancelled || sessions.get(tabId) !== session) return;
       session.elementFrames = collected.elementFrames;

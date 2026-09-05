@@ -70,3 +70,5 @@ const base = { actionType: "click", label: "Continue shopping", ...submitIn("Con
 assert.strictEqual(risk.classify({ ...base, reason: "click to place the order and pay now" }).risk, "low");
 
 console.log("Action risk tests passed");
+assert.equal(of({actionType:'press',key:'Enter',label:'Search Amazon.in',isTextInput:true,isSubmitControl:true,inForm:true,formIsSearch:true}), 'low');
+assert.equal(of({actionType:'press',key:'Enter',label:'Email',isTextInput:true,isSubmitControl:true,inForm:true,formHasPaymentField:true}), 'critical');

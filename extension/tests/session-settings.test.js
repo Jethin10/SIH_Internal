@@ -28,6 +28,9 @@ const source = fs.readFileSync(require.resolve("../background/service-worker.js"
   assert.equal(stored.gatewaySettings.provider.apiKey, "");
   await settingsContext.getSettings();
   assert.equal(writes, 2, "Migration must run only once");
+  await settingsContext.saveSettings({...first,provider:{...first.provider,apiKey:'fixture-primary',fallbackApiKeys:['fixture-fallback']}});
+  assert.equal((await settingsContext.getSettings()).provider.fallbackApiKeys[0],'fixture-fallback');
+  assert(!JSON.stringify(stored).includes('fixture-fallback'),'Fallback keys must stay out of persistent public settings');
 
   const sessions = new Map();
   let finishPrevious;

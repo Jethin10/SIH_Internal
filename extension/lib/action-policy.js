@@ -59,7 +59,12 @@
     return { ok: true };
   }
 
-  const api = { validate, TARGET_ACTIONS, ALLOWED_KEYS };
+  const responseSchema = {anyOf:Object.entries(FIELDS).map(([type,fields]) => ({
+    type:'object',additionalProperties:false,
+    required:[...fields].filter(field=>!['reason','amount','ms'].includes(field)),
+    properties:Object.fromEntries([...fields].map(field=>[field,field==='type'?{type:'string',enum:[type]}:{type:field==='expectedVersion'?'integer':['amount','ms'].includes(field)?'number':'string'}]))
+  }))};
+  const api = { validate, TARGET_ACTIONS, ALLOWED_KEYS, responseSchema };
   root.PrivacyActionPolicy = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

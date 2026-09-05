@@ -4,33 +4,58 @@
   "model": "deterministic test",
   "platform": "win32",
   "browser": "145.0.7632.6",
-  "seconds": 1.336,
+  "seconds": 2.742,
   "steps": [
+    "fill",
+    "press",
     "click",
     "select",
     "click",
+    "fill",
+    "fill",
+    "fill",
     "fill",
     "done"
   ],
   "requests": [
     {
-      "bytes": 4864,
+      "bytes": 5633,
       "path": "/"
     },
     {
-      "bytes": 5337,
+      "bytes": 5840,
+      "path": "/"
+    },
+    {
+      "bytes": 6303,
+      "path": "/results"
+    },
+    {
+      "bytes": 6770,
       "path": "/product"
     },
     {
-      "bytes": 5523,
+      "bytes": 6956,
       "path": "/product"
     },
     {
-      "bytes": 6040,
+      "bytes": 7713,
       "path": "/cart"
     },
     {
-      "bytes": 6342,
+      "bytes": 7814,
+      "path": "/cart"
+    },
+    {
+      "bytes": 7948,
+      "path": "/cart"
+    },
+    {
+      "bytes": 8052,
+      "path": "/cart"
+    },
+    {
+      "bytes": 8169,
       "path": "/cart"
     }
   ],
