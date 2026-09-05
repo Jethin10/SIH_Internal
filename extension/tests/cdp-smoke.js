@@ -62,30 +62,50 @@ async function main() {
   assert(page, "integration fixture page target was not found");
 
   const cdp = await connect(page.webSocketDebuggerUrl);
-  await new Promise((resolve) => setTimeout(resolve, 900));
   await cdp.send("Runtime.enable");
-  await new Promise((resolve) => setTimeout(resolve, 250));
-
-  const contexts = cdp.events
-    .filter((event) => event.method === "Runtime.executionContextCreated")
-    .map((event) => event.params.context);
-  assert(contexts.length > 0, "no execution contexts were reported");
-
-  let extensionContext = null;
-  const orderedContexts = [...contexts].sort((a, b) => Number(b.auxData?.frameId === page.id) - Number(a.auxData?.frameId === page.id));
-  for (const context of orderedContexts) {
-    let result;
+  function liveContexts() {
+    const live = new Map();
+    for (const event of cdp.events) {
+      if (event.method === "Runtime.executionContextsCleared") live.clear();
+      if (event.method === "Runtime.executionContextCreated") live.set(event.params.context.id, event.params.context);
+      if (event.method === "Runtime.executionContextDestroyed") live.delete(event.params.executionContextId);
+    }
+    return Array.from(live.values());
+  }
+  const pageReadyDeadline = Date.now() + 15000;
+  let pageReady = false;
+  while (!pageReady && Date.now() < pageReadyDeadline) {
     try {
-      result = await cdp.send("Runtime.evaluate", {
-        contextId: context.id,
-        expression: "Boolean(globalThis.__STRAW_HATS_PRIVACY_GATEWAY__ && globalThis.PrivacyPII)",
+      const ready = await cdp.send("Runtime.evaluate", {
+        expression: `location.href === ${JSON.stringify(FIXTURE_URL)} && document.readyState === 'complete'`,
         returnByValue: true
       });
-    } catch (_) { continue; }
-    if (result.result?.value === true) {
-      extensionContext = context;
-      break;
+      pageReady = ready.result?.value === true;
+    } catch (_) {}
+    if (!pageReady) await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert(pageReady, "integration fixture did not finish loading");
+  const contextDeadline = Date.now() + 15000;
+  let contexts = [];
+  let extensionContext = null;
+  while (!extensionContext && Date.now() < contextDeadline) {
+    contexts = liveContexts();
+    const orderedContexts = [...contexts].sort((a, b) => Number(b.auxData?.frameId === page.id) - Number(a.auxData?.frameId === page.id));
+    for (const context of orderedContexts) {
+      let result;
+      try {
+        result = await cdp.send("Runtime.evaluate", {
+          contextId: context.id,
+          expression: "Boolean(globalThis.__STRAW_HATS_PRIVACY_GATEWAY__ && globalThis.PrivacyPII)",
+          returnByValue: true
+        });
+      } catch (_) { continue; }
+      if (result.result?.value === true) {
+        extensionContext = context;
+        break;
+      }
     }
+    if (!extensionContext) await new Promise((resolve) => setTimeout(resolve, 100));
   }
   assert(extensionContext, "privacy content script did not initialize in an isolated world");
   async function waitForConfirmation() {
@@ -116,13 +136,19 @@ async function main() {
   assert.strictEqual(savedSettings.result.value.local.gatewaySettings.provider.apiKey, "", "API key was persisted in local storage");
   assert.strictEqual(savedSettings.result.value.local.gatewaySettings.userProfile.email, "", "private profile was persisted in local storage");
 
-  const refresh = await cdp.send("Runtime.evaluate", {
-    contextId: extensionContext.id,
-    expression: "chrome.runtime.sendMessage({type:'REFRESH_CONTEXT'})",
-    awaitPromise: true,
-    returnByValue: true
-  });
-  const response = refresh.result?.value;
+  const contextReadyDeadline = Date.now() + 15000;
+  let response = null;
+  while (Date.now() < contextReadyDeadline) {
+    const refresh = await cdp.send("Runtime.evaluate", {
+      contextId: extensionContext.id,
+      expression: "chrome.runtime.sendMessage({type:'REFRESH_CONTEXT'})",
+      awaitPromise: true,
+      returnByValue: true
+    });
+    response = refresh.result?.value;
+    if (response?.ok && response.context?.elements?.length > 0 && response.context.metrics?.graphComplete) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
   assert(response?.ok, `refresh failed: ${JSON.stringify(response)}`);
   assert(response.context?.elements?.length > 0, "safe context has no elements");
   assert(response.context.metrics?.sensitiveNodes >= 1, "expected sensitive nodes were not detected");
