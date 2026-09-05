@@ -102,11 +102,25 @@ async function main() {
 
     const fixtureCdp = await connect(fixture.webSocketDebuggerUrl);
     await fixtureCdp.send("Runtime.enable");
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    const contexts = fixtureCdp.events.filter((event) => event.method === "Runtime.executionContextCreated").map((event) => event.params.context);
-    const extensionContext = contexts.find((context) => !context.auxData?.isDefault && context.auxData?.frameId === fixture.id);
-    const pageContext = contexts.find((context) => context.auxData?.isDefault && context.auxData?.frameId === fixture.id);
-    if (!extensionContext || !pageContext) throw new Error("Fixture contexts were not found");
+    let pageContext;
+    const contextDeadline = Date.now() + 15000;
+    while (!pageContext && Date.now() < contextDeadline) {
+      const live = new Map();
+      for (const event of fixtureCdp.events) {
+        if (event.method === "Runtime.executionContextsCleared") live.clear();
+        if (event.method === "Runtime.executionContextCreated") live.set(event.params.context.id, event.params.context);
+        if (event.method === "Runtime.executionContextDestroyed") live.delete(event.params.executionContextId);
+      }
+      const candidate = [...live.values()].find((context) => context.auxData?.isDefault && context.auxData?.frameId === fixture.id);
+      if (candidate) {
+        try {
+          const ready = await fixtureCdp.send("Runtime.evaluate", { contextId: candidate.id, expression: "document.readyState === 'complete' && Boolean(document.querySelector('#opaque'))", returnByValue: true });
+          if (ready.result?.value) pageContext = candidate;
+        } catch (_) {}
+      }
+      if (!pageContext) await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    if (!pageContext) throw new Error("The fixture page did not finish loading");
     const panelCdp = await connect(panel.webSocketDebuggerUrl);
     await panelCdp.send("Runtime.enable");
     await panelCdp.send("Page.enable");
