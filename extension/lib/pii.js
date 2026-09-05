@@ -219,6 +219,36 @@
       || /^\s*(?:records?|rows?|entries|items|samples|users)\b/iu.test(after);
   }
 
+  const PERSON_TOKEN = String.raw`(?:[\p{L}]\.|[\p{L}\p{M}]+(?:[.'’\-][\p{L}\p{M}]+)*)`;
+  const PERSON_SEQUENCE = `${PERSON_TOKEN}(?:[ \t]+${PERSON_TOKEN}){0,4}`;
+
+  function addCapturedContextMatch(input, candidates, match, type, priority, labelledOverride) {
+    let value = String(match[1] || "").trim();
+    if (type === "ADDRESS") value = value.replace(/,+$/, "").trim();
+    if (!value) return;
+    if (/^<[A-Z0-9_]+(?::[A-F0-9]{6,})?>/i.test(value)) return;
+    if (type === "ADDRESS" && validIPv4(value)) return;
+    const offset = match[0].lastIndexOf(match[1]);
+    const index = match.index + Math.max(0, offset);
+    candidates.push({ type, value, index, end: index + value.length, priority, labelledOverride });
+  }
+
+  function overlapsEmailValue(input, index, end) {
+    const windowStart = Math.max(0, index - 64);
+    const window = input.slice(windowStart, Math.min(input.length, end + 64));
+    const email = /[A-Z0-9._%+-]+[ \t]*@[ \t]*[A-Z0-9.-]+\.[A-Z]{2,}/giu;
+    let match;
+    while ((match = email.exec(window)) !== null) {
+      const emailStart = windowStart + match.index;
+      const emailEnd = emailStart + match[0].length;
+      if (index < emailEnd && end > emailStart) return true;
+      if (match.index === email.lastIndex) email.lastIndex += 1;
+    }
+    return false;
+  }
+
+  const ADDRESS_BOUNDARY = String.raw`(?=\s*(?:,\s*\[|\n|$|\(|\s+(?:Name|Full\s+Name|City|State|Zip(?:\s+Code)?|Postal(?:\s+Code)?|Email(?:\s+Address)?|Phone(?:\s+Number)?|Contact|Date(?:\s+of\s+Birth)?|Financial|Monthly|Account|Policy|Property|New\s+Loan|Street|Passport|Travel\s+Document)\b\s*:|[.;](?=\s+(?:[A-Z][\p{Ll}\p{M}]+|The|This|It|WHEREAS|II\b)|$)))`;
+
   function addContextualMatches(input, normalizedInput, candidates) {
     const ocrPhone = /(?:phone|mobile|contact|call|tel(?:ephone)?|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)?\s*(?:\+?91[ -]?)?([6-9][0-9ILO]{4}[ -]?[0-9ILO]{5})/giu;
     let match;
@@ -232,22 +262,34 @@
       if (match.index === ocrPhone.lastIndex) ocrPhone.lastIndex += 1;
     }
 
-    const labelledPhone = /(?:phone(?:\s+number)?|mobile(?:\s+number)?|telephone|contact(?:\s+number)?|tel|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)\s*(\+?(?:\(\d{2,4}\)|\d)[\d(). -]{4,}\d)/giu;
+    const labelledPhone = /(?:phone(?:\s+number)?|mobile(?:\s+number)?|telephone|contact(?:\s+number)?|tel|whatsapp|फोन|मोबाइल|संपर्क|t[eé]l[eé]fono|t[eé]l[eé]phone|telefono|телефон|رقم\s+الهاتف)\s*(?::|is|at|-)\s*(\+?\s*(?:\(\+?\d{1,4}\)|\d{1,4})(?:[\s().-]*\d{1,4}){1,7}(?:\s*(?:x|ext(?:ension)?\.?)\s*\d{1,8})?)/giu;
     while ((match = labelledPhone.exec(normalizedInput)) !== null) {
       const value = match[1].trim();
-      const digits = value.replace(/\D/g, "");
-      if (digits.length >= 7 && digits.length <= 15) {
+      const base = value.replace(/\s*(?:x|ext(?:ension)?\.?)\s*\d{1,8}$/i, "");
+      const digits = base.replace(/\D/g, "");
+      if (digits.length >= 2 && digits.length <= 15) {
         const index = match.index + match[0].lastIndexOf(match[1]) + match[1].indexOf(value);
-        candidates.push({ type: "PHONE", value: input.slice(index, index + value.length), index, end: index + value.length, priority: 7 });
+        candidates.push({ type: "PHONE", value: input.slice(index, index + value.length), index, end: index + value.length, priority: 7, labelledOverride: true });
       }
       if (match.index === labelledPhone.lastIndex) labelledPhone.lastIndex += 1;
     }
 
-    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?))?|travel\s+document)\s*(?::|is|-)\s*([A-Z0-9][A-Z0-9-]{5,11})\b/giu;
+    const internationalPhone = /(?<![\d-])(?:\+\d{1,3}[\s.-]?)?(?:\(\+?\d{1,4}\)|\(\d{2,4}\)|\d{1,4})(?:[\s.-]\d{1,4}){2,5}(?:\s*(?:x|ext(?:ension)?\.?)\s*\d{1,8})?(?![\d-])/giu;
+    while ((match = internationalPhone.exec(normalizedInput)) !== null) {
+      const value = match[0].trim();
+      const digits = value.replace(/\s*(?:x|ext(?:ension)?\.?)\s*\d{1,8}$/i, "").replace(/\D/g, "");
+      const clearlyInternational = /\+|\(|\b1[\s.-]?800\b|\b00\d{1,3}[\s.-]/i.test(value);
+      if (clearlyInternational && new Set(digits).size > 1 && digits.length >= 7 && digits.length <= 15 && !phoneLooksLikeCount(input, match.index, match.index + value.length)) {
+        candidates.push({ type: "PHONE", value: input.slice(match.index, match.index + value.length), index: match.index, end: match.index + value.length, priority: 4 });
+      }
+      if (match.index === internationalPhone.lastIndex) internationalPhone.lastIndex += 1;
+    }
+
+    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?)\s*)?|travel\s+document|pasaporte|passeport|passaporto|паспорт)\s*(?:(?::|is|-)\s*|\s+(?!(?:number|no\.?|is)\b)(?=[A-Z0-9]))["']?([A-Z0-9][A-Z0-9-]{2,15})\b/giu;
     while ((match = labelledPassport.exec(input)) !== null) {
       const value = match[1];
       const index = match.index + match[0].lastIndexOf(value);
-      candidates.push({ type: "PASSPORT", value, index, end: index + value.length, priority: 7 });
+      candidates.push({ type: "PASSPORT", value, index, end: index + value.length, priority: 7, labelledOverride: true });
       if (match.index === labelledPassport.lastIndex) labelledPassport.lastIndex += 1;
     }
 
@@ -259,19 +301,47 @@
       if (match.index === labelledCard.lastIndex) labelledCard.lastIndex += 1;
     }
 
-    const streetAddress = /\b\d{1,6}\s+[\p{L}\p{M}0-9.'’/-]+(?:\s+[\p{L}\p{M}0-9.'’/-]+){0,5}\s+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Terrace|Way|Boulevard|Blvd|Highway|Hwy|Motorway|Bypass|Lodge|Lakes|Villages|Parkways|Throughway|Tunnel|Path|Trafficway|Valley|Plains|Mission|Pines|Forks?|Circles?|Drives?|Union|Hill|Crest|Course|Extensions?|Gardens?|Groves?|Manor|Meadows|Junctions?|Centers?|Trace|Summit|Trail|Turnpike|Station|Plaza|Square|Key|Cape|Isle|Locks?|Shoals?|Ports?|Views?|Heights?|Corners?|Club)(?:,?\s+(?:Apt|Apartment|Suite|Unit)\.?\s*[A-Z0-9-]+)?(?:,\s*[\p{L}\p{M}.'’ -]{2,32}){0,2}\b/giu;
+    const streetAddress = /\b\d{1,6}\s+[\p{L}\p{M}0-9.'’/-]+(?:\s+[\p{L}\p{M}0-9.'’/-]+){0,5}\s+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Terrace|Way|Boulevard|Blvd|Highway|Hwy|Motorway|Bypass|Lodge|Lakes|Villages|Parkways|Throughway|Tunnel|Path|Trafficway|Valley|Plains|Mission|Pines|Forks?|Circles?|Drives?|Union|Hill|Crest|Course|Extensions?|Gardens?|Groves?|Manor|Meadows|Junctions?|Centers?|Trace|Summit|Trail|Turnpike|Station|Plaza|Square|Key|Cape|Isle|Locks?|Shoals?|Ports?|Views?|Heights?|Corners?|Club|Forest|Forge|Mountain|Pass|Alley|Spring|Landing|Creek|Brooks|Fields|Ways?|Vicolo)(?:,?\s+(?:Apt|Apartment|Suite|Unit|Flat|Studio)\.?\s*[A-Z0-9-]+)?(?:,\s*[\p{L}\p{M}.'’ -]{2,32}){0,3}\b/giu;
     while ((match = streetAddress.exec(input)) !== null) {
       candidates.push({ type: "ADDRESS", value: match[0], index: match.index, end: match.index + match[0].length, priority: 6 });
       if (match.index === streetAddress.lastIndex) streetAddress.lastIndex += 1;
     }
 
+    const internationalAddress = /\b\d{1,6}\s+(?:Vicolo|Via|Corso|Piazza|Strada|Rua|Calle|Av(?:enida)?|Boulevard)\s+[\p{L}\p{M}.'’ -]{2,50}(?:,\s*[\p{L}\p{M}.'’ -]{2,40}){0,2}/giu;
+    while ((match = internationalAddress.exec(input)) !== null) {
+      candidates.push({ type: "ADDRESS", value: match[0].trim(), index: match.index, end: match.index + match[0].trim().length, priority: 6 });
+      if (match.index === internationalAddress.lastIndex) internationalAddress.lastIndex += 1;
+    }
+
+    const labelledAddress = new RegExp(String.raw`(?<!Email\s)(?<!Phone\s)(?<!Date\s)(?<!Account\s)(?:(?:Street|Mailing|Contact|Residential|Delivery|Home|Permanent\s+Residential|Permanent|Billing|Registered|Correspondence)\s+Address|Address|Direcci[oó]n|Adresse|Indirizzo|पता|घर\s+का\s+पता|डिलीवरी\s+पता|आवासीय\s+पता)\s*(?:(?::|is|है|-)\s*)([^\n;]+?)${ADDRESS_BOUNDARY}`, "giu");
+    while ((match = labelledAddress.exec(input)) !== null) {
+      addCapturedContextMatch(input, candidates, match, "ADDRESS", 8, true);
+      if (match.index === labelledAddress.lastIndex) labelledAddress.lastIndex += 1;
+    }
+
+    const contextualAddress = new RegExp(String.raw`(?:located|residing|based)\s+(?:at|in)\s+([^\n;]+?)(?=\s*\(|[.;](?=\s+(?:[A-Z][\p{Ll}\p{M}]+|The|This|It|WHEREAS|II\b)|$)|$)`, "giu");
+    while ((match = contextualAddress.exec(input)) !== null) {
+      addCapturedContextMatch(input, candidates, match, "ADDRESS", 7, true);
+      if (match.index === contextualAddress.lastIndex) contextualAddress.lastIndex += 1;
+    }
+
+    const relationalAddress = new RegExp(String.raw`(?:with\s+(?:a\s+)?(?:street|mailing|residential|contact)\s+address\s+(?:at|of)|head\s+office\s+located\s+at)\s+([^\n;]+?)(?=\s*\(|[.;](?=\s+(?:[A-Z][\p{Ll}\p{M}]+|The|This|It|WHEREAS|II\b)|$)|$)`, "giu");
+    while ((match = relationalAddress.exec(input)) !== null) {
+      addCapturedContextMatch(input, candidates, match, "ADDRESS", 8, true);
+      if (match.index === relationalAddress.lastIndex) relationalAddress.lastIndex += 1;
+    }
+
     const labelledValues = [
-      ["PERSON", /(?:[Pp]atient|[Bb]eneficiary|[Rr]ecipient|[Aa]ccount [Hh]older|Full Legal Name|Full Name|Applicant Name|Provider Name|Account Name|Cardholder Name|Customer Name|[Bb]orrower|[Ss]hipper|[Uu]ser|[Ss]ignature)\s*(?:name\s*)?(?:is|:|-)\s*((?:Dr\.?\s+)?[\p{Lu}][\p{L}\p{M}'’-]{1,}(?:[ \t]+[\p{Lu}][\p{L}\p{M}'’-]{1,}){0,3}?)(?=[ \t]+(?:Date|Address|Phone|Email|Account|Policy|Street|Property|New Loan)\b\s*:|[.,;|\n]|$)/gu],
+      ["PERSON", new RegExp(String.raw`(?:Patient|Beneficiary|Recipient|Account\s+Holder|Full\s+Legal\s+Name|Full\s+Name|Applicant\s+Name|Provider\s+Name|Account\s+Name|Cardholder\s+Name|Customer\s+Name|Borrower|Shipper|User|Signature|Name|Payer|Payee|Seller|Buyer|Claimant|Insurer|Policyholder|Client|Consignee|Contact|Paid\s+to|मरीज|रोगी|लाभार्थी|प्राप्तकर्ता|नाम|पूरा\s+नाम|Nombre|Nom|Nome)\s*(?:is|:|-|है)\s*(${PERSON_SEQUENCE})(?=\s*(?:[.,;|\n]|$|\(|\s+(?:Date|Address|Phone|Email|Account|Policy|Street|Property|New\s+Loan|Passport|City|State)\b\s*:))`, "giu")],
       ["PERSON", /\bmy\s+name\s+is\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})/giu],
       ["PERSON", /\bDear\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})(?=,)/gu],
-      ["PERSON", /(?:मरीज|रोगी|लाभार्थी|प्राप्तकर्ता)\s*(?:का नाम\s*)?(?:है|:|-)\s*([\p{L}\p{M}'’-]{2,}(?:\s+[\p{L}\p{M}'’-]{2,}){1,3})/gu],
-      ["ADDRESS", /(?:Residential address|residential address|Delivery address|delivery address|Home address|home address)\s*(?:is|:|-)\s*([^.;\n]{8,100})/gu],
-      ["ADDRESS", /(?:घर का पता|डिलीवरी पता|आवासीय पता)\s*(?:है|:|-)?\s*([^.;\n]{5,100})/gu],
+      ["PERSON", new RegExp(String.raw`(?:मरीज|रोगी|लाभार्थी|प्राप्तकर्ता)\s*(?:का\s+नाम\s*)?(?:है|:|-)\s*(${PERSON_SEQUENCE})`, "gu")],
+      ["PERSON", new RegExp(String.raw`(?:^|\n)\s*(${PERSON_TOKEN})(?=,\s*(?:This\s+is|We\s+hope|Dear|प्रिय|यह)\b)`, "gimu")],
+      ["PERSON", new RegExp(String.raw`(?:Sincerely|Regards|Best|Cordially)\s*,?\s*(${PERSON_SEQUENCE})(?=[.,;\n]|$)`, "giu")],
+      ["PERSON", new RegExp(String.raw`(?:^|\n)\s*(${PERSON_TOKEN}(?:[ \t]+${PERSON_TOKEN}){1,4})(?=['’]s\b)`, "giu")],
+      ["PERSON", new RegExp(String.raw`(?:such\s+as|named|account\s+of|belongs\s+to)\s+(${PERSON_TOKEN}(?:[ \t]+${PERSON_TOKEN}){1,4})(?=['’]s\b)`, "giu")],
+      ["PERSON", new RegExp(String.raw`(?:between|by\s+and\s+between)\s+(${PERSON_SEQUENCE})(?=\s*,?\s+(?:a\s+|with\s+|having\s+|residing\s+|whose\s+|the\s+))`, "giu")],
+      ["PERSON", new RegExp(String.raw`(?:Nombre|Nom|Nome|नाम|পূর্ণ\s+নাম|பெயர்)\s*(?:is|:|-|है)\s*(${PERSON_SEQUENCE})`, "giu")],
       ["HEALTH", /(?:Diagnosis|diagnosis|Medical condition|medical condition|Health condition|health condition|Allergy|allergy)\s*(?:is|:|-)\s*([^.;\n]{3,100})/gu],
       ["HEALTH", /(?:बीमारी|रोग|स्वास्थ्य स्थिति|एलर्जी)\s*(?:है|:|-)?\s*([^.;\n]{3,100})/gu]
     ];
@@ -322,6 +392,10 @@
       while (from < lowerInput.length) {
         const index = lowerInput.indexOf(lowerValue, from);
         if (index === -1) break;
+        if (item.type === "PERSON" && overlapsEmailValue(input, index, index + item.value.length)) {
+          from = index + item.value.length;
+          continue;
+        }
         candidates.push({ ...item, value: input.slice(index, index + item.value.length), index, end: index + item.value.length });
         from = index + item.value.length;
       }

@@ -32,6 +32,7 @@ assert.strictEqual(secretVault.resolve(secret.safe), "hunter2");
 assert(PII.redactText("IFSC HDFC0001234", new PII.AliasVault("ifsc")).safe.includes("<IFSC:"));
 assert(PII.redactText("Passport K1234567", new PII.AliasVault("passport")).safe.includes("<PASSPORT:"));
 assert.strictEqual(PII.findPII("Invalid Aadhaar 234567890123").some((item) => item.type === "AADHAAR"), false);
+assert.deepEqual(PII.findPII("Address: <PRIVATE_TOKEN>"), [], "Capability placeholders must not be classified as address PII");
 
 const capabilityVault = new PII.AliasVault("capabilities");
 capabilityVault.registerUserProfile({ email: "private@example.com" });

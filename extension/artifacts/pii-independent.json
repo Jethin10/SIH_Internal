@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T06:17:10.377Z",
+  "generatedAt": "2026-09-05T08:38:15.259Z",
   "provenance": {
     "dataset": "gretelai/synthetic_pii_finance_multilingual",
     "url": "https://huggingface.co/datasets/gretelai/synthetic_pii_finance_multilingual",
@@ -16,17 +16,17 @@
   "cases": 119,
   "positives": 99,
   "negativeDocuments": 20,
-  "tp": 42,
-  "fn": 57,
-  "recall": 0.42424242424242425,
+  "tp": 92,
+  "fn": 7,
+  "recall": 0.9292929292929293,
   "negativeFalsePositives": 0,
   "negativeDocumentsWithFindings": 0,
   "cleanNegativeRate": 1,
   "perType": {
     "ADDRESS": {
       "expected": 20,
-      "detected": 1,
-      "missed": 19
+      "detected": 20,
+      "missed": 0
     },
     "IP": {
       "expected": 8,
@@ -35,13 +35,13 @@
     },
     "PERSON": {
       "expected": 25,
-      "detected": 4,
-      "missed": 21
+      "detected": 22,
+      "missed": 3
     },
     "PHONE": {
       "expected": 15,
-      "detected": 6,
-      "missed": 9
+      "detected": 15,
+      "missed": 0
     },
     "EMAIL": {
       "expected": 15,
@@ -55,151 +55,11 @@
     },
     "PASSPORT": {
       "expected": 8,
-      "detected": 3,
-      "missed": 5
+      "detected": 7,
+      "missed": 1
     }
   },
   "misses": [
-    {
-      "id": "gretel-test-1000-1",
-      "sourceRow": 1000,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "Toronto, Canada"
-    },
-    {
-      "id": "gretel-test-1012-1",
-      "sourceRow": 1012,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Alessia V. Roccabonella"
-    },
-    {
-      "id": "gretel-test-1012-2",
-      "sourceRow": 1012,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "9494 Tammy Forest, 95521, Seanville"
-    },
-    {
-      "id": "gretel-test-1013-1",
-      "sourceRow": 1013,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "893 Franco Plains, Apt. 277"
-    },
-    {
-      "id": "gretel-test-1013-2",
-      "sourceRow": 1013,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Giuseppina I. Sforza"
-    },
-    {
-      "id": "gretel-test-1016-0",
-      "sourceRow": 1016,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Florencia R. Huertas"
-    },
-    {
-      "id": "gretel-test-1016-1",
-      "sourceRow": 1016,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "959 Matthew Forge, Apt. 1676"
-    },
-    {
-      "id": "gretel-test-1016-2",
-      "sourceRow": 1016,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "001-397-680-4345 x3930"
-    },
-    {
-      "id": "gretel-test-1018-1",
-      "sourceRow": 1018,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Renée Wagner-Langlois"
-    },
-    {
-      "id": "gretel-test-1018-4",
-      "sourceRow": 1018,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "6905 Emily Mountain, 24041, Port Jeffrey"
-    },
-    {
-      "id": "gretel-test-1019-1",
-      "sourceRow": 1019,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "3838 David Ville"
-    },
-    {
-      "id": "gretel-test-1019-3",
-      "sourceRow": 1019,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Lorraine Lagarde-Cost"
-    },
-    {
-      "id": "gretel-test-1020-2",
-      "sourceRow": 1020,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "45, Baker Street, London, NW1 6XE"
-    },
-    {
-      "id": "gretel-test-1022-1",
-      "sourceRow": 1022,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "775 Rodriguez Creek, Brittanyhaven"
-    },
-    {
-      "id": "gretel-test-1025-4",
-      "sourceRow": 1025,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "123, High Street, London, UK"
-    },
-    {
-      "id": "gretel-test-1026-0",
-      "sourceRow": 1026,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Adélaïde Dupont-Boucher"
-    },
-    {
-      "id": "gretel-test-1026-1",
-      "sourceRow": 1026,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "15267 Michael Locks, 07193, Fergusonton"
-    },
-    {
-      "id": "gretel-test-1026-9",
-      "sourceRow": 1026,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "1-8"
-    },
-    {
-      "id": "gretel-test-1029-0",
-      "sourceRow": 1029,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "John Doe"
-    },
-    {
-      "id": "gretel-test-1029-6",
-      "sourceRow": 1029,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "(123) 456-7890"
-    },
     {
       "id": "gretel-test-1029-7",
       "sourceRow": 1029,
@@ -208,179 +68,11 @@
       "entity": "123456789"
     },
     {
-      "id": "gretel-test-1034-1",
-      "sourceRow": 1034,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Severiano O. Porcel"
-    },
-    {
-      "id": "gretel-test-1034-2",
-      "sourceRow": 1034,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "48 Vicolo Segrè, Moio Alcantara"
-    },
-    {
-      "id": "gretel-test-1038-2",
-      "sourceRow": 1038,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "123 Main Street, Toronto, Ontario, Canada"
-    },
-    {
-      "id": "gretel-test-1039-0",
-      "sourceRow": 1039,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Silvestro Mannoia-Scotti"
-    },
-    {
-      "id": "gretel-test-1044-1",
-      "sourceRow": 1044,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "123 Main Street, Toronto, ON, Canada, M5J 1E3"
-    },
-    {
-      "id": "gretel-test-1044-2",
-      "sourceRow": 1044,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "John Doe"
-    },
-    {
-      "id": "gretel-test-1044-6",
-      "sourceRow": 1044,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "456 Park Lane, London, UK, W1A 2AB"
-    },
-    {
-      "id": "gretel-test-1044-7",
-      "sourceRow": 1044,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Jane Smith"
-    },
-    {
-      "id": "gretel-test-1045-2",
-      "sourceRow": 1045,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Malena C. Ferrándiz"
-    },
-    {
-      "id": "gretel-test-1045-3",
-      "sourceRow": 1045,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "7404 Burch Pass, 30095, Kimberlyburgh"
-    },
-    {
-      "id": "gretel-test-1045-4",
-      "sourceRow": 1045,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "1-800-123-4567"
-    },
-    {
-      "id": "gretel-test-1049-0",
-      "sourceRow": 1049,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Eduard Reuter"
-    },
-    {
-      "id": "gretel-test-1049-1",
-      "sourceRow": 1049,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "Vicolo Lucio, 2"
-    },
-    {
       "id": "gretel-test-1049-2",
       "sourceRow": 1049,
       "sourceLabel": "name",
       "type": "PERSON",
       "entity": "Confirmor"
-    },
-    {
-      "id": "gretel-test-1050-3",
-      "sourceRow": 1050,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Célina Renard-Muller"
-    },
-    {
-      "id": "gretel-test-1050-4",
-      "sourceRow": 1050,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "7827 Crawford Alley, 83924, West Jonathanton"
-    },
-    {
-      "id": "gretel-test-1051-1",
-      "sourceRow": 1051,
-      "sourceLabel": "name",
-      "type": "PERSON",
-      "entity": "Amico Antonietta Loredan"
-    },
-    {
-      "id": "gretel-test-1051-2",
-      "sourceRow": 1051,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "0667 Scott Brooks, 40509, East Lindseyborough"
-    },
-    {
-      "id": "gretel-test-1052-1",
-      "sourceRow": 1052,
-      "sourceLabel": "street_address",
-      "type": "ADDRESS",
-      "entity": "6040 John Spring"
-    },
-    {
-      "id": "gretel-test-1068-4",
-      "sourceRow": 1068,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "(+44) 123-456-7890"
-    },
-    {
-      "id": "gretel-test-1075-4",
-      "sourceRow": 1075,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "1-800-123-4567"
-    },
-    {
-      "id": "gretel-test-1084-2",
-      "sourceRow": 1084,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "+1-800-123-4567"
-    },
-    {
-      "id": "gretel-test-1085-1",
-      "sourceRow": 1085,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "+1-800-123-4567"
-    },
-    {
-      "id": "gretel-test-1095-0",
-      "sourceRow": 1095,
-      "sourceLabel": "first_name",
-      "type": "PERSON",
-      "entity": "Inmaculada"
-    },
-    {
-      "id": "gretel-test-1095-3",
-      "sourceRow": 1095,
-      "sourceLabel": "phone_number",
-      "type": "PHONE",
-      "entity": "1-800-123-4567"
     },
     {
       "id": "gretel-test-1174-1",
@@ -397,25 +89,11 @@
       "entity": "379530845"
     },
     {
-      "id": "gretel-test-1302-0",
-      "sourceRow": 1302,
-      "sourceLabel": "first_name",
-      "type": "PERSON",
-      "entity": "Michele"
-    },
-    {
       "id": "gretel-test-1316-10",
       "sourceRow": 1316,
       "sourceLabel": "credit_card_number",
       "type": "CARD",
       "entity": "3022 3330 5753"
-    },
-    {
-      "id": "gretel-test-1335-1",
-      "sourceRow": 1335,
-      "sourceLabel": "first_name",
-      "type": "PERSON",
-      "entity": "Andreas"
     },
     {
       "id": "gretel-test-1426-3",
@@ -425,39 +103,11 @@
       "entity": "3455-7250-6677-742"
     },
     {
-      "id": "gretel-test-1470-4",
-      "sourceRow": 1470,
-      "sourceLabel": "passport_number",
-      "type": "PASSPORT",
-      "entity": "489290094"
-    },
-    {
       "id": "gretel-test-1482-1",
       "sourceRow": 1482,
       "sourceLabel": "first_name",
       "type": "PERSON",
       "entity": "Roy"
-    },
-    {
-      "id": "gretel-test-1530-4",
-      "sourceRow": 1530,
-      "sourceLabel": "passport_number",
-      "type": "PASSPORT",
-      "entity": "970787082"
-    },
-    {
-      "id": "gretel-test-1573-2",
-      "sourceRow": 1573,
-      "sourceLabel": "passport_number",
-      "type": "PASSPORT",
-      "entity": "211786459"
-    },
-    {
-      "id": "gretel-test-1767-0",
-      "sourceRow": 1767,
-      "sourceLabel": "passport_number",
-      "type": "PASSPORT",
-      "entity": "573126808"
     }
   ],
   "negativeFindings": [],

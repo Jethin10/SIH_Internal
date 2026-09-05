@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-05T06:16:23.902Z",
+  "generatedAt": "2026-09-05T08:38:15.232Z",
   "provenance": "Hand-authored synthetic challenge cases; no real personal data. These cases are separate from the generated corpus, but are not an independently collected held-out dataset.",
-  "cases": 36,
-  "tp": 31,
+  "cases": 47,
+  "tp": 42,
   "fp": 0,
   "fn": 0,
   "precision": 1,
@@ -299,6 +299,105 @@
     },
     {
       "id": "international-passport-labelled",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "international-passport-numeric",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "multilingual-passport",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "international-phone-extension",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "international-phone-plus-parens",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "person-with-initials",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "person-accented-initial",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "person-hindi",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "address-international",
+      "category": "context",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "address-hindi",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "address-italian",
+      "category": "mixed-language",
+      "expected": 1,
+      "detected": 1,
+      "missed": 0,
+      "falsePositives": 0,
+      "knownGap": null
+    },
+    {
+      "id": "possessive-person",
       "category": "context",
       "expected": 1,
       "detected": 1,
