@@ -8,6 +8,7 @@ const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
 const { createServer } = require("../server/server.js");
+const { chromePath, chromeTestArgs } = require("./browser-runtime.js");
 
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "artifacts", "product-ui.png");
@@ -21,16 +22,6 @@ function freePort() {
       server.close(() => resolve(port));
     });
   });
-}
-
-function chromePath() {
-  const roots = [process.env.CHROME_PATH].filter(Boolean);
-  const playwright = path.join(os.homedir(), "AppData", "Local", "ms-playwright");
-  if (fs.existsSync(playwright)) for (const folder of fs.readdirSync(playwright).sort().reverse()) roots.push(path.join(playwright, folder, "chrome-win64", "chrome.exe"));
-  roots.push(path.join(process.env.PROGRAMFILES || "", "Google", "Chrome", "Application", "chrome.exe"));
-  const found = roots.find((candidate) => fs.existsSync(candidate));
-  if (!found) throw new Error("Chrome was not found");
-  return found;
 }
 
 async function connect(url) {
@@ -78,6 +69,7 @@ function staticServer() {
 }
 
 async function main() {
+  const executable = chromePath();
   const [webPort, debugPort, plannerPort] = await Promise.all([freePort(), freePort(), freePort()]);
   const planner = createServer();
   await new Promise((resolve, reject) => planner.once("error", reject).listen(plannerPort, "127.0.0.1", resolve));
@@ -85,7 +77,8 @@ async function main() {
   await new Promise((resolve, reject) => server.once("error", reject).listen(webPort, "127.0.0.1", resolve));
   const fixtureUrl = `http://127.0.0.1:${webPort}/tests/integration.html`;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "strawhats-capture-"));
-  const browser = spawn(chromePath(), ["--headless=new", "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: "ignore" });
+  const browser = spawn(executable, [...chromeTestArgs(), "--headless=new", "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: ["ignore", "ignore", "inherit"] });
+  browser.once("error", (error) => console.error(`Browser launch failed: ${error.message}`));
   try {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
     const worker = await waitForTarget(

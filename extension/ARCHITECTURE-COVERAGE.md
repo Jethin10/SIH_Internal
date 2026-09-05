@@ -6,7 +6,7 @@ This file maps the architecture document to the code that exists. It separates t
 
 | Requirement | Status | Evidence |
 | --- | --- | --- |
-| Chrome and Firefox Manifest V3 builds and generic website coverage | Implemented and packaged; Chrome runtime-tested, Firefox schema-linted | `manifest.json`, `manifest.firefox.json`, browser adapters |
+| Chrome and Firefox Manifest V3 builds and generic website coverage | Implemented and packaged; Chrome and Firefox synthetic runtime journeys verified on macOS | `manifest.json`, `manifest.firefox.json`, browser adapters, `artifacts/firefox-runtime.json` |
 | DOM, form, ARIA, open Shadow DOM, and permitted iframe perception | Implemented | `content/content-script.js`, `background/service-worker.js` |
 | Incremental privacy graph, mutation tracking, IDs, hashes, versions | Implemented | `content/content-script.js` |
 | Immediate pending-mutation flush before context or action use | Implemented | `content/content-script.js` |
@@ -44,6 +44,9 @@ This file maps the architecture document to the code that exists. It separates t
 - Provider requests use the complete sensitive inventory, strict JSON parsing, a 30-second timeout, a 1 MB response limit, and JSON content-type enforcement.
 - Browser-specific adapters keep Chrome offscreen/side-panel APIs out of the Firefox package; both archives have root manifests and verified checksums.
 - Upstream planner mode requires a bearer token, rejects insecure non-loopback endpoints and redirects, and uses timing-safe token comparison.
+- OCR incorporates the page's known sensitive inventory, including non-regex secrets; inventory/profile changes invalidate the cached visual context.
+- Associated form captions are not registered as duplicate private values. The actual input values remain in the sensitive inventory.
+- Verification uses a shared pinned Chromium resolver on Windows, macOS, and Linux, with portable Node release tooling and a clean-profile Firefox runtime test.
 
 ## Deliberately not claimed
 
@@ -60,7 +63,7 @@ These architecture sections describe later research or product work, or capabili
 | Full remote desktop, Citrix, WebGL game, or scanned-PDF control | The architecture explicitly defers a complete remote-desktop vision system |
 | Production credential service, enterprise RBAC, Redis, and object storage | Explicitly outside the SIH extension MVP |
 | Signed browser-store publication | Requires external Chrome/Mozilla accounts and review; packages are prepared but not store-approved |
-| Firefox runtime certification | Package passes Mozilla schema lint; this machine has no Firefox runtime, so the full Firefox journey remains externally unverified |
+| Broad Firefox certification | Firefox 155.0.1 passed the synthetic runtime journey on macOS; other Firefox versions/platforms and browser-store review remain outside this evidence |
 | Perfect PII recall or perfect OCR | The architecture itself excludes these guarantees |
 
 ## Verification commands

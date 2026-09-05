@@ -150,13 +150,21 @@ async function evaluateFresh(cdp, kind, expression) {
   }
   assert(ready, "Benchmark page and privacy graph did not finish loading");
   const samples = [];
+  const debuggerSamples = [];
   let lastResponse;
 
   for (let index = 0; index < 30; index += 1) {
     const started = performance.now();
-    lastResponse = await evaluateFresh(cdp, "extension", "chrome.runtime.sendMessage({type:'REFRESH_CONTEXT'})");
+    const measured = await evaluateFresh(cdp, "extension", `(async () => {
+      const started = performance.now();
+      const response = await chrome.runtime.sendMessage({type:'REFRESH_CONTEXT'});
+      return { elapsedMs: performance.now() - started, response };
+    })()`);
+    lastResponse = measured.response;
     assert(lastResponse?.ok, `context refresh failed: ${JSON.stringify(lastResponse)}`);
-    samples.push(performance.now() - started);
+    assert(Number.isFinite(measured.elapsedMs) && measured.elapsedMs >= 0, "invalid request timing");
+    samples.push(measured.elapsedMs);
+    debuggerSamples.push(performance.now() - started);
   }
 
   await evaluateFresh(cdp, "page", "document.querySelector('#mutate').click()");
@@ -178,6 +186,8 @@ async function evaluateFresh(cdp, kind, expression) {
     warmP50Ms: percentile(warm, 0.5),
     warmP95Ms: percentile(warm, 0.95),
     warmP99Ms: percentile(warm, 0.99),
+    debuggerRoundTripP95Ms: percentile(debuggerSamples.slice(5), 0.95),
+    timingScope: "Browser-clock runtime message round trip; debugger discovery and result transfer reported separately",
     mutationMs: metrics.lastMutationMs,
     changed: metrics.changedNodesLastBatch,
     reprocessed: metrics.reprocessedLastBatch,

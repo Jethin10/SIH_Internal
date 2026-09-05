@@ -38,4 +38,4 @@ Everyone must be able to answer these five questions in under 30 seconds each:
 2. What stops a harmful action? A strict action schema, task-scope check, fresh target/version validation, semantic risk rules, and local confirmation.
 3. What happens after navigation? Visual state and pending confirmation are cleared; an origin change rotates the task scope and capabilities.
 4. What is genuinely measured? The five criteria listed in `SIH-EVALUATION.md`, on synthetic/local fixtures with limitations stated.
-5. What is not finished as a production product? Broad real-world PII/vision benchmarks, Firefox packaging, privileged browser surfaces, enterprise administration, and third-party security review.
+5. What is not finished as a production product? Broad real-world PII/vision benchmarks, real-model task evidence, wider Firefox platform coverage, privileged browser surfaces, enterprise administration, and third-party security review. Firefox packaging and the macOS synthetic runtime journey are complete.

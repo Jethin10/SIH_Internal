@@ -33,7 +33,7 @@ Browser speech recognition may send audio to its speech service. Speech synthesi
 
 Use Stop to cancel the task even if another tab has become active. A late model response cannot execute the next action. The configured step limit bounds the loop; reaching it is reported as a stop, not successful booking.
 
-Google consent pages, login, CAPTCHA, inaccessible controls, provider quotas, or changing site markup can interrupt the flow. The model is instructed to explain these interruptions rather than bypass them. This version controls one task tab; an airline checkout opened in another tab needs a new task there. A live model run and physical microphone capture remain to be verified with the user's key and device. Offline and simulated tests do not prove successful live booking.
+Google consent pages, login, CAPTCHA, inaccessible controls, provider quotas, or changing site markup can interrupt the flow. The model is instructed to explain these interruptions rather than bypass them. This version controls one task tab; an airline checkout opened in another tab needs a new task there. Google Flights loaded with route and date controls during the September 5, 2026 browser check. A live model run and physical microphone capture remain to be verified with the user's key and device. Offline and simulated tests do not prove successful live booking.
 
 ## Product comparison
 

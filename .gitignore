@@ -1,2 +1,4 @@
 # Installed dependencies are restored from package lockfiles.
 **/node_modules/
+**/.env
+**/.env.*

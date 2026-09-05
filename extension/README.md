@@ -53,18 +53,24 @@ For the offline judge demo, run `npm run demo`. It starts the planner on port 87
 
 ## Verify
 
-Run the complete suite from this directory:
+Use Node 22 LTS and run the suite from this directory on macOS, Windows, or Linux:
 
-```powershell
+```sh
+npm ci
+npm run setup:browsers
 npm test
 npm run test:ui
+npm run test:provider:harness
 npm run evaluate
 npm run release
 npm run verify:release
 npm run lint:firefox
+npm run test:firefox
 ```
 
-`run-e2e.js` starts a clean temporary Chromium profile, loads the unpacked extension, serves the fixture, exercises the real content script and service worker, then closes the browser. `npm run test:ui` drives the actual side-panel controls and captures `artifacts/product-ui.png`. Set `CHROME_PATH` only if the scripts cannot find Chrome or Playwright Chromium.
+`run-e2e.js` starts a clean temporary Chromium profile, loads the unpacked extension, serves the fixture, exercises the real content script and service worker, then closes the browser. `npm run test:ui` drives the actual side-panel controls and captures `artifacts/product-ui.png`. The shared browser resolver uses pinned Playwright Chromium on Intel/Apple Silicon Macs, Windows, and Linux. `CHROME_PATH` may override it with an absolute Chromium or Chrome for Testing executable path; regular Chrome does not support automated extension side-loading. Missing browsers fail promptly before local servers start.
+
+Release, checksum verification, and Firefox lint now use Node scripts. `RELEASE_DIR` optionally selects another artifact output directory. Firefox runtime testing requires a release package and downloads Firefox/geckodriver to Selenium's cache when needed; `FIREFOX_PATH` can select an installed executable. See [DEVELOPMENT.md](DEVELOPMENT.md) for setup, privacy challenge results, and real-model verification.
 
 The end-to-end test covers local secret storage, structured extraction, PII redaction, private-capability filling, user-input freshness, visual OCR and masking, browser actions, incremental mutations, high-risk block and allow-once paths, form-semantic risk detection, strict egress, adversarial task scope, cross-origin isolation, and audit receipt retrieval. `npm run evaluate` produces the five SIH evaluation criteria and all release gates in `artifacts/`.
 

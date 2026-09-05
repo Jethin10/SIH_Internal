@@ -1,2 +1,5 @@
 .chrome-test-profile*/
 .chromium-test-profile*/
+node_modules/
+.env
+.env.*

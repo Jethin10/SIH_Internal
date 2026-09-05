@@ -4,6 +4,7 @@ const net = require("net");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+const { chromePath, chromeTestArgs } = require("../scripts/browser-runtime.js");
 
 const extensionRoot = path.resolve(__dirname, "..");
 
@@ -16,24 +17,6 @@ function freePort() {
       server.close(() => resolve(port));
     });
   });
-}
-
-function chromePath() {
-  const candidates = [process.env.CHROME_PATH].filter(Boolean);
-  const playwrightRoot = path.join(os.homedir(), "AppData", "Local", "ms-playwright");
-  if (fs.existsSync(playwrightRoot)) {
-    for (const folder of fs.readdirSync(playwrightRoot).sort().reverse()) {
-      candidates.push(path.join(playwrightRoot, folder, "chrome-win64", "chrome.exe"));
-    }
-  }
-  candidates.push(
-    path.join(process.env.PROGRAMFILES || "", "Google", "Chrome", "Application", "chrome.exe"),
-    path.join(process.env["PROGRAMFILES(X86)"] || "", "Google", "Chrome", "Application", "chrome.exe"),
-    path.join(process.env.LOCALAPPDATA || "", "Google", "Chrome", "Application", "chrome.exe")
-  );
-  const found = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!found) throw new Error("Chrome was not found. Set CHROME_PATH to chrome.exe.");
-  return found;
 }
 
 function staticServer() {
@@ -97,20 +80,26 @@ async function waitFor(url, timeoutMs) {
 }
 
 async function main() {
+  // Fail before starting servers so a missing browser never leaves a hung test.
+  const executable = chromePath();
   const [webPort, debugPort] = await Promise.all([freePort(), freePort()]);
   const fixturePath = process.env.FIXTURE_PATH || "tests/integration.html";
   const fixtureUrl = `http://127.0.0.1:${webPort}/${fixturePath}`;
   const server = staticServer();
   await new Promise((resolve, reject) => server.once("error", reject).listen(webPort, "127.0.0.1", resolve));
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "strawhats-e2e-"));
-  const browser = spawn(chromePath(), [
+  const browser = spawn(executable, [
+    ...chromeTestArgs(),
     "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
     `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`,
     `--load-extension=${extensionRoot}`, fixtureUrl
-  ], { stdio: "ignore" });
+  ], { stdio: ["ignore", "ignore", "inherit"] });
+  let launchError;
+  browser.once("error", (error) => { launchError = error; });
   try {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`, 15000);
     await waitFor(fixtureUrl, 3000);
+    if (launchError) throw launchError;
     const cdpScript = process.env.CDP_SCRIPT || "cdp-smoke.js";
     const test = spawn(process.execPath, [path.join(__dirname, cdpScript)], {
       cwd: extensionRoot,

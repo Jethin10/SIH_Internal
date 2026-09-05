@@ -10,7 +10,7 @@
     { type: "UPI", regex: /\b[A-Z0-9._-]{2,}@[A-Z][A-Z0-9.-]{1,}\b/gi },
     { type: "JWT", regex: /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g },
     { type: "IP", regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g },
-    { type: "PHONE", regex: /(?<!\d)(?:\+?91[-\s]?)?[6-9]\d{9}(?!\d)/g },
+    { type: "PHONE", regex: /(?<!\d)(?:\+?91[-\s]?)?[6-9]\d{4}[ -]?\d{5}(?!\d)/g },
     { type: "AADHAAR", regex: /(?<!\d)(?:\d[ -]?){11}\d(?!\d)/g },
     { type: "CARD", regex: /(?<!\d)(?:\d[ -]?){13,19}(?!\d)/g }
   ];
