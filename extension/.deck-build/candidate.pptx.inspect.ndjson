@@ -1,0 +1,204 @@
+{"kind":"deck","id":"pr/rb9co3","name":"Deck"}
+{"kind":"layout","layoutId":"88698901-9e8c-47ff-bfc3-4b9b6b239c21","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"01c11a5b-56eb-4bae-96d5-5acc0ee0b132","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/s12djh","slide":1,"title":"STRAW HATS  /  SIH 26171","textShapes":5}
+{"kind":"shape","id":"sh/itsvelon","slide":1,"bbox":[70,76,10,494]}
+{"kind":"textbox","id":"sh/5gju907e","slide":1,"text":"STRAW HATS  /  SIH 26171","textPreview":"STRAW HATS  /  SIH 26171","textChars":24,"textLines":1,"bbox":[108,80,680,32]}
+{"kind":"textbox","id":"sh/4fadgv6t","slide":1,"text":"Privacy Gateway\nfor Browser Agents","textPreview":"Privacy Gateway | for Browser Agents","textChars":34,"textLines":2,"bbox":[108,156,900,190]}
+{"kind":"textbox","id":"sh/vqhc36pw","slide":1,"text":"A local boundary between what an AI model can request and what a browser may disclose or execute.","textPreview":"A local boundary between what an AI model can request and what a browser may disclose or execute.","textChars":97,"textLines":1,"bbox":[110,385,820,96]}
+{"kind":"textbox","id":"sh/up8ba1or","slide":1,"text":"Internal hackathon presentation  ·  September 2026","textPreview":"Internal hackathon presentation  ·  September 2026","textChars":50,"textLines":1,"bbox":[110,610,760,28]}
+{"kind":"shape","id":"sh/hszu5g72","slide":1,"bbox":[1010,122,145,145]}
+{"kind":"textbox","id":"sh/grqdcb6h","slide":1,"text":"0 raw\nin test","textPreview":"0 raw | in test","textChars":13,"textLines":2,"bbox":[1028,156,108,80]}
+{"kind":"notes","id":"nt/s12djh","slide":1,"text":"Open with the problem statement, then move directly to the live product. Product source: extension/README.md."}
+{"kind":"slide","id":"sl/07symc","slide":2,"title":"The browser-agent privacy gap","textShapes":9}
+{"kind":"textbox","id":"sh/por2dcbe","slide":2,"text":"The browser-agent privacy gap","textPreview":"The browser-agent privacy gap","textChars":29,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/21g32xc3","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/3mpkb2do","slide":2,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/cril8ru5","slide":2,"text":"Most agent loops combine two broad powers","textPreview":"Most agent loops combine two broad powers","textChars":41,"textLines":1,"bbox":[70,150,700,42]}
+{"kind":"textbox","id":"sh/xsr2hwbq","slide":2,"text":"SEE","textPreview":"SEE","textChars":3,"textLines":1,"bbox":[90,238,170,44]}
+{"kind":"textbox","id":"sh/ap036hcz","slide":2,"text":"Full DOM text\nForm values\nScreenshots","textPreview":"Full DOM text | Form values | Screenshots","textChars":37,"textLines":3,"bbox":[90,300,300,170]}
+{"kind":"shape","id":"sh/bq9kfmtk","slide":2,"bbox":[450,205,2,340]}
+{"kind":"textbox","id":"sh/kv2lcru1","slide":2,"text":"ACT","textPreview":"ACT","textChars":3,"textLines":1,"bbox":[520,238,170,44]}
+{"kind":"textbox","id":"sh/lwb2lwbm","slide":2,"text":"Click controls\nFill fields\nSubmit forms","textPreview":"Click controls | Fill fields | Submit forms","textChars":39,"textLines":3,"bbox":[520,300,300,170]}
+{"kind":"shape","id":"sh/doj6pgnq","slide":2,"bbox":[880,170,280,360]}
+{"kind":"textbox","id":"sh/sna5gbm5","slide":2,"text":"The missing layer","textPreview":"The missing layer","textChars":17,"textLines":1,"bbox":[915,210,210,38]}
+{"kind":"textbox","id":"sh/r2hon650","slide":2,"text":"A local policy boundary that minimizes context before reasoning and validates every proposed action before execution.","textPreview":"A local policy boundary that minimizes context before reasoning and validates every proposed action before execution.","textChars":117,"textLines":1,"bbox":[915,278,205,190]}
+{"kind":"notes","id":"nt/07symc","slide":2,"text":"Frame the problem as excessive observation plus excessive execution authority. Avoid claiming every current agent behaves identically."}
+{"kind":"slide","id":"sl/wtbwoc","slide":3,"title":"The product boundary","textShapes":15}
+{"kind":"textbox","id":"sh/gnahkz6l","slide":3,"text":"The product boundary","textPreview":"The product boundary","textChars":20,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/fm10rup0","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/ulszip8f","slide":3,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/pc3ixo72","slide":3,"text":"The model proposes. The gateway decides.","textPreview":"The model proposes. The gateway decides.","textChars":40,"textLines":1,"bbox":[70,145,1040,54]}
+{"kind":"textbox","id":"sh/4ruhoj6x","slide":3,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[82,242,52,36]}
+{"kind":"textbox","id":"sh/3ql0vepc","slide":3,"text":"OBSERVATION","textPreview":"OBSERVATION","textChars":11,"textLines":1,"bbox":[155,242,220,34]}
+{"kind":"textbox","id":"sh/2pczm9or","slide":3,"text":"Build a local privacy graph from DOM, ARIA, forms, frames and visible OCR.","textPreview":"Build a local privacy graph from DOM, ARIA, forms, frames and visible OCR.","textChars":74,"textLines":1,"bbox":[390,240,760,58]}
+{"kind":"shape","id":"sh/dgni1o7e","slide":3,"bbox":[155,308,995,1]}
+{"kind":"textbox","id":"sh/cfe1sj6t","slide":3,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[82,334,52,36]}
+{"kind":"textbox","id":"sh/ud07mloj","slide":3,"text":"DISCLOSURE","textPreview":"DISCLOSURE","textChars":10,"textLines":1,"bbox":[155,334,220,34]}
+{"kind":"textbox","id":"sh/ve9ofq54","slide":3,"text":"Replace private values with random task aliases and inspect the complete outbound payload.","textPreview":"Replace private values with random task aliases and inspect the complete outbound payload.","textChars":90,"textLines":1,"bbox":[390,332,760,58]}
+{"kind":"shape","id":"sh/wfipov6p","slide":3,"bbox":[155,400,995,1]}
+{"kind":"textbox","id":"sh/hgr6hgna","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[82,426,52,36]}
+{"kind":"textbox","id":"sh/ihk7qlov","slide":3,"text":"EXECUTION","textPreview":"EXECUTION","textChars":9,"textLines":1,"bbox":[155,426,220,34]}
+{"kind":"textbox","id":"sh/j2t8jq5g","slide":3,"text":"Revalidate target, version, field type, task scope and risk before any browser action.","textPreview":"Revalidate target, version, field type, task scope and risk before any browser action.","textChars":86,"textLines":1,"bbox":[390,424,760,58]}
+{"kind":"shape","id":"sh/432psv61","slide":3,"bbox":[155,492,995,1]}
+{"kind":"textbox","id":"sh/54bql0n6","slide":3,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[82,518,52,36]}
+{"kind":"textbox","id":"sh/ylg7e1ob","slide":3,"text":"EVIDENCE","textPreview":"EVIDENCE","textChars":8,"textLines":1,"bbox":[155,518,220,34]}
+{"kind":"textbox","id":"sh/z6po765w","slide":3,"text":"Show masks, egress state, timing and local receipts inside the side panel.","textPreview":"Show masks, egress state, timing and local receipts inside the side panel.","textChars":74,"textLines":1,"bbox":[390,516,760,58]}
+{"kind":"notes","id":"nt/wtbwoc","slide":3,"text":"Every claim on this slide maps to shipped code in content/, background/, visual/ and sidepanel/."}
+{"kind":"slide","id":"sl/9hiuon","slide":4,"title":"System architecture","textShapes":17}
+{"kind":"textbox","id":"sh/c72t03yd","slide":4,"text":"System architecture","textPreview":"System architecture","textChars":19,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/r69cryx8","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/q50bytgn","slide":4,"bbox":[70,112,1140,2]}
+{"kind":"shape","id":"sh/p4rupof2","slide":4,"bbox":[80,235,220,220]}
+{"kind":"textbox","id":"sh/4jitw3yh","slide":4,"text":"WEB PAGE","textPreview":"WEB PAGE","textChars":8,"textLines":1,"bbox":[104,270,172,32]}
+{"kind":"textbox","id":"sh/3i9cnyxw","slide":4,"text":"DOM · ARIA\nforms · frames","textPreview":"DOM · ARIA | forms · frames","textChars":25,"textLines":2,"bbox":[104,330,172,80]}
+{"kind":"textbox","id":"sh/2h0butgb","slide":4,"text":"›","textPreview":"›","textChars":1,"textLines":1,"bbox":[306,312,82,70]}
+{"kind":"shape","id":"sh/hgrulofq","slide":4,"bbox":[330,235,220,220]}
+{"kind":"textbox","id":"sh/gfytsjyl","slide":4,"text":"LOCAL GATEWAY","textPreview":"LOCAL GATEWAY","textChars":13,"textLines":1,"bbox":[354,270,172,32]}
+{"kind":"textbox","id":"sh/69gvu9of","slide":4,"text":"privacy graph\nPII policy · vault","textPreview":"privacy graph | PII policy · vault","textChars":32,"textLines":2,"bbox":[354,330,172,80]}
+{"kind":"textbox","id":"sh/7apcne50","slide":4,"text":"›","textPreview":"›","textChars":1,"textLines":1,"bbox":[556,312,82,70]}
+{"kind":"shape","id":"sh/8bydwj6l","slide":4,"bbox":[620,235,220,220]}
+{"kind":"textbox","id":"sh/tcrup4nq","slide":4,"text":"SAFE PLANNER","textPreview":"SAFE PLANNER","textChars":12,"textLines":1,"bbox":[644,270,172,32]}
+{"kind":"textbox","id":"sh/y5gvqpo3","slide":4,"text":"local server or\nHTTPS endpoint","textPreview":"local server or | HTTPS endpoint","textChars":30,"textLines":2,"bbox":[644,330,172,80]}
+{"kind":"textbox","id":"sh/j6pcju5o","slide":4,"text":"›","textPreview":"›","textChars":1,"textLines":1,"bbox":[846,312,82,70]}
+{"kind":"shape","id":"sh/k7ydsz69","slide":4,"bbox":[910,235,220,220]}
+{"kind":"textbox","id":"sh/l87ul4nu","slide":4,"text":"LOCAL FIREWALL","textPreview":"LOCAL FIREWALL","textChars":14,"textLines":1,"bbox":[934,270,172,32]}
+{"kind":"textbox","id":"sh/ahwvmpo7","slide":4,"text":"scope · version\nrisk · confirmation","textPreview":"scope · version | risk · confirmation","textChars":35,"textLines":2,"bbox":[934,330,172,80]}
+{"kind":"shape","id":"sh/bi5cfu5s","slide":4,"bbox":[330,505,220,54]}
+{"kind":"textbox","id":"sh/fmlsnqlk","slide":4,"text":"RAW VALUES STAY HERE","textPreview":"RAW VALUES STAY HERE","textChars":20,"textLines":1,"bbox":[345,520,190,24]}
+{"kind":"textbox","id":"sh/elcrel4z","slide":4,"text":"safe context","textPreview":"safe context","textChars":12,"textLines":1,"bbox":[548,196,106,24]}
+{"kind":"textbox","id":"sh/1o3apg3q","slide":4,"text":"structured action","textPreview":"structured action","textChars":17,"textLines":1,"bbox":[803,196,138,24]}
+{"kind":"textbox","id":"sh/0nu9gvm5","slide":4,"text":"Only validated actions reach the page","textPreview":"Only validated actions reach the page","textChars":37,"textLines":1,"bbox":[720,590,440,40]}
+{"kind":"notes","id":"nt/9hiuon","slide":4,"text":"Architecture evidence: background/service-worker.js, content/content-script.js, server/server.js and visual/offscreen.js."}
+{"kind":"slide","id":"sl/8ejhnt","slide":5,"title":"Privacy graph and private capabilities","textShapes":16}
+{"kind":"textbox","id":"sh/3axc3yxk","slide":5,"text":"Privacy graph and private capabilities","textPreview":"Privacy graph and private capabilities","textChars":38,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/4v6dc3e5","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/pwfu58fa","slide":5,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/qxovetwv","slide":5,"text":"Raw page value","textPreview":"Raw page value","textChars":14,"textLines":1,"bbox":[80,165,260,34]}
+{"kind":"textbox","id":"sh/ryxc7yxg","slide":5,"text":"test.user@example.com","textPreview":"test.user@example.com","textChars":21,"textLines":1,"bbox":[80,218,380,48]}
+{"kind":"textbox","id":"sh/cz6dg3e1","slide":5,"text":"Local tokenization","textPreview":"Local tokenization","textChars":18,"textLines":1,"bbox":[80,318,260,34]}
+{"kind":"textbox","id":"sh/d0zu98fm","slide":5,"text":"<EMAIL: 96-bit random ID>","textPreview":"<EMAIL: 96-bit random ID>","textChars":25,"textLines":1,"bbox":[80,370,390,52]}
+{"kind":"shape","id":"sh/e18vidw7","slide":5,"bbox":[520,152,2,410]}
+{"kind":"textbox","id":"sh/z2hcbixs","slide":5,"text":"Every graph node carries","textPreview":"Every graph node carries","textChars":24,"textLines":1,"bbox":[580,160,500,36]}
+{"kind":"textbox","id":"sh/nut07ads","slide":5,"text":"semantic identity","textPreview":"semantic identity","textChars":17,"textLines":1,"bbox":[580,225,230,32]}
+{"kind":"textbox","id":"sh/mtkje5c7","slide":5,"text":"Stable target ID, role, label and field type","textPreview":"Stable target ID, role, label and field type","textChars":44,"textLines":1,"bbox":[820,225,345,52]}
+{"kind":"textbox","id":"sh/9wb290vy","slide":5,"text":"freshness","textPreview":"freshness","textChars":9,"textLines":1,"bbox":[580,307,230,32]}
+{"kind":"textbox","id":"sh/ov21gvud","slide":5,"text":"Content hash, mutation epoch and positive version","textPreview":"Content hash, mutation epoch and positive version","textChars":49,"textLines":1,"bbox":[820,307,345,52]}
+{"kind":"textbox","id":"sh/z6t03qdg","slide":5,"text":"disclosure","textPreview":"disclosure","textChars":10,"textLines":1,"bbox":[580,389,230,32]}
+{"kind":"textbox","id":"sh/e5kjalcb","slide":5,"text":"KEEP, TOKENIZE, DROP or BLOCK","textPreview":"KEEP, TOKENIZE, DROP or BLOCK","textChars":29,"textLines":1,"bbox":[820,389,345,52]}
+{"kind":"textbox","id":"sh/1sbi50vm","slide":5,"text":"execution limits","textPreview":"execution limits","textChars":16,"textLines":1,"bbox":[580,471,230,32]}
+{"kind":"textbox","id":"sh/0721cvu1","slide":5,"text":"Origin, task, destination field, expiry and use count","textPreview":"Origin, task, destination field, expiry and use count","textChars":53,"textLines":1,"bbox":[820,471,345,52]}
+{"kind":"textbox","id":"sh/j2dkfut0","slide":5,"text":"Aliases rotate with every task and origin change.","textPreview":"Aliases rotate with every task and origin change.","textChars":49,"textLines":1,"bbox":[80,550,1030,44]}
+{"kind":"notes","id":"nt/8ejhnt","slide":5,"text":"The displayed token is explanatory; the implementation uses uppercase hexadecimal without spaces. Evidence: lib/pii.js and background/service-worker.js."}
+{"kind":"slide","id":"sl/o5ejcc","slide":6,"title":"Local visual redaction","textShapes":14}
+{"kind":"textbox","id":"sh/pgf6p0fy","slide":6,"text":"Local visual redaction","textPreview":"Local visual redaction","textChars":22,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/2done5g7","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/3exonaxs","slide":6,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/d4z6tkfu","slide":6,"text":"Canvas text becomes usable without sending pixels to the planner","textPreview":"Canvas text becomes usable without sending pixels to the planner","textChars":64,"textLines":1,"bbox":[570,154,600,92]}
+{"kind":"textbox","id":"sh/qhoni5g3","slide":6,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[580,282,34,30]}
+{"kind":"textbox","id":"sh/bixoraxo","slide":6,"text":"Capture the visible tab locally","textPreview":"Capture the visible tab locally","textChars":31,"textLines":1,"bbox":[632,282,510,34]}
+{"kind":"textbox","id":"sh/07q5ozyl","slide":6,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[580,346,34,30]}
+{"kind":"textbox","id":"sh/l8z6xkf6","slide":6,"text":"Run bundled Tesseract OCR","textPreview":"Run bundled Tesseract OCR","textChars":25,"textLines":1,"bbox":[632,346,510,34]}
+{"kind":"textbox","id":"sh/t436hwfi","slide":6,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[580,410,34,30]}
+{"kind":"textbox","id":"sh/s3ap8ryx","slide":6,"text":"Tokenize detected private text","textPreview":"Tokenize detected private text","textChars":30,"textLines":1,"bbox":[632,410,510,34]}
+{"kind":"textbox","id":"sh/ri1ofmxs","slide":6,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[580,474,34,30]}
+{"kind":"textbox","id":"sh/6hsn6hg7","slide":6,"text":"Paint masks into a local preview","textPreview":"Paint masks into a local preview","textChars":32,"textLines":1,"bbox":[632,474,510,34]}
+{"kind":"textbox","id":"sh/1836lwfu","slide":6,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[580,538,34,30]}
+{"kind":"textbox","id":"sh/g7upcby9","slide":6,"text":"Require pixel freshness before visual clicks","textPreview":"Require pixel freshness before visual clicks","textChars":44,"textLines":1,"bbox":[632,538,510,34]}
+{"kind":"textbox","id":"sh/f6loj6xo","slide":6,"text":"2 sensitive regions masked in the controlled fixture","textPreview":"2 sensitive regions masked in the controlled fixture","textChars":52,"textLines":1,"bbox":[575,610,570,34]}
+{"kind":"image","id":"im/5k3mp8vm","slide":6,"name":"","alt":"StrawHats side panel showing raw and safe context plus a locally masked screenshot","bbox":[70,132,440,535]}
+{"kind":"notes","id":"nt/o5ejcc","slide":6,"text":"Screenshot generated by scripts/capture-product-ui.js from the running extension. Controlled result: 3 of 3 labelled Canvas targets recovered and 100% of OCR-detected sensitive lines masked. Source: artifacts/evaluation-report.json."}
+{"kind":"slide","id":"sl/57s99v","slide":7,"title":"Local action firewall","textShapes":18}
+{"kind":"textbox","id":"sh/3ax0vy58","slide":7,"text":"Local action firewall","textPreview":"Local action firewall","textChars":21,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/ob6ho3md","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/pczix8ny","slide":7,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/qd8jqt4j","slide":7,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[75,170,50,32]}
+{"kind":"shape","id":"sh/beh0zy54","slide":7,"bbox":[75,220,240,205]}
+{"kind":"textbox","id":"sh/cfq1s3mp","slide":7,"text":"PROPOSE","textPreview":"PROPOSE","textChars":7,"textLines":1,"bbox":[99,250,195,32]}
+{"kind":"textbox","id":"sh/dgzil8na","slide":7,"text":"Planner returns one structured action","textPreview":"Planner returns one structured action","textChars":37,"textLines":1,"bbox":[99,308,190,88]}
+{"kind":"textbox","id":"sh/6h4ze94f","slide":7,"text":"›","textPreview":"›","textChars":1,"textLines":1,"bbox":[315,284,52,60]}
+{"kind":"textbox","id":"sh/rid0ne50","slide":7,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[367,170,50,32]}
+{"kind":"shape","id":"sh/bm1wbehk","slide":7,"bbox":[367,220,240,205]}
+{"kind":"textbox","id":"sh/alsvi9gz","slide":7,"text":"REVALIDATE","textPreview":"REVALIDATE","textChars":10,"textLines":1,"bbox":[391,250,195,32]}
+{"kind":"textbox","id":"sh/x83edozq","slide":7,"text":"Target, version, task scope and origin","textPreview":"Target, version, task scope and origin","textChars":38,"textLines":1,"bbox":[391,308,190,88]}
+{"kind":"textbox","id":"sh/wnadkjy5","slide":7,"text":"›","textPreview":"›","textChars":1,"textLines":1,"bbox":[607,284,52,60]}
+{"kind":"textbox","id":"sh/ni1c7uho","slide":7,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[659,170,50,32]}
+{"kind":"shape","id":"sh/mhsvepg3","slide":7,"bbox":[659,220,240,205]}
+{"kind":"textbox","id":"sh/9kju94zu","slide":7,"text":"ASSESS","textPreview":"ASSESS","textChars":6,"textLines":1,"bbox":[683,250,195,32]}
+{"kind":"textbox","id":"sh/ojadgzy9","slide":7,"text":"Field compatibility and side-effect risk","textPreview":"Field compatibility and side-effect risk","textChars":40,"textLines":1,"bbox":[683,308,190,88]}
+{"kind":"textbox","id":"sh/zehc3uhc","slide":7,"text":"›","textPreview":"›","textChars":1,"textLines":1,"bbox":[899,284,52,60]}
+{"kind":"textbox","id":"sh/ed8vapg7","slide":7,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[951,170,50,32]}
+{"kind":"shape","id":"sh/2p8vmpkz","slide":7,"bbox":[951,220,240,205]}
+{"kind":"textbox","id":"sh/3ahwfu1k","slide":7,"text":"DECIDE","textPreview":"DECIDE","textChars":6,"textLines":1,"bbox":[975,250,195,32]}
+{"kind":"textbox","id":"sh/4bqdoz25","slide":7,"text":"Execute, block or request allow-once confirmation","textPreview":"Execute, block or request allow-once confirmation","textChars":49,"textLines":1,"bbox":[975,308,190,88]}
+{"kind":"shape","id":"sh/pczehkja","slide":7,"bbox":[75,500,1130,2]}
+{"kind":"textbox","id":"sh/qd8fqpkv","slide":7,"text":"Navigation clears stale visual state and pending confirmation. Origin changes also rotate every private capability.","textPreview":"Navigation clears stale visual state and pending confirmation. Origin changes also rotate every private capability.","textChars":115,"textLines":1,"bbox":[90,536,1080,82]}
+{"kind":"notes","id":"nt/57s99v","slide":7,"text":"Demo both outcomes: block Submit order, then repeat and allow once. Evidence: tests/cdp-smoke.js."}
+{"kind":"slide","id":"sl/96bv9x","slide":8,"title":"Measured results on the presentation machine","textShapes":10}
+{"kind":"textbox","id":"sh/wv6x4rut","slide":8,"text":"Measured results on the presentation machine","textPreview":"Measured results on the presentation machine","textChars":44,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/vadgvmt8","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/u94f2hcn","slide":8,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/87mx0rux","slide":8,"text":"Context reduction by generated page size","textPreview":"Context reduction by generated page size","textChars":40,"textLines":1,"bbox":[92,570,540,30]}
+{"kind":"textbox","id":"sh/76dg7mtc","slide":8,"text":"1,254","textPreview":"1,254","textChars":5,"textLines":1,"bbox":[760,175,180,64]}
+{"kind":"textbox","id":"sh/m54fyhcr","slide":8,"text":"synthetic PII cases\n0 FP · 0 FN","textPreview":"synthetic PII cases | 0 FP · 0 FN","textChars":31,"textLines":2,"bbox":[760,241,270,58]}
+{"kind":"textbox","id":"sh/t4zy5gbm","slide":8,"text":"15.36 ms","textPreview":"15.36 ms","textChars":8,"textLines":1,"bbox":[760,335,240,60]}
+{"kind":"textbox","id":"sh/s3qhcba1","slide":8,"text":"worst warm p95","textPreview":"worst warm p95","textChars":14,"textLines":1,"bbox":[760,397,250,30]}
+{"kind":"textbox","id":"sh/2tgbe187","slide":8,"text":"4.02 MB","textPreview":"4.02 MB","textChars":7,"textLines":1,"bbox":[760,477,220,60]}
+{"kind":"textbox","id":"sh/nupsn69s","slide":8,"text":"graph estimate at 20k nodes","textPreview":"graph estimate at 20k nodes","textChars":27,"textLines":1,"bbox":[760,540,340,30]}
+{"kind":"textbox","id":"sh/ovytgbqd","slide":8,"text":"Controlled local fixtures. Full limitations appear in the generated evaluation report.","textPreview":"Controlled local fixtures. Full limitations appear in the generated evaluation report.","textChars":86,"textLines":1,"bbox":[70,647,1100,24]}
+{"kind":"chart","id":"ch/hw7mt4zu","slide":8,"name":"","chartType":"bar","bbox":[65,165,610,390]}
+{"kind":"notes","id":"nt/96bv9x","slide":8,"text":"Source: artifacts/evaluation-report.json generated on 4 September 2026. Chart unit: percentage points of context-byte reduction. Synthetic/local results only."}
+{"kind":"slide","id":"sl/mgibds","slide":9,"title":"Adversarial release gates","textShapes":17}
+{"kind":"textbox","id":"sh/8jmlcrq5","slide":9,"text":"Adversarial release gates","textPreview":"Adversarial release gates","textChars":25,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/7idkj69k","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/6xk3a18z","slide":9,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/lwb2hwre","slide":9,"text":"RAW PII EGRESS","textPreview":"RAW PII EGRESS","textChars":14,"textLines":1,"bbox":[80,156,240,32]}
+{"kind":"textbox","id":"sh/kv2l8rat","slide":9,"text":"Known canaries reached the mock provider only after tokenization","textPreview":"Known canaries reached the mock provider only after tokenization","textChars":64,"textLines":1,"bbox":[330,154,700,52]}
+{"kind":"textbox","id":"sh/jutkfm9o","slide":9,"text":"PASS","textPreview":"PASS","textChars":4,"textLines":1,"bbox":[1080,156,100,30]}
+{"kind":"shape","id":"sh/ytkj6hs3","slide":9,"bbox":[80,222,1100,1]}
+{"kind":"textbox","id":"sh/xsb2dcri","slide":9,"text":"TASK SCOPE","textPreview":"TASK SCOPE","textChars":10,"textLines":1,"bbox":[80,250,240,32]}
+{"kind":"textbox","id":"sh/wr2147ax","slide":9,"text":"An unrelated submit action proposed by the provider was blocked","textPreview":"An unrelated submit action proposed by the provider was blocked","textChars":63,"textLines":1,"bbox":[330,248,700,52]}
+{"kind":"textbox","id":"sh/ulg7a9sf","slide":9,"text":"PASS","textPreview":"PASS","textChars":4,"textLines":1,"bbox":[1080,250,100,30]}
+{"kind":"shape","id":"sh/fmp8je90","slide":9,"bbox":[80,316,1100,1]}
+{"kind":"textbox","id":"sh/gnypcjal","slide":9,"text":"CROSS ORIGIN","textPreview":"CROSS ORIGIN","textChars":12,"textLines":1,"bbox":[80,344,240,32]}
+{"kind":"textbox","id":"sh/h8rqlor6","slide":9,"text":"A private capability could not fill a field in another frame origin","textPreview":"A private capability could not fill a field in another frame origin","textChars":67,"textLines":1,"bbox":[330,342,700,52]}
+{"kind":"textbox","id":"sh/6hg769sj","slide":9,"text":"PASS","textPreview":"PASS","textChars":4,"textLines":1,"bbox":[1080,344,100,30]}
+{"kind":"shape","id":"sh/7ipofet4","slide":9,"bbox":[80,410,1100,1]}
+{"kind":"textbox","id":"sh/sjyp8za9","slide":9,"text":"VISUAL ACTION","textPreview":"VISUAL ACTION","textChars":13,"textLines":1,"bbox":[80,438,240,32]}
+{"kind":"textbox","id":"sh/tk76h4ru","slide":9,"text":"Block and allow-once paths both preserved pixel freshness","textPreview":"Block and allow-once paths both preserved pixel freshness","textChars":57,"textLines":1,"bbox":[330,436,700,52]}
+{"kind":"textbox","id":"sh/idw72ps7","slide":9,"text":"PASS","textPreview":"PASS","textChars":4,"textLines":1,"bbox":[1080,438,100,30]}
+{"kind":"shape","id":"sh/je5obuts","slide":9,"bbox":[80,504,1100,1]}
+{"kind":"textbox","id":"sh/nil43q9k","slide":9,"text":"LARGE PAGE","textPreview":"LARGE PAGE","textChars":10,"textLines":1,"bbox":[80,532,240,32]}
+{"kind":"textbox","id":"sh/mxs3al8z","slide":9,"text":"Complete graphs through 20,000 generated nodes","textPreview":"Complete graphs through 20,000 generated nodes","textChars":46,"textLines":1,"bbox":[330,530,700,52]}
+{"kind":"textbox","id":"sh/9k3m50rq","slide":9,"text":"PASS","textPreview":"PASS","textChars":4,"textLines":1,"bbox":[1080,532,100,30]}
+{"kind":"notes","id":"nt/mgibds","slide":9,"text":"All release gates passed in the latest npm run evaluate. Source: artifacts/EVALUATION-SUMMARY.md."}
+{"kind":"slide","id":"sl/q4m48v","slide":10,"title":"Team knowledge coverage","textShapes":12}
+{"kind":"textbox","id":"sh/ob6l4ze5","slide":10,"text":"Team knowledge coverage","textPreview":"Team knowledge coverage","textChars":23,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/nax4vux0","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/29o32pwf","slide":10,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/xgzm14f2","slide":10,"text":"PRODUCT + EXECUTION","textPreview":"PRODUCT + EXECUTION","textChars":19,"textLines":1,"bbox":[70,165,320,34]}
+{"kind":"textbox","id":"sh/wfql8jeh","slide":10,"text":"Jethin\nShubhangi\nIshu","textPreview":"Jethin | Shubhangi | Ishu","textChars":21,"textLines":3,"bbox":[70,225,300,142]}
+{"kind":"shape","id":"sh/bex4zexw","slide":10,"bbox":[70,390,300,2]}
+{"kind":"textbox","id":"sh/ado369wb","slide":10,"text":"Side panel, demo flow, action schema, confirmation and browser execution","textPreview":"Side panel, demo flow, action schema, confirmation and browser execution","textChars":72,"textLines":1,"bbox":[70,422,300,122]}
+{"kind":"textbox","id":"sh/dkv2pkfi","slide":10,"text":"PRIVACY + SERVER","textPreview":"PRIVACY + SERVER","textChars":16,"textLines":1,"bbox":[455,165,320,34]}
+{"kind":"textbox","id":"sh/sjmlwfed","slide":10,"text":"Divyam\nMaan\nJethin","textPreview":"Divyam | Maan | Jethin","textChars":18,"textLines":3,"bbox":[455,225,300,142]}
+{"kind":"shape","id":"sh/mp47690b","slide":10,"bbox":[455,390,300,2]}
+{"kind":"textbox","id":"sh/nqdozehw","slide":10,"text":"PII pipeline, aliases, egress barrier, local planner and provider security","textPreview":"PII pipeline, aliases, egress barrier, local planner and provider security","textChars":74,"textLines":1,"bbox":[455,422,300,122]}
+{"kind":"textbox","id":"sh/ormp8jyh","slide":10,"text":"VISION + EVIDENCE","textPreview":"VISION + EVIDENCE","textChars":17,"textLines":1,"bbox":[840,165,320,34]}
+{"kind":"textbox","id":"sh/9sv614z2","slide":10,"text":"Shreya\nIshu\nMaan","textPreview":"Shreya | Ishu | Maan","textChars":16,"textLines":3,"bbox":[840,225,300,142]}
+{"kind":"shape","id":"sh/ato7a9g7","slide":10,"bbox":[840,390,300,2]}
+{"kind":"textbox","id":"sh/buxo3ehs","slide":10,"text":"OCR, visual masks, test harness, five SIH metrics and presentation recovery","textPreview":"OCR, visual masks, test harness, five SIH metrics and presentation recovery","textChars":75,"textLines":1,"bbox":[840,422,300,122]}
+{"kind":"textbox","id":"sh/wv6pcjyd","slide":10,"text":"Every technical area has three people. Every member appears in more than one area.","textPreview":"Every technical area has three people. Every member appears in more than one area.","textChars":82,"textLines":1,"bbox":[70,600,1100,38]}
+{"kind":"notes","id":"nt/q4m48v","slide":10,"text":"The detailed overlapping responsibility map is in TEAM-RESPONSIBILITIES.md. These groups describe knowledge ownership rather than hierarchy."}
+{"kind":"slide","id":"sl/wuoch1","slide":11,"title":"Current product boundary","textShapes":7}
+{"kind":"textbox","id":"sh/5kbapo3y","slide":11,"text":"Current product boundary","textPreview":"Current product boundary","textChars":24,"textLines":1,"bbox":[70,42,1080,56]}
+{"kind":"textbox","id":"sh/ih0ru947","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1170,49,42,26]}
+{"kind":"shape","id":"sh/3i9snels","slide":11,"bbox":[70,112,1140,2]}
+{"kind":"textbox","id":"sh/sn290j29","slide":11,"text":"Ready to demonstrate","textPreview":"Ready to demonstrate","textChars":20,"textLines":1,"bbox":[70,158,470,42]}
+{"kind":"textbox","id":"sh/d8bato3u","slide":11,"text":"Chrome runtime verified\nFirefox package schema verified\nOn-device OCR and masks\nAuthenticated local planner\nReproducible evaluation and releases","textPreview":"Chrome runtime verified | Firefox package schema verified | On-device OCR and masks | Authenticated local planner | Reproducible evaluati...","textChars":144,"textLines":5,"bbox":[70,225,500,280]}
+{"kind":"shape","id":"sh/qlkry9kj","slide":11,"bbox":[620,145,2,410]}
+{"kind":"textbox","id":"sh/rmtsrelo","slide":11,"text":"Still research or production work","textPreview":"Still research or production work","textChars":33,"textLines":1,"bbox":[680,158,500,42]}
+{"kind":"textbox","id":"sh/8ri9ozm5","slide":11,"text":"Browser-store signing and review\nBroad real-world PII and vision datasets\nPrivileged browser surfaces\nEnterprise operations\nIndependent security assessment","textPreview":"Browser-store signing and review | Broad real-world PII and vision datasets | Privileged browser surfaces | Enterprise operations | Indep...","textChars":155,"textLines":5,"bbox":[680,225,500,280]}
+{"kind":"shape","id":"sh/tcrqh43q","slide":11,"bbox":[70,585,1110,58]}
+{"kind":"textbox","id":"sh/dsry5wre","slide":11,"text":"LIVE DEMO  ·  Inspect page  /  Fill private value  /  Mask Canvas PII  /  Block and allow action","textPreview":"LIVE DEMO  ·  Inspect page  /  Fill private value  /  Mask Canvas PII  /  Block and allow action","textChars":96,"textLines":1,"bbox":[100,601,1050,28]}
+{"kind":"notes","id":"nt/wuoch1","slide":11,"text":"Close with the live demo. Do not describe this as production ready. Use DEMO.md for the six-minute sequence and recovery options."}

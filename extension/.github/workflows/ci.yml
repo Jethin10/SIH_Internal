@@ -1,0 +1,24 @@
+name: privacy-gateway-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify extension
+        run: npm test
+      - name: Run benchmarks
+        run: npm run benchmark
+      - name: Run SIH release gates
+        run: npm run evaluate
+      - name: Build and verify browser releases
+        run: npm run release
+      - name: Lint Firefox package
+        run: npm run lint:firefox

@@ -1,0 +1,13 @@
+[
+ {"text":"Email alice@example.com","types":["EMAIL"]},
+ {"text":"Call +91 9876543210","types":["PHONE"]},
+ {"text":"PAN ABCDE1234F","types":["PAN"]},
+ {"text":"Pay demo.user@upi","types":["UPI"]},
+ {"text":"IFSC HDFC0001234","types":["IFSC"]},
+ {"text":"Public order 123456","types":[]},
+ {"text":"Server 192.168.1.5","types":["IP"]},
+ {"text":"Card 4111 1111 1111 1111","types":["CARD"]},
+ {"text":"Invalid card 4111 1111 1111 1112","types":[]},
+ {"text":"Voter ABC1234567","types":["VOTER_ID"]},
+ {"text":"Passport A1234567","types":["PASSPORT"]}
+]

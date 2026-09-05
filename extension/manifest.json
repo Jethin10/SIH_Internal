@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "StrawHats Privacy Gateway",
+  "version": "1.0.0",
+  "description": "Local-first privacy mediation and action control for browser agents.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "sidePanel",
+    "webNavigation",
+    "offscreen"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "action": {
+    "default_title": "Open Privacy Gateway"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_idle",
+      "js": [
+        "lib/pii.js",
+        "lib/action-policy.js",
+        "content/content-script.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "vendor/tesseract/worker.min.js",
+        "vendor/tesseract-core/*",
+        "vendor/lang/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

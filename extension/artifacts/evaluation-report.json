@@ -1,0 +1,269 @@
+{
+  "generatedAt": "2026-09-04T16:26:13.662Z",
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v25.6.1",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12500H",
+    "logicalCpus": 16,
+    "systemMemoryGb": 15.7
+  },
+  "scope": {
+    "pii": "Generated synthetic regression corpus. Not a real-world accuracy estimate.",
+    "browser": "Local deterministic fixtures in a clean temporary Chromium profile.",
+    "latency": "Warm extension request round-trip measured by the local CDP benchmark. Cold initial scan and OCR reported separately."
+  },
+  "pii": {
+    "cases": 1254,
+    "positives": 1000,
+    "negatives": 254,
+    "tp": 1000,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1,
+    "f1": 1,
+    "perType": {
+      "EMAIL": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "PHONE": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "PAN": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "IFSC": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "UPI": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "VOTER_ID": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "PASSPORT": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "IP": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "CARD": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      },
+      "AADHAAR": {
+        "tp": 100,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "note": "Generated synthetic regression corpus. This proves deterministic rule coverage, not real-world PII accuracy."
+  },
+  "e2e": {
+    "ok": true,
+    "extensionContext": "StrawHats Privacy Gateway",
+    "graphNodes": 16,
+    "sensitiveNodes": 5,
+    "safeElements": 14,
+    "rawBytes": 1849,
+    "safeBytes": 5536,
+    "visualLines": 8,
+    "visualOcrMs": 435,
+    "visualRedactions": 2,
+    "visualExpectedTargets": 3,
+    "visualRecoveredTargets": 3,
+    "visualDetectedSensitiveLines": 2,
+    "visualMaskCoveragePct": 100,
+    "mockTaskLatencyMs": 99.8,
+    "searchFilled": "privacy gateway",
+    "privateCapabilityFilled": "vault.user@example.com",
+    "userEditVersionAdvanced": 3,
+    "changedNodes": 2,
+    "reprocessedNodes": 2,
+    "highRiskGate": "block and allow-once paths verified",
+    "auditReceipts": 36,
+    "remoteEgress": "mock provider accepted task only after OTP/name tokenization",
+    "adversarialScope": "unrelated cloud action blocked",
+    "crossOriginCapability": "blocked",
+    "blockedFieldPolicy": "password omitted from safe context",
+    "visualActionPolicy": "all visual clicks require local confirmation",
+    "readOnlySearch": "laptop",
+    "domainPolicy": "blocked origin enforcement verified",
+    "egressStatus": "verified_zero"
+  },
+  "benchmarks": {
+    "generatedAt": "2026-09-04T16:26:13.653Z",
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v25.6.1",
+    "results": [
+      {
+        "nodes": 1000,
+        "graphNodes": 1003,
+        "graphComplete": true,
+        "pendingScanNodes": 0,
+        "initialScanMs": 29.299999997019768,
+        "contextBuildMs": 1,
+        "warmP50Ms": 9.782500000000027,
+        "warmP95Ms": 12.843700000000013,
+        "warmP99Ms": 14.09250000000003,
+        "mutationMs": 0.6999999992549419,
+        "changed": 10,
+        "reprocessed": 10,
+        "rawBytes": 133294,
+        "safeBytes": 63071,
+        "graphApproxBytes": 207516,
+        "reductionPct": 52.7,
+        "trials": 25
+      },
+      {
+        "nodes": 5000,
+        "graphNodes": 5003,
+        "graphComplete": true,
+        "pendingScanNodes": 0,
+        "initialScanMs": 120.89999999850988,
+        "contextBuildMs": 4.600000001490116,
+        "warmP50Ms": 10.783400000000029,
+        "warmP95Ms": 15.358199999999897,
+        "warmP99Ms": 16.58050000000003,
+        "mutationMs": 1.4000000022351742,
+        "changed": 10,
+        "reprocessed": 10,
+        "rawBytes": 673294,
+        "safeBytes": 63557,
+        "graphApproxBytes": 1043516,
+        "reductionPct": 90.6,
+        "trials": 25
+      },
+      {
+        "nodes": 10000,
+        "graphNodes": 10003,
+        "graphComplete": true,
+        "pendingScanNodes": 0,
+        "initialScanMs": 244.29999999701977,
+        "contextBuildMs": 4.900000002235174,
+        "warmP50Ms": 8.945699999999988,
+        "warmP95Ms": 10.365199999999959,
+        "warmP99Ms": 12.492600000000039,
+        "mutationMs": 0.6999999992549419,
+        "changed": 10,
+        "reprocessed": 10,
+        "rawBytes": 1350294,
+        "safeBytes": 63742,
+        "graphApproxBytes": 2090516,
+        "reductionPct": 95.3,
+        "trials": 25
+      },
+      {
+        "nodes": 20000,
+        "graphNodes": 20003,
+        "graphComplete": true,
+        "pendingScanNodes": 0,
+        "initialScanMs": 268.30000000074506,
+        "contextBuildMs": 9.100000001490116,
+        "warmP50Ms": 9.142200000000003,
+        "warmP95Ms": 10.336999999999989,
+        "warmP99Ms": 10.407600000000002,
+        "mutationMs": 0.8000000007450581,
+        "changed": 10,
+        "reprocessed": 10,
+        "rawBytes": 2740294,
+        "safeBytes": 64284,
+        "graphApproxBytes": 4220516,
+        "reductionPct": 97.7,
+        "trials": 25
+      }
+    ]
+  },
+  "sihCriteria": {
+    "piiDetection": {
+      "metric": "precision / recall / F1 on generated held-out regression cases",
+      "value": {
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "cases": 1254
+      },
+      "limitation": "Synthetic deterministic corpus; not a real-world population estimate."
+    },
+    "visualContextAccuracy": {
+      "metric": "labelled canvas text targets recovered by local OCR",
+      "value": {
+        "recovered": 3,
+        "expected": 3,
+        "recall": 1
+      },
+      "limitation": "Single controlled browser fixture."
+    },
+    "visualRedaction": {
+      "metric": "OCR-detected sensitive lines covered by local screenshot masks",
+      "value": {
+        "detectedSensitiveLines": 2,
+        "masks": 2,
+        "coveragePct": 100
+      },
+      "limitation": "Coverage of detected lines, not independent pixel-level precision."
+    },
+    "latency": {
+      "metric": "warm context p95 / local OCR / mock-provider task loop",
+      "value": {
+        "warmContextP95Ms": 15.36,
+        "visualOcrMs": 435,
+        "mockTaskLatencyMs": 99.8
+      },
+      "limitation": "Local machine and deterministic fixtures; network latency is excluded."
+    },
+    "resourceUse": {
+      "metric": "estimated in-memory privacy graph at the largest 20k-node fixture",
+      "value": {
+        "maxGraphApproxMb": 4.02,
+        "largestFixtureNodes": 20000
+      },
+      "limitation": "Graph estimate, not whole-browser process memory."
+    }
+  },
+  "summary": {
+    "maxWarmP95Ms": 15.36,
+    "maxContextBuildMs": 9.1,
+    "minLargePageReductionPct": 90.6,
+    "maxGraphApproxMb": 4.02,
+    "allGatesPassed": true
+  },
+  "gates": {
+    "syntheticPiiRegression": true,
+    "adversarialBrowserE2E": true,
+    "zeroKnownRawPiiEgress": true,
+    "dangerousTaskScopeFalseAllows": true,
+    "crossOriginCapabilityIsolation": true,
+    "blockPolicyExclusion": true,
+    "visualConfirmation": true,
+    "visualContextTargetsRecovered": true,
+    "visualSensitiveLinesMasked": true,
+    "mockEndToEndTaskUnder500Ms": true,
+    "domainPolicy": true,
+    "completeGraphs": true,
+    "incrementalMutationOnly": true,
+    "warmStructuredP95Under50Ms": true,
+    "contextBuildUnder50Ms": true,
+    "largePageReductionAtLeast70Pct": true,
+    "graphApproxUnder20MbAt20k": true
+  }
+}

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Gateway</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">STRAW HATS · SIH 26171</div>
+          <h1>Privacy Gateway</h1>
+        </div>
+        <div class="status-pill" id="statusPill"><span></span><b>LOCAL</b></div>
+      </header>
+
+      <section class="task-card">
+        <label for="taskInput">Agent task</label>
+        <textarea id="taskInput" rows="3" placeholder="Find a laptop under ₹60,000, fill this form using my saved details…"></textarea>
+        <div class="task-actions">
+          <button class="primary" id="runButton">Run task</button>
+          <button class="secondary" id="refreshButton">Inspect page</button>
+          <button class="secondary" id="visualButton">Local visual scan</button>
+          <button class="ghost hidden" id="stopButton">Stop</button>
+        </div>
+        <div class="provider-line" id="providerLine">Local fallback planner</div>
+      </section>
+
+      <section class="trust-strip" aria-label="Privacy guarantees">
+        <span><b>01</b> Observe locally</span><i></i><span><b>02</b> Minimize</span><i></i><span><b>03</b> Validate action</span>
+      </section>
+
+      <section class="metrics-grid">
+        <article><span>Graph nodes</span><strong id="metricNodes">0</strong></article>
+        <article><span>Sensitive</span><strong id="metricSensitive">0</strong></article>
+        <article><span>Changed</span><strong id="metricChanged">0</strong></article>
+        <article><span>Reprocessed</span><strong id="metricReprocessed">0</strong></article>
+        <article><span>Raw context</span><strong id="metricRaw">0 B</strong></article>
+        <article><span>Safe context</span><strong id="metricSafe">0 B</strong></article>
+        <article><span>Context build</span><strong id="metricLatency">0 ms</strong></article>
+        <article class="zero"><span>PII egress</span><strong id="metricRawPii">NOT SENT</strong></article>
+      </section>
+
+      <section class="pipeline">
+        <div class="pipeline-title"><span>Live privacy path</span><small id="pageLabel">No page inspected</small></div>
+        <div class="columns">
+          <article>
+            <h2>Raw local</h2>
+            <div class="stream" id="rawStream"><p class="muted">Sensitive values stay here.</p></div>
+          </article>
+          <article>
+            <h2>Safe context</h2>
+            <div class="stream" id="safeStream"><p class="muted">Inspect a page to see aliases.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="visual-preview hidden" id="visualPreviewSection">
+        <div class="section-heading">
+          <h2>Local redacted view</h2>
+          <span id="visualRedactionCount">0 masked</span>
+        </div>
+        <img id="redactedPreview" alt="Locally processed screenshot with detected private text masked" />
+        <p>Generated on-device. The screenshot is never included in the planner request.</p>
+      </section>
+
+      <section class="agent-log">
+        <div class="section-heading">
+          <h2>Agent + local firewall</h2>
+          <span id="stepBadge">idle</span>
+        </div>
+        <div id="log" class="log"><div class="log-row muted">No actions yet.</div></div>
+      </section>
+
+      <section class="agent-log">
+        <div class="section-heading">
+          <h2>Local privacy receipts</h2>
+          <div class="heading-actions"><button class="text-button" id="exportAuditButton">Export</button><button class="text-button" id="clearAuditButton">Clear</button><span id="receiptCount">0</span></div>
+        </div>
+        <div id="receipts" class="log"><div class="log-row muted">No local actions recorded yet.</div></div>
+      </section>
+
+      <section class="confirmation hidden" id="confirmationBox">
+        <div class="warning">HIGH-RISK ACTION</div>
+        <h2 id="confirmationTitle">Local confirmation required</h2>
+        <p id="confirmationReason"></p>
+        <pre id="confirmationAction"></pre>
+        <div class="task-actions">
+          <button class="danger" id="allowButton">Allow once</button>
+          <button class="secondary" id="blockButton">Block</button>
+        </div>
+      </section>
+
+      <details class="settings" id="settingsPanel">
+        <summary>Settings</summary>
+        <div class="settings-body">
+          <h3>OpenAI-compatible reasoning endpoint</h3>
+          <label>Endpoint<input id="endpointInput" placeholder="https://openrouter.ai/api/v1/chat/completions" /></label>
+          <label>Model<input id="modelInput" placeholder="provider/model" /></label>
+          <label>API key<input id="apiKeyInput" type="password" placeholder="Kept only for this browser session" /></label>
+          <p class="hint">The key and private profile stay in session memory. Localhost endpoints do not require a key; other endpoints do.</p>
+
+          <h3>Session-only private profile</h3>
+          <p class="hint">These values are converted to task-scoped, random capability aliases. Raw values are resolved only during local execution.</p>
+          <label>Name<input id="nameInput" autocomplete="off" /></label>
+          <label>Email<input id="emailInput" autocomplete="off" /></label>
+          <label>Phone<input id="phoneInput" autocomplete="off" /></label>
+          <label>Address<textarea id="addressInput" rows="2"></textarea></label>
+          <label>UPI ID<input id="upiInput" autocomplete="off" /></label>
+          <h3>Local policy</h3>
+          <label>Allowed domains<input id="allowedDomainsInput" placeholder="example.com, *.trusted.in" /></label>
+          <label>Blocked domains<input id="blockedDomainsInput" placeholder="ads.example, untrusted.test" /></label>
+          <label class="check"><input id="alwaysConfirmSensitiveFillInput" type="checkbox" /> Always confirm sensitive fills</label>
+          <label class="check"><input id="cloudEnabledInput" type="checkbox" /> Permit safe context to reach configured cloud</label>
+          <label class="check"><input id="visualEnabledInput" type="checkbox" /> Permit local visual fallback</label>
+          <button class="primary" id="saveSettingsButton">Save settings</button>
+          <button class="secondary" id="clearPrivateButton">Clear session secrets now</button>
+        </div>
+      </details>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

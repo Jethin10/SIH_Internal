@@ -1,0 +1,16 @@
+{
+  "name": "strawhats-privacy-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-first privacy mediation and action control for browser agents.",
+  "scripts": {
+    "test": "node tests/pii.test.js && node tests/action-policy.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
+    "server": "node server/server.js",
+    "benchmark": "node tests/run-benchmarks.js",
+    "evaluate": "node tests/run-evaluation.js",
+    "release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1",
+    "verify:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1",
+    "lint:firefox": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/lint-firefox.ps1",
+    "capture:ui": "node scripts/capture-product-ui.js"
+  }
+}

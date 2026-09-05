@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Privacy graph benchmark</title><style>body{font:14px sans-serif}.row{padding:2px}button,input{margin:4px}</style></head><body>
+<h1>Generated commerce catalogue</h1><input id="search" aria-label="Search products"><button id="mutate">Apply filter</button><div id="list"></div>
+<script>
+const count=Math.max(1,Math.min(25000,Number(new URLSearchParams(location.search).get('nodes'))||1000));
+const list=document.querySelector('#list'),frag=document.createDocumentFragment();
+for(let i=0;i<count;i++){const row=document.createElement('div');row.className='row';row.id=`row-${i}`;row.textContent=`Product ${i} price ₹${1000+i}`;frag.append(row)}list.append(frag);
+document.querySelector('#mutate').onclick=()=>{for(let i=0;i<10;i++)document.querySelector(`#row-${i}`).textContent=`Filtered product ${i} price ₹${900+i}`};
+</script></body></html>
