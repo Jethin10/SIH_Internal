@@ -1,9 +1,17 @@
 "use strict";
 
 const assert = require("assert");
-const { createServer } = require("../server/server.js");
+const { createServer, localPlan } = require("../server/server.js");
 
 async function main() {
+  const visualPayload = {
+    task: "click Private visual fallback",
+    context: { elements: [{ id: "visual-1", label: "Private visual fallback", source: "vision", actionable: true, version: 1 }], visual: { scanned: true } },
+    history: [{ action: { type: "visual_scan" }, result: { status: "executed", localOnly: true } }]
+  };
+  assert.equal(localPlan(visualPayload).type, "click", "A successful scan must continue to the requested action");
+  visualPayload.history.push({ action: { type: "click" }, result: { status: "executed" } });
+  assert.equal(localPlan(visualPayload).type, "done", "A successful click must not be repeated");
   const server = createServer();
   await new Promise((resolve, reject) => server.once("error", reject).listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}`;

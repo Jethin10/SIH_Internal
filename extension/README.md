@@ -42,19 +42,22 @@ Temporary loading is suitable for the hackathon. Normal distribution requires Mo
 
 The in-extension fallback planner handles direct click, search, scrolling, history-back, and saved-profile fill commands. For the included server, run `npm run server`, set the endpoint to `http://127.0.0.1:8787/v1/chat/completions`, model to `local-demo`, and leave the key blank. If `UPSTREAM_ENDPOINT` is configured, set `PLANNER_TOKEN` and enter that same token as the extension API key. The server rejects non-HTTPS upstreams except loopback URLs. An HTTPS OpenAI-compatible endpoint can also be used directly. The API key and private profile last only for the current browser session.
 
+For the offline judge demo, run `npm run demo`. It starts the planner on port 8787 and the synthetic checkout fixture on port 8765. Follow [DEMO.md](DEMO.md) for the tested six-minute sequence.
+
 ## Verify
 
 Run the complete suite from this directory:
 
 ```powershell
 npm test
+npm run test:ui
 npm run evaluate
 npm run release
 npm run verify:release
 npm run lint:firefox
 ```
 
-`run-e2e.js` starts a clean temporary Chromium profile, loads the unpacked extension, serves the fixture, exercises the real content script and service worker, then closes the browser. Set `CHROME_PATH` only if it cannot find Chrome or Playwright Chromium.
+`run-e2e.js` starts a clean temporary Chromium profile, loads the unpacked extension, serves the fixture, exercises the real content script and service worker, then closes the browser. `npm run test:ui` drives the actual side-panel controls and captures `artifacts/product-ui.png`. Set `CHROME_PATH` only if the scripts cannot find Chrome or Playwright Chromium.
 
 The end-to-end test covers local secret storage, structured extraction, PII redaction, private-capability filling, user-input freshness, visual OCR and masking, browser actions, incremental mutations, high-risk block and allow-once paths, form-semantic risk detection, strict egress, adversarial task scope, cross-origin isolation, and audit receipt retrieval. `npm run evaluate` produces the five SIH evaluation criteria and all release gates in `artifacts/`.
 

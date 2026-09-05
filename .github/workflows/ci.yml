@@ -1,0 +1,42 @@
+name: Demo verification
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  extension:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Chromium with extension support
+        run: npx --yes playwright@1.58.2 install chromium
+      - run: npm test
+      - run: npm run test:ui
+      - run: npm run evaluate
+      - run: npm run release
+      - run: npm run verify:release
+      - run: npm run lint:firefox
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo-evidence
+          path: extension/artifacts/
+  team-hub:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: strawhats-team-hub
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: strawhats-team-hub/package-lock.json
+      - run: npm ci
+      - run: npm run build

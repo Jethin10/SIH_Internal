@@ -7,6 +7,7 @@ const net = require("net");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+const { createServer } = require("../server/server.js");
 
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "artifacts", "product-ui.png");
@@ -66,7 +67,9 @@ function staticServer() {
 }
 
 async function main() {
-  const [webPort, debugPort] = await Promise.all([freePort(), freePort()]);
+  const [webPort, debugPort, plannerPort] = await Promise.all([freePort(), freePort(), freePort()]);
+  const planner = createServer();
+  await new Promise((resolve, reject) => planner.once("error", reject).listen(plannerPort, "127.0.0.1", resolve));
   const server = staticServer();
   await new Promise((resolve, reject) => server.once("error", reject).listen(webPort, "127.0.0.1", resolve));
   const fixtureUrl = `http://127.0.0.1:${webPort}/tests/integration.html`;
@@ -108,7 +111,7 @@ async function main() {
         if (value) return value;
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
-      throw new Error(`Timed out waiting for panel state: ${expression}`);
+      throw new Error(`Timed out waiting for panel state: ${expression}\n${await panelEval("document.body.innerText")}`);
     };
 
     await panelEval("document.querySelector('#log').innerHTML='<div class=\"log-row muted\">No actions yet.</div>'; document.querySelector('#refreshButton').click(); true");
@@ -117,12 +120,37 @@ async function main() {
     assert(/test\.user@example\.com/i.test(inspected.raw), "Inspect-page UI did not show the local raw email");
     assert(!/test\.user@example\.com/i.test(inspected.safe), "Inspect-page UI leaked the raw email into safe context");
 
-    await fixtureCdp.send("Runtime.evaluate", { contextId: pageContext.id, expression: "document.querySelector('#opaque').scrollIntoView({block:'center'})" });
+    await panelEval(`document.querySelector('#settingsPanel').open=true;
+      document.querySelector('#endpointInput').value='http://127.0.0.1:${plannerPort}/v1/chat/completions';
+      document.querySelector('#modelInput').value='local-demo';
+      document.querySelector('#emailInput').value='vault.user@example.com';
+      document.querySelector('#saveSettingsButton').click(); true`);
+    await waitPanel("document.querySelector('#providerLine').textContent === 'Local planner: local-demo'");
+    await panelEval("document.querySelector('#settingsPanel').open=false; document.querySelector('#taskInput').value='fill my email'; document.querySelector('#runButton').click(); true");
+    await waitPanel("document.querySelector('#log').innerText.includes('Requested browser action completed.')");
+    const privateEmail = (await fixtureCdp.send("Runtime.evaluate", { contextId: pageContext.id, expression: "document.querySelector('#email').value", returnByValue: true })).result?.value;
+    assert.equal(privateEmail, "vault.user@example.com", "Settings and Run task did not fill the private capability");
+    await panelEval("document.querySelector('#refreshButton').click(); true");
+    await waitPanel("document.querySelector('#metricRawPii').textContent === 'VERIFIED 0'");
+
+    // A person moves focus into the side panel before scanning. This test opens
+    // the panel in a separate target, so remove the fixture's blinking caret.
+    // Keep pixel-freshness checks strict; do not mask genuine page changes.
+    await fixtureCdp.send("Runtime.evaluate", { contextId: pageContext.id, expression: "document.activeElement.blur(); document.querySelector('#opaque').scrollIntoView({block:'center'})" });
     await new Promise((resolve) => setTimeout(resolve, 150));
     await panelEval("document.querySelector('#visualButton').click(); true");
     await waitPanel("document.querySelector('#redactedPreview').src.startsWith('data:image/png;base64,')", 20000);
     const visualState = await panelEval("({count:document.querySelector('#visualRedactionCount').textContent, visible:!document.querySelector('#visualPreviewSection').classList.contains('hidden')})");
     assert(visualState.visible && !/^0 masked/.test(visualState.count), "Visual-scan UI did not show a masked local preview");
+
+    for (const allow of [false, true]) {
+      await panelEval("document.querySelector('#taskInput').value='click Private visual fallback'; document.querySelector('#runButton').click(); true");
+      await waitPanel("!document.querySelector('#confirmationBox').classList.contains('hidden')");
+      await panelEval(`document.querySelector('#${allow ? "allowButton" : "blockButton"}').click(); true`);
+      await waitPanel("!document.querySelector('#runButton').disabled");
+      const count = (await fixtureCdp.send("Runtime.evaluate", { contextId: pageContext.id, expression: "window.canvasClicks", returnByValue: true })).result?.value;
+      assert.equal(count, allow ? 1 : 0, `Visual confirmation through the panel did not match the user's choice: ${await panelEval("document.querySelector('#log').innerText")}`);
+    }
 
     await panelEval("document.querySelector('#taskInput').value='click Submit order'; document.querySelector('#runButton').click(); true");
     await waitPanel("!document.querySelector('#confirmationBox').classList.contains('hidden')");
@@ -133,14 +161,29 @@ async function main() {
     const receiptVisible = await panelEval("/block/i.test(document.querySelector('#receipts').innerText)");
     assert(receiptVisible, "Blocked action did not produce a visible privacy receipt");
 
-    await panelEval("document.querySelector('#taskInput').value='Fill my email, then submit the order'; document.querySelector('#providerLine').textContent='Local planner server · safe context only'; true");
+    await waitPanel("!document.querySelector('#runButton').disabled");
+    await panelEval("document.querySelector('#taskInput').value='click Submit order'; document.querySelector('#runButton').click(); true");
+    await waitPanel("!document.querySelector('#confirmationBox').classList.contains('hidden')");
+    await panelEval("document.querySelector('#allowButton').click(); true");
+    await waitPanel("!document.querySelector('#runButton').disabled");
+    const allowedSubmit = (await fixtureCdp.send("Runtime.evaluate", { contextId: pageContext.id, expression: "window.submitClicks", returnByValue: true })).result?.value;
+    assert.equal(allowedSubmit, 1, "Allow once must submit exactly once");
+
+    await panelEval("document.querySelector('#taskInput').value='click Submit order'; true");
     const shot = await panelCdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true });
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, Buffer.from(shot.data, "base64"));
+    await panelEval("document.querySelector('#clearPrivateButton').click(); true");
+    await waitPanel("document.querySelector('#emailInput').value === ''");
+    await panelCdp.send("Page.reload");
+    await waitPanel("document.querySelector('#modelInput')?.value === 'local-demo'");
+    assert.equal(await panelEval("document.querySelector('#emailInput').value"), "", "Cleared secrets returned after panel reload");
+    await panelEval("document.querySelector('#clearAuditButton').click(); true");
+    await waitPanel("document.querySelector('#receiptCount').textContent === '0'");
     fixtureCdp.ws.close(); panelCdp.ws.close();
-    console.log(JSON.stringify({ ok: true, output, journeys: { inspectPage: inspected.nodes, visualMask: visualState.count, blockedSubmit: submitClicks, receiptVisible } }, null, 2));
+    console.log(JSON.stringify({ ok: true, output, journeys: { inspectPage: inspected.nodes, privateFill: true, localPlannerEgress: true, visualMask: visualState.count, visualBlockAndAllow: true, blockedSubmit: submitClicks, allowedSubmit, receiptVisible, clearSecretsAndReload: true, clearReceipts: true } }, null, 2));
   } finally {
-    browser.kill(); server.close();
+    browser.kill(); server.close(); planner.close();
     try { fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); } catch (_) {}
   }
 }

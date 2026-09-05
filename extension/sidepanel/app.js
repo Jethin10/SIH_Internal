@@ -22,9 +22,9 @@ function setProviderLine() {
   try { localEndpoint = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(provider.endpoint).hostname); } catch (_) {}
   const cloudActive = Boolean(state.settings?.policy?.cloudEnabled !== false && provider.model && (provider.apiKey || localEndpoint));
   $("providerLine").textContent = cloudActive
-    ? `Cloud reasoning: ${provider.model}`
+    ? `${localEndpoint ? "Local planner" : "Cloud reasoning"}: ${provider.model}`
     : "Local fallback planner. Add a model in Settings for general tasks.";
-  $("statusPill").querySelector("b").textContent = cloudActive ? "SAFE CLOUD" : "LOCAL";
+  $("statusPill").querySelector("b").textContent = cloudActive && !localEndpoint ? "SAFE CLOUD" : "LOCAL";
 }
 
 function renderRedactedPreview(visual) {
@@ -224,6 +224,7 @@ async function startTask() {
 async function stopTask() {
   await request({ type: "STOP_TASK" }).catch(() => {});
   setRunning(false);
+  $("confirmationBox").classList.add("hidden");
 }
 
 chrome.runtime.onMessage.addListener((message) => {
@@ -277,7 +278,7 @@ $("runButton").addEventListener("click", startTask);
 $("refreshButton").addEventListener("click", refreshContext);
 $("visualButton").addEventListener("click", visualScan);
 $("stopButton").addEventListener("click", stopTask);
-$("saveSettingsButton").addEventListener("click", saveSettings);
+$("saveSettingsButton").addEventListener("click", () => saveSettings().catch((error) => appendLog(`Settings failed. ${error.message}`, "blocked")));
 $("clearPrivateButton").addEventListener("click", async () => {
   await request({ type: "CLEAR_PRIVATE_SESSION" });
   for (const id of ["apiKeyInput", "nameInput", "emailInput", "phoneInput", "addressInput", "upiInput"]) $(id).value = "";
@@ -296,16 +297,23 @@ $("exportAuditButton").addEventListener("click", () => {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
-$("allowButton").addEventListener("click", async () => {
-  $("confirmationBox").classList.add("hidden");
-  try { await request({ type: "CONFIRM_PENDING", allow: true }); }
-  catch (error) { appendLog(`<b>Confirmation failed.</b> ${error.message}`, "blocked"); }
-});
-$("blockButton").addEventListener("click", async () => {
-  $("confirmationBox").classList.add("hidden");
-  try { await request({ type: "CONFIRM_PENDING", allow: false }); }
-  catch (error) { appendLog(`<b>Block failed.</b> ${error.message}`, "blocked"); }
-});
+async function confirmAction(allow) {
+  $("allowButton").disabled = true;
+  $("blockButton").disabled = true;
+  $("allowButton").textContent = allow ? "Checking fresh page..." : "Allow once";
+  try {
+    await request({ type: "CONFIRM_PENDING", allow });
+    $("confirmationBox").classList.add("hidden");
+  } catch (error) {
+    appendLog(`Confirmation failed. ${error.message} You can retry or stop the task.`, "blocked");
+  } finally {
+    $("allowButton").disabled = false;
+    $("blockButton").disabled = false;
+    $("allowButton").textContent = "Allow once";
+  }
+}
+$("allowButton").addEventListener("click", () => confirmAction(true));
+$("blockButton").addEventListener("click", () => confirmAction(false));
 $("taskInput").addEventListener("keydown", (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key === "Enter") startTask();
 });

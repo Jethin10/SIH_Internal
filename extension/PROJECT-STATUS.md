@@ -1,6 +1,6 @@
 # Project status
 
-Status: hackathon-ready for SIH 26171 as of 4 September 2026.
+Status: demo-ready for SIH 26171 as of 5 September 2026.
 
 ## Verified deliverables
 
@@ -10,19 +10,19 @@ Status: hackathon-ready for SIH 26171 as of 4 September 2026.
 - Unit, policy, server, clean-profile Chrome E2E, adversarial, large-page, and UI-journey verification.
 - Generated report covering all five SIH criteria with limitations beside each measurement.
 - Separate root-manifest Chrome, Firefox, and source packages with SHA-256 verification; Firefox package passes Mozilla `web-ext` with zero errors.
-- Eleven-slide internal presentation, six-minute demo script, team knowledge map, and versioned release archive.
+- Six-minute demo script, one-command local demo startup, team knowledge map, and versioned release archive.
 
 ## Latest verified evidence
 
 - `npm test`: pass.
 - `npm run evaluate`: all release gates pass.
-- Worst warm structured-context p95: 15.36 ms on this presentation machine.
+- Worst warm structured-context p95: see the generated evaluation summary for the current machine run.
 - Minimum context reduction for 5,000+ generated nodes: 90.6%.
 - Estimated privacy-graph size at 20,000 generated nodes: 4.02 MB.
 - Visual fixture: 3/3 labelled Canvas targets recovered and every OCR-detected sensitive line masked.
-- Real UI journey: 16 graph nodes shown, two visual masks shown, blocked submit count remained zero, and a receipt appeared.
+- Real UI journey: private fill, verified-zero planner egress, visual masks, block and allow-once paths, secret clearing, receipt clearing, and settings persistence pass in a clean Chromium profile.
 - Mozilla `web-ext` lint: zero errors and three warnings, all inside the bundled Tesseract runtime's use of the JavaScript `Function` constructor.
-- Final presentation: `artifacts/StrawHats_SIH26171_Internal_Presentation_Final.pptx`, with 11 rendered slides and package/layout validation passed.
+- GitHub Actions repeats extension tests, UI journeys, evaluation gates, release packaging, Firefox lint, and the team-hub production build on every push and pull request.
 
 ## Boundaries that must remain explicit
 

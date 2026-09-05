@@ -82,6 +82,19 @@ async function main() {
     }
   }
   assert(extensionContext, "privacy content script did not initialize in an isolated world");
+  async function waitForConfirmation() {
+    const deadline = Date.now() + 10000;
+    while (Date.now() < deadline) {
+      const result = await cdp.send("Runtime.evaluate", {
+        contextId: extensionContext.id,
+        expression: "chrome.runtime.sendMessage({type:'GET_AUDIT'})",
+        awaitPromise: true, returnByValue: true
+      });
+      if (result.result?.value?.receipts?.[0]?.localDecision === "needs_confirmation") return;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    throw new Error("The visual action did not reach confirmation within 10 seconds");
+  }
 
   const savedSettings = await cdp.send("Runtime.evaluate", {
     contextId: extensionContext.id,
@@ -197,7 +210,7 @@ async function main() {
     returnByValue: true
   });
   assert(visualBlockTask.result?.value?.ok, "visual click task did not start");
-  await new Promise((resolve) => setTimeout(resolve, 450));
+  await waitForConfirmation();
   const blockVisual = await cdp.send("Runtime.evaluate", {
     contextId: extensionContext.id,
     expression: "chrome.runtime.sendMessage({type:'CONFIRM_PENDING', allow:false})",
@@ -218,14 +231,14 @@ async function main() {
     returnByValue: true
   });
   assert(visualAllowTask.result?.value?.ok, "second visual click task did not start");
-  await new Promise((resolve) => setTimeout(resolve, 450));
+  await waitForConfirmation();
   const allowVisual = await cdp.send("Runtime.evaluate", {
     contextId: extensionContext.id,
     expression: "chrome.runtime.sendMessage({type:'CONFIRM_PENDING', allow:true})",
     awaitPromise: true,
     returnByValue: true
   });
-  assert(allowVisual.result?.value?.ok, "confirmed visual action was not accepted");
+  assert(allowVisual.result?.value?.ok, `confirmed visual action was not accepted: ${JSON.stringify(allowVisual.result?.value)}`);
   await new Promise((resolve) => setTimeout(resolve, 150));
   const allowedCanvasCount = await cdp.send("Runtime.evaluate", { contextId: mainContext.id, expression: "window.canvasClicks", returnByValue: true });
   assert.strictEqual(allowedCanvasCount.result?.value, 1, "confirmed visual action did not click exactly once");

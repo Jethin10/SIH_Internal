@@ -4,12 +4,23 @@ if (typeof importScripts === "function") {
   importScripts("../lib/pii.js");
   importScripts("../lib/action-policy.js");
   importScripts("../lib/domain-policy.js");
+  importScripts("../lib/capture-queue.js");
   importScripts("chrome-adapter.js");
 }
 const PII = globalThis.PrivacyPII;
 const ActionPolicy = globalThis.PrivacyActionPolicy;
 const DomainPolicy = globalThis.PrivacyDomainPolicy;
 const BrowserAdapter = globalThis.StrawHatsBrowserAdapter;
+const captureTab = globalThis.StrawHatsCaptureQueue.createCaptureQueue({
+  capture: async (tabId) => {
+    const tab = await chrome.tabs.get(tabId);
+    if (!tab.active) throw new Error("Return to the inspected tab and try again.");
+    const screenshot = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+    const after = await chrome.tabs.get(tabId);
+    if (!after.active || after.url !== tab.url) throw new Error("The active page changed during capture. Inspect it again.");
+    return screenshot;
+  }
+});
 
 const sessions = new Map();
 const visualCache = new Map();
@@ -321,7 +332,7 @@ async function captureVisualContext(tabId, safeContext) {
   const tab = await chrome.tabs.get(tabId);
   if (!tab.windowId) throw new Error("Cannot capture the current browser window");
   broadcast({ type: "VISUAL_OCR_PROGRESS", status: "capturing visible page locally", progress: 0 });
-  const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+  const dataUrl = await captureTab(tabId);
   const screenshotHash = await hashDataUrl(dataUrl);
   const cached = visualCache.get(tabId);
   if (cached && cached.screenshotHash === screenshotHash && Number(cached.epoch) === Number(safeContext.page?.epoch || 0)) return cached;
@@ -369,7 +380,7 @@ async function visualObservationIsCurrent(tabId, visual) {
   if (!visual?.screenshotHash) return false;
   const tab = await chrome.tabs.get(tabId);
   if (!tab.windowId) return false;
-  const current = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+  const current = await captureTab(tabId);
   return (await hashDataUrl(current)) === visual.screenshotHash;
 }
 
@@ -894,6 +905,8 @@ async function runSession(tabId) {
         if (visualTarget && !(await visualObservationIsCurrent(tabId, visual))) {
           visualCache.delete(tabId);
           result = { status: "blocked", reason: "Visual observation is stale; the visible pixels changed after local OCR" };
+        } else if (session.cancelled || sessions.get(tabId) !== session) {
+          return;
         } else {
           result = await sendFrame(tabId, frameId, {
             type: visualTarget ? "PROPOSE_VISUAL_ACTION" : "PROPOSE_ACTION",
@@ -969,8 +982,10 @@ async function confirmPending(allow) {
   const tabId = await activeTabId();
   const session = sessions.get(tabId);
   if (!session?.pending) throw new Error("No pending high-risk action");
+  if (session.confirming) throw new Error("This confirmation is already being processed.");
+  session.confirming = true;
+  try {
   const { action, frameId, visual, safeContext } = session.pending;
-  session.pending = null;
   let result;
   if (allow) {
     const boundaryCurrent = await assertSessionBoundary(session, await getSettings());
@@ -980,6 +995,7 @@ async function confirmPending(allow) {
       visualCache.delete(tabId);
       result = { status: "blocked", reason: "Visual confirmation expired because the visible pixels changed" };
     } else {
+      if (session.cancelled || sessions.get(tabId) !== session) throw new Error("Task stopped before confirmation.");
       result = await sendFrame(tabId, frameId, {
         type: visual ? "EXECUTE_VISUAL_CONFIRMED" : "EXECUTE_CONFIRMED",
         action
@@ -988,6 +1004,7 @@ async function confirmPending(allow) {
   } else {
     result = { status: "blocked", reason: "User blocked the action locally" };
   }
+  session.pending = null;
   session.history.push({ action, result, userDecision: allow ? "allow_once" : "block" });
   result.receipt = recordAudit(tabId, session, safeContext, action, result, allow ? "allow_once" : "block");
   broadcast({ type: "ACTION_RESULT", tabId, action, result });
@@ -1000,6 +1017,9 @@ async function confirmPending(allow) {
   session.step += 1;
   runSession(tabId);
   return { ok: true };
+  } finally {
+    session.confirming = false;
+  }
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

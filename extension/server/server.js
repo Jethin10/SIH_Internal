@@ -78,7 +78,7 @@ function localPlan(payload) {
   const history = payload?.history || [];
   const last = history.at(-1);
 
-  if (last?.result?.status === "executed") return { type: "done", message: "Requested browser action completed." };
+  if (last?.result?.status === "executed" && last.action?.type !== "visual_scan") return { type: "done", message: "Requested browser action completed." };
   const click = task.match(/(?:click|press|open)\s+(?:on\s+)?["']?(.+?)["']?$/i);
   if (click) {
     const needle = click[1].toLowerCase();
