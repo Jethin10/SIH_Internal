@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "mode": "configured-model",
+  "generatedAt": "2026-09-05T06:16:41.846Z",
+  "platform": "win32",
+  "providerHost": "api.groq.com",
+  "model": "openai/gpt-oss-20b",
+  "taskMs": 1983,
+  "requests": [
+    { "status": 200, "providerRoundTripMs": 799 },
+    { "status": 200, "providerRoundTripMs": 644 }
+  ],
+  "checks": {
+    "privateFill": true,
+    "rawSyntheticValuesAbsent": true,
+    "screenshotAbsent": true
+  },
+  "limitation": "One synthetic private email-fill task through the configured live provider. No API key is stored in this artifact. Provider round-trip includes proxy, network, and inference time."
+}
