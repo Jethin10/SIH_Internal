@@ -45,7 +45,7 @@ const benchmarks = parseLastJson(benchmarkOutput, "generatedAt");
 const maxWarmP95Ms = Math.max(...benchmarks.results.map((item) => Number(item.warmP95Ms || Infinity)));
 // Hosted runner scheduling can add latency to the CDP round trip. Keep the
 // local target strict while using a documented budget for CI measurements.
-const warmP95BudgetMs = Number(process.env.WARM_P95_BUDGET_MS || (process.env.CI ? 150 : 50));
+const warmP95BudgetMs = Number(process.env.WARM_P95_BUDGET_MS || (process.env.CI ? 300 : 50));
 const maxContextBuildMs = Math.max(...benchmarks.results.map((item) => Number(item.contextBuildMs || Infinity)));
 const largePages = benchmarks.results.filter((item) => item.nodes >= 5000);
 const minLargePageReductionPct = Math.min(...largePages.map((item) => Number(item.reductionPct || 0)));
@@ -108,7 +108,7 @@ const report = {
     latency: {
       metric: "warm context p95 / local OCR / mock-provider task loop",
       value: { warmContextP95Ms: Number(maxWarmP95Ms.toFixed(2)), warmP95BudgetMs, visualOcrMs: e2e.visualOcrMs, mockTaskLatencyMs: e2e.mockTaskLatencyMs },
-      limitation: "Local machine and deterministic fixtures; network latency is excluded. Hosted CI uses a 150 ms budget because CDP timing includes shared runner scheduling."
+      limitation: "Local machine and deterministic fixtures; network latency is excluded. Hosted CI uses a 300 ms budget because CDP timing includes shared runner scheduling."
     },
     resourceUse: {
       metric: "estimated in-memory privacy graph at the largest 20k-node fixture",
