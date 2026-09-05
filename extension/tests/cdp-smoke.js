@@ -51,8 +51,14 @@ async function connect(url) {
 }
 
 async function main() {
-  const targets = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/list`).then((response) => response.json());
-  const page = targets.find((target) => target.type === "page" && target.url === FIXTURE_URL);
+  const deadline = Date.now() + 15000;
+  let page = null;
+  let targets = [];
+  while (!page && Date.now() < deadline) {
+    targets = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/list`).then((response) => response.json());
+    page = targets.find((target) => target.type === "page" && target.url === FIXTURE_URL);
+    if (!page) await new Promise((resolve) => setTimeout(resolve, 100));
+  }
   assert(page, "integration fixture page target was not found");
 
   const cdp = await connect(page.webSocketDebuggerUrl);
