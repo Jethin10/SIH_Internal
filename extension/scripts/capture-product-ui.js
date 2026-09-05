@@ -57,6 +57,17 @@ async function waitFor(url, timeout = 15000) {
   throw new Error(`Timed out waiting for ${url}`);
 }
 
+async function waitForTarget(debugPort, predicate, description, timeout = 15000) {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    const targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then((response) => response.json());
+    const target = targets.find(predicate);
+    if (target) return target;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`Timed out waiting for ${description}`);
+}
+
 function staticServer() {
   return http.createServer((request, response) => {
     const target = path.resolve(root, decodeURIComponent(new URL(request.url, "http://localhost").pathname).replace(/^\/+/, "") || "tests/integration.html");
@@ -77,18 +88,16 @@ async function main() {
   const browser = spawn(chromePath(), ["--headless=new", "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: "ignore" });
   try {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    let targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then((response) => response.json());
-    const worker = targets.find((target) => target.url?.startsWith("chrome-extension://") && target.url.endsWith("background/service-worker.js"));
-    if (!worker) throw new Error("Extension service worker target was not found");
+    const worker = await waitForTarget(
+      debugPort,
+      (target) => target.url?.startsWith("chrome-extension://") && target.url.endsWith("background/service-worker.js"),
+      "the extension service worker"
+    );
     const extensionId = new URL(worker.url).hostname;
     const panelUrl = `chrome-extension://${extensionId}/sidepanel/index.html`;
     await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(panelUrl)}`, { method: "PUT" });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then((response) => response.json());
-    const fixture = targets.find((target) => target.url === fixtureUrl);
-    const panel = targets.find((target) => target.url === panelUrl);
-    if (!fixture || !panel) throw new Error("Capture targets were not found");
+    const fixture = await waitForTarget(debugPort, (target) => target.url === fixtureUrl, "the fixture page");
+    const panel = await waitForTarget(debugPort, (target) => target.url === panelUrl, "the extension side panel");
     await fetch(`http://127.0.0.1:${debugPort}/json/activate/${fixture.id}`);
 
     const fixtureCdp = await connect(fixture.webSocketDebuggerUrl);
@@ -113,6 +122,8 @@ async function main() {
       }
       throw new Error(`Timed out waiting for panel state: ${expression}\n${await panelEval("document.body.innerText")}`);
     };
+
+    await waitPanel("document.readyState === 'complete' && Boolean(document.querySelector('#log'))");
 
     await panelEval("document.querySelector('#log').innerHTML='<div class=\"log-row muted\">No actions yet.</div>'; document.querySelector('#refreshButton').click(); true");
     await waitPanel("Number(document.querySelector('#metricNodes').textContent.replace(/,/g,'')) > 0");
