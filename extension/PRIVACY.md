@@ -21,3 +21,7 @@ The included local planner can operate without internet access. If its upstream 
 Cloud reasoning and visual processing can each be disabled in Settings. Users can clear session secrets and local receipts at any time. Uninstalling the extension removes its browser-managed storage.
 
 This hackathon release is not an independently certified security product. Detector and OCR limitations are documented in `PROJECT-STATUS.md` and `SIH-EVALUATION.md`.
+
+## Optional voice input
+
+Speak task uses the browser's speech recognition service, which may transmit audio to a browser-vendor service. Audio does not pass through this extension's model-context redaction. Recognition starts only when requested; transcripts require Run task before execution. Optional spoken completion uses browser or OS speech synthesis and reads a fixed status message. No audio recording is stored by the extension.

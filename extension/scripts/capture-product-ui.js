@@ -139,6 +139,17 @@ async function main() {
 
     await waitPanel("document.readyState === 'complete' && Boolean(document.querySelector('#log'))");
 
+    // Exercise new setup controls before configuring the offline test planner.
+    await panelEval("document.querySelector('#settingsPanel').open=true; document.querySelector('#apiKeyInput').value='test-unsaved-key'; document.querySelector('#providerPreset').value='groq'; document.querySelector('#providerPreset').dispatchEvent(new Event('change')); true");
+    assert.equal(await panelEval("document.querySelector('#endpointInput').value"), 'https://api.groq.com/openai/v1/chat/completions');
+    assert.equal(await panelEval("document.querySelector('#apiKeyInput').value"), '', 'Provider switch must clear the previous key');
+    await panelEval("document.querySelector('#providerPreset').value='openrouter'; document.querySelector('#providerPreset').dispatchEvent(new Event('change')); true");
+    assert.equal(await panelEval("document.querySelector('#modelInput').value"), 'openrouter/free');
+    await panelEval("document.querySelector('#flightDemo').open=true; document.querySelector('#flightButton').click(); true");
+    await waitPanel("document.querySelector('#flightStatus').textContent.includes('Add your provider')");
+    assert.equal(await panelEval("document.querySelector('#runButton').disabled"), false, 'Missing credentials must leave the task runnable');
+    await panelEval("document.querySelector('#flightDemo').open=false; true");
+
     await panelEval("document.querySelector('#log').innerHTML='<div class=\"log-row muted\">No actions yet.</div>'; document.querySelector('#refreshButton').click(); true");
     await waitPanel("Number(document.querySelector('#metricNodes').textContent.replace(/,/g,'')) > 0");
     const inspected = await panelEval("({nodes:document.querySelector('#metricNodes').textContent, raw:document.querySelector('#rawStream').innerText, safe:document.querySelector('#safeStream').innerText})");

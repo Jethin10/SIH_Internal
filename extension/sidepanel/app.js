@@ -1,7 +1,7 @@
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const state = { settings: null, running: false, lastContext: null, receipts: [] };
+const state = { settings: null, running: false, lastContext: null, receipts: [], tabId: null };
 
 function formatBytes(value) {
   const n = Number(value || 0);
@@ -12,6 +12,9 @@ function formatBytes(value) {
 function setRunning(running) {
   state.running = running;
   $("runButton").disabled = running;
+  $("flightButton").disabled = running;
+  $("voiceButton").disabled = running || !SpeechRecognitionAPI;
+  if (running && recognition) recognition.abort();
   $("stopButton").classList.toggle("hidden", !running);
   $("stepBadge").textContent = running ? "running" : "idle";
 }
@@ -149,6 +152,7 @@ async function loadSettings() {
   $("alwaysConfirmSensitiveFillInput").checked = Boolean(policy.alwaysConfirmSensitiveFill);
   $("cloudEnabledInput").checked = policy.cloudEnabled !== false;
   $("visualEnabledInput").checked = policy.visualEnabled !== false;
+  $("maxStepsInput").value = String(policy.maxSteps || 30);
   setProviderLine();
 }
 
@@ -171,7 +175,8 @@ async function saveSettings() {
       blockedDomains: $("blockedDomainsInput").value.trim(),
       alwaysConfirmSensitiveFill: $("alwaysConfirmSensitiveFillInput").checked,
       cloudEnabled: $("cloudEnabledInput").checked,
-      visualEnabled: $("visualEnabledInput").checked
+      visualEnabled: $("visualEnabledInput").checked,
+      maxSteps: Number($("maxStepsInput").value)
     }
   };
   await request({ type: "SAVE_SETTINGS", settings });
@@ -214,7 +219,8 @@ async function startTask() {
   setRunning(true);
   appendLog(`<b>Task</b> ${task}`);
   try {
-    await request({ type: "START_TASK", task });
+    const response = await request({ type: "START_TASK", task });
+    state.tabId = response.tabId;
   } catch (error) {
     setRunning(false);
     appendLog(`<b>Could not start.</b> ${error.message}`, "blocked");
@@ -222,14 +228,16 @@ async function startTask() {
 }
 
 async function stopTask() {
-  await request({ type: "STOP_TASK" }).catch(() => {});
+  await request({ type: "STOP_TASK", tabId: state.tabId }).catch(() => {});
   setRunning(false);
   $("confirmationBox").classList.add("hidden");
 }
 
 chrome.runtime.onMessage.addListener((message) => {
   if (!message || message.source !== "gateway-worker") return;
+  if (state.running && state.tabId != null && message.tabId != null && message.tabId !== state.tabId) return;
   if (message.type === "TASK_STARTED") {
+    state.tabId = message.tabId;
     setRunning(true);
     $("stepBadge").textContent = "step 1";
   } else if (message.type === "CONTEXT") {
@@ -267,6 +275,11 @@ chrome.runtime.onMessage.addListener((message) => {
     setRunning(false);
     $("confirmationBox").classList.add("hidden");
     appendLog(`<b>Done.</b> ${message.message || "Task complete"}`, "ok");
+    if ($("speakResults").checked && globalThis.speechSynthesis) {
+      // Speak status only; model answers can contain information from the page.
+      speechSynthesis.cancel();
+      speechSynthesis.speak(new SpeechSynthesisUtterance("The agent has stopped. Review the result in the activity log."));
+    }
   } else if (message.type === "TASK_ERROR") {
     setRunning(false);
     $("confirmationBox").classList.add("hidden");
@@ -281,6 +294,8 @@ $("stopButton").addEventListener("click", stopTask);
 $("saveSettingsButton").addEventListener("click", () => saveSettings().catch((error) => appendLog(`Settings failed. ${error.message}`, "blocked")));
 $("clearPrivateButton").addEventListener("click", async () => {
   await request({ type: "CLEAR_PRIVATE_SESSION" });
+  if (state.settings) { state.settings.provider.apiKey = ""; state.settings.userProfile = {}; }
+  setProviderLine();
   for (const id of ["apiKeyInput", "nameInput", "emailInput", "phoneInput", "addressInput", "upiInput"]) $(id).value = "";
   appendLog("<b>Session secrets cleared.</b> API key and private profile were removed.", "ok");
 });
@@ -302,7 +317,7 @@ async function confirmAction(allow) {
   $("blockButton").disabled = true;
   $("allowButton").textContent = allow ? "Checking fresh page..." : "Allow once";
   try {
-    await request({ type: "CONFIRM_PENDING", allow });
+    await request({ type: "CONFIRM_PENDING", allow, tabId: state.tabId });
     $("confirmationBox").classList.add("hidden");
   } catch (error) {
     appendLog(`Confirmation failed. ${error.message} You can retry or stop the task.`, "blocked");
@@ -316,6 +331,75 @@ $("allowButton").addEventListener("click", () => confirmAction(true));
 $("blockButton").addEventListener("click", () => confirmAction(false));
 $("taskInput").addEventListener("keydown", (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key === "Enter") startTask();
+});
+
+const SpeechRecognitionAPI = globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
+let recognition = null;
+$("voiceButton").disabled = !SpeechRecognitionAPI;
+if (!SpeechRecognitionAPI) $("voiceStatus").textContent = "Speech recognition is unavailable in this browser. Type your task instead.";
+$("voiceButton").addEventListener("click", () => {
+  if (recognition) { recognition.stop(); return; }
+  if (!SpeechRecognitionAPI || state.running) return;
+  const current = new SpeechRecognitionAPI();
+  recognition = current;
+  current.lang = navigator.language || "en-IN";
+  current.interimResults = true;
+  current.continuous = false;
+  let failed = false;
+  current.onresult = (event) => {
+    $("taskInput").value = Array.from(event.results, (result) => result[0].transcript).join(" ");
+    $("voiceStatus").textContent = "Transcript received. Review it, then choose Run task.";
+  };
+  current.onerror = (event) => {
+    failed = true;
+    $("voiceStatus").textContent = event.error === "not-allowed"
+      ? "Microphone access was denied. Allow microphone access in browser settings or type your task."
+      : `Speech recognition stopped (${event.error}). You can retry or type your task.`;
+  };
+  current.onend = () => {
+    recognition = null;
+    $("voiceButton").textContent = "Speak task";
+    $("voiceButton").setAttribute("aria-pressed", "false");
+    if (!failed) $("voiceStatus").textContent = "Listening ended. Review the transcript before running.";
+  };
+  try {
+    current.start();
+    $("voiceButton").textContent = "Stop listening";
+    $("voiceButton").setAttribute("aria-pressed", "true");
+    $("voiceStatus").textContent = "Listening. Your browser may process audio using its speech service.";
+  } catch (_) { recognition = null; $("voiceStatus").textContent = "Could not start the microphone. Type your task or retry."; }
+});
+window.addEventListener("pagehide", () => { recognition?.abort(); globalThis.speechSynthesis?.cancel(); });
+
+const presets = {
+  openrouter: ["https://openrouter.ai/api/v1/chat/completions", "openrouter/free"],
+  groq: ["https://api.groq.com/openai/v1/chat/completions", ""],
+  openai: ["https://api.openai.com/v1/chat/completions", ""],
+  local: ["http://127.0.0.1:8787/v1/chat/completions", "local-demo"]
+};
+$("providerPreset").addEventListener("change", () => {
+  const preset = presets[$("providerPreset").value];
+  if (!preset) return;
+  $("endpointInput").value = preset[0];
+  $("modelInput").value = preset[1];
+  $("apiKeyInput").value = "";
+  $("modelInput").placeholder = "Enter a model ID from your provider's catalog";
+});
+$("endpointInput").addEventListener("input", () => { $("apiKeyInput").value = ""; $("providerPreset").value = "custom"; });
+const departure = new Date();
+departure.setDate(departure.getDate() + 14);
+const localDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+$("flightDate").min = localDate(new Date());
+$("flightDate").value = localDate(departure);
+$("flightButton").addEventListener("click", async () => {
+  $("flightButton").disabled = true;
+  try {
+    const response = await request({ type: "START_FLIGHT_DEMO", from: $("flightFrom").value.trim(), to: $("flightTo").value.trim(), date: $("flightDate").value });
+    state.tabId = response.tabId;
+    $("taskInput").value = response.task;
+    $("flightStatus").textContent = "Live search started. Follow the actions below; use Stop to cancel.";
+  } catch (error) { $("flightStatus").textContent = error.message; }
+  finally { $("flightButton").disabled = state.running; }
 });
 
 loadSettings().then(refreshContext).catch((error) => appendLog(`<b>Startup.</b> ${error.message}`, "blocked"));

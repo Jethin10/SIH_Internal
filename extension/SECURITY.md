@@ -18,3 +18,7 @@ The server limits request and response bodies, enforces JSON, applies timeouts, 
 For this internal hackathon project, report suspected vulnerabilities directly to the StrawHats team and include reproduction steps without real personal data. Rotate any exposed key or token immediately.
 
 External penetration testing, browser-store review, and production incident-response operations are not represented as complete by this repository.
+
+## Voice and live-agent data boundaries
+
+The browser speech service may receive microphone audio before a transcript reaches the extension. Review transcripts before running tasks; do not dictate credentials. Optional speech output reads a fixed completion status. Provider keys are supplied by the user and remain in browser-session storage. Switching a preset clears the unsaved key, and provider error bodies are not echoed into the activity log. Model actions still pass task-scope, page-freshness, and confirmation checks. These controls reduce exposure but do not guarantee perfect detection or correct model behavior on changing travel websites.
