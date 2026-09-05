@@ -123,15 +123,32 @@ async function evaluateFresh(cdp, kind, expression) {
 }
 
 (async () => {
-  const targets = await fetch(`http://127.0.0.1:${port}/json/list`).then((response) => response.json());
-  const target = targets.find((item) => item.type === "page" && item.url === url);
+  let target;
+  const targetDeadline = Date.now() + 15000;
+  while (!target && Date.now() < targetDeadline) {
+    const targets = await fetch(`http://127.0.0.1:${port}/json/list`).then((response) => response.json());
+    target = targets.find((item) => item.type === "page" && item.url === url);
+    if (!target) await new Promise((resolve) => setTimeout(resolve, 100));
+  }
   assert(target, `benchmark page target was not found for ${url}`);
 
   const cdp = await connect(target.webSocketDebuggerUrl);
   await cdp.send("Runtime.enable");
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  await findExtensionContext(cdp);
+  const readyDeadline = Date.now() + 30000;
+  let ready = false;
+  while (!ready && Date.now() < readyDeadline) {
+    try {
+      const loaded = await evaluateFresh(cdp, "page", `location.href === ${JSON.stringify(url)} && document.readyState === 'complete'`);
+      if (loaded) {
+        const initial = await evaluateFresh(cdp, "extension", "chrome.runtime.sendMessage({type:'REFRESH_CONTEXT'})");
+        ready = initial?.ok && initial.context?.metrics?.graphComplete && initial.context.metrics.graphNodes > 0;
+      }
+    } catch (error) {
+      if (!/context|destroyed|invalid/i.test(error.message)) throw error;
+    }
+    if (!ready) await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert(ready, "Benchmark page and privacy graph did not finish loading");
   const samples = [];
   let lastResponse;
 
