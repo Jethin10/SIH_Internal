@@ -21,12 +21,27 @@
         <textarea id="taskInput" rows="3" placeholder="Try: fill my email, search for privacy gateway, or click Submit order"></textarea>
         <div class="task-actions">
           <button class="primary" id="runButton">Run task</button>
+          <button class="secondary" id="voiceButton" aria-pressed="false">Speak task</button>
           <button class="secondary" id="refreshButton">Inspect page</button>
           <button class="secondary" id="visualButton">Local visual scan</button>
           <button class="ghost hidden" id="stopButton">Stop</button>
         </div>
         <div class="provider-line" id="providerLine">Local fallback planner</div>
+        <p class="hint" id="voiceStatus" role="status">Speak, review the transcript, then run. Browser speech recognition may send audio to its speech service.</p>
+        <label class="check"><input id="speakResults" type="checkbox" /> Read completion status aloud</label>
       </section>
+
+      <details class="settings" id="flightDemo">
+        <summary>Live flight booking demo</summary>
+        <div class="settings-body">
+          <p>Open Google Flights and let your configured model search, compare fares, and select an itinerary. Review the fare before continuing to an airline. Login, CAPTCHA, passenger details, and payment may need your input.</p>
+          <label>From city or airport<input id="flightFrom" value="Hyderabad HYD" maxlength="80" /></label>
+          <label>To city or airport<input id="flightTo" value="Delhi DEL" maxlength="80" /></label>
+          <label>Departure date<input id="flightDate" type="date" /></label>
+          <button class="primary" id="flightButton">Start live flight search</button>
+          <p class="hint" id="flightStatus" role="status">Requires a model and your own provider key. No ticket is purchased by opening the demo.</p>
+        </div>
+      </details>
 
       <section class="trust-strip" aria-label="Privacy guarantees">
         <span><b>01</b> Observe locally</span><i></i><span><b>02</b> Minimize</span><i></i><span><b>03</b> Validate action</span>
@@ -97,10 +112,13 @@
         <summary>Settings</summary>
         <div class="settings-body">
           <h3>OpenAI-compatible reasoning endpoint</h3>
+          <label>Provider preset<select id="providerPreset"><option value="custom">Custom / existing settings</option><option value="openrouter">OpenRouter free router</option><option value="groq">Groq</option><option value="openai">OpenAI</option><option value="local">Local offline demo</option></select></label>
           <label>Endpoint<input id="endpointInput" placeholder="https://openrouter.ai/api/v1/chat/completions" /></label>
           <label>Model<input id="modelInput" placeholder="provider/model" /></label>
           <label>API key<input id="apiKeyInput" type="password" placeholder="Kept only for this browser session" /></label>
           <p class="hint">The key and private profile stay in session memory. Localhost endpoints do not require a key; other endpoints do.</p>
+          <p class="hint">Add your own key later. Free model availability and quotas depend on the provider. Changing providers clears the unsaved key so it cannot be sent to the wrong host.</p>
+          <label>Maximum agent steps<select id="maxStepsInput"><option value="10">10 steps</option><option value="30">30 steps</option><option value="50">50 steps</option></select></label>
 
           <h3>Session-only private profile</h3>
           <p class="hint">These values are converted to task-scoped, random capability aliases. Raw values are resolved only during local execution.</p>
@@ -118,6 +136,22 @@
           <button class="primary" id="saveSettingsButton">Save settings</button>
           <button class="secondary" id="clearPrivateButton">Clear session secrets now</button>
         </div>
+      </details>
+      <details class="settings">
+        <summary>How this compares</summary>
+        <div class="settings-body comparison">
+          <p>This prototype focuses on inspecting and limiting what a browser agent sees and does. It is not a benchmark winner or a replacement for every browser assistant.</p>
+          <table><thead><tr><th>Product</th><th>Workflow and controls</th></tr></thead><tbody>
+            <tr><th>Privacy Gateway</th><td>Your Chrome or Firefox tab, your compatible model endpoint, local private aliases, action validation, and visible receipts. Voice availability depends on the browser.</td></tr>
+            <tr><th><a href="https://www.perplexity.ai/help-center/en/articles/13531023-managing-comet-assistant-permissions" target="_blank" rel="noopener noreferrer">Perplexity Comet</a></th><td>Assistant integrated into Comet, with browser-control and read-only permissions configurable by domain.</td></tr>
+            <tr><th><a href="https://help.openai.com/en/articles/11752874-chatgpt-agent" target="_blank" rel="noopener noreferrer">ChatGPT agent</a></th><td>Hosted agent workflow with a visual browser, tools, and clarification or confirmation when needed.</td></tr>
+          </tbody></table>
+          <p class="hint">Official product documentation checked September 5, 2026. Features and plans change; no comparative speed or privacy benchmark is claimed.</p>
+        </div>
+      </details>
+      <details class="settings">
+        <summary>Security and data use</summary>
+        <div class="settings-body"><p>Page inspection and private-value aliasing happen locally. Only minimized text context reaches your chosen model; raw screenshots are not sent to it. Keys and your private profile are stored for the browser session. Each proposed action is checked against the current page and task, and high-risk actions require Allow once. Detection can miss sensitive text, and a model can make mistakes. Speech recognition and speech synthesis may use browser or operating-system services outside this gateway. Review transcripts before running and inspect each booking confirmation.</p></div>
       </details>
     </main>
     <script src="app.js"></script>

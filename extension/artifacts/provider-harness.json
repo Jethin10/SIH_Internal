@@ -1,19 +1,19 @@
 {
   "ok": true,
   "mode": "offline-harness-only",
-  "generatedAt": "2026-09-05T05:13:21.443Z",
-  "platform": "darwin",
+  "generatedAt": "2026-09-05T06:12:20.694Z",
+  "platform": "win32",
   "providerHost": "offline",
   "model": "local-demo",
-  "taskMs": 467,
+  "taskMs": 476,
   "requests": [
     {
       "status": 200,
-      "providerRoundTripMs": 5
+      "providerRoundTripMs": 1
     },
     {
       "status": 200,
-      "providerRoundTripMs": 1
+      "providerRoundTripMs": 0
     }
   ],
   "checks": {

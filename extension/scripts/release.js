@@ -68,7 +68,7 @@ function packageRelease() {
     const zip = new Zip();
     const dirs = browser === "Source" ? [...runtimeDirs, "server", "artifacts", "tests", "scripts"] : runtimeDirs;
     const files = browser === "Source"
-      ? ["manifest.json", "manifest.firefox.json", ...notices, "README.md", "DEVELOPMENT.md", "ARCHITECTURE-COVERAGE.md", "SIH-EVALUATION.md", "DEMO.md", "TEAM-RESPONSIBILITIES.md", "PROJECT-STATUS.md", "package.json", "package-lock.json", ".gitignore", ".nvmrc"]
+      ? ["manifest.json", "manifest.firefox.json", ...notices, "README.md", "LIVE-AGENT.md", "DEVELOPMENT.md", "ARCHITECTURE-COVERAGE.md", "SIH-EVALUATION.md", "DEMO.md", "TEAM-RESPONSIBILITIES.md", "PROJECT-STATUS.md", "package.json", "package-lock.json", ".gitignore", ".nvmrc"]
       : ["manifest.json", ...notices];
     for (const relative of [...files, ...dirs]) addTree(zip, relative, browser);
     if (browser === "Firefox") zip.updateFile("manifest.json", Buffer.from(`${JSON.stringify(firefox, null, 2)}\n`));

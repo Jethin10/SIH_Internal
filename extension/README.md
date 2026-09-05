@@ -4,6 +4,13 @@ Hackathon-ready Chrome and Firefox Manifest V3 prototype for SIH 26171. It is a 
 
 ## What is implemented
 
+- Push-to-talk task input with transcript review, permission-error recovery, and optional spoken completion status.
+- OpenAI-compatible provider presets for OpenRouter, Groq, OpenAI, custom endpoints, and the offline planner. Add your own key later.
+- A live Google Flights demo launcher with route/date validation and automatic model-driven search in its new tab.
+- Configurable 10/30/50-step agent runs, cancellation checks after model responses, and product comparison and security sections in the panel.
+
+See [LIVE-AGENT.md](LIVE-AGENT.md) for provider setup, voice data use, and the live flight demonstration. Live cloud inference and microphone capture require verification with your own key and device.
+
 - Generic DOM, form, ARIA, open Shadow DOM, dynamic-page, and permitted iframe perception on HTTP and HTTPS pages.
 - An in-memory incremental privacy graph with semantic element IDs, content hashes, versions, mutation batching, and immediate flushes at egress and execution boundaries.
 - Capturing `input` and `change` listeners so user-entered values cannot bypass graph updates.
