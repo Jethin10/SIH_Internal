@@ -12,6 +12,7 @@ const { chromePath, chromeTestArgs } = require("./browser-runtime.js");
 
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "artifacts", "product-ui.png");
+const chromeManifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8"));
 
 function freePort() {
   return new Promise((resolve, reject) => {
@@ -83,7 +84,7 @@ async function main() {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
     const worker = await waitForTarget(
       debugPort,
-      (target) => target.url?.startsWith("chrome-extension://") && target.url.endsWith("background/service-worker.js"),
+      (target) => target.url?.startsWith("chrome-extension://") && target.url.endsWith(chromeManifest.background.service_worker),
       "the extension service worker"
     );
     const extensionId = new URL(worker.url).hostname;
