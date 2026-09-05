@@ -17,3 +17,14 @@ assert(!JSON.stringify(context.compactPlannerHistory(history)).includes("9876543
 const leaked = { ...safe, elements: [{ label: "user@example.com" }] };
 assert.throws(() => context.assertEgressSafe(leaked, [], { userProfile: {} }, "click Canvas", []), /PII/);
 console.log("Planner telemetry minimization and raw PII rejection tests passed");
+
+const crowded = { ...safe, page: { viewport: { height: 800 } }, elements: Array.from({length: 200}, (_, i) => ({
+  id: `e_${i}`, version: 3, label: `Product ${i} ${'x'.repeat(150)}`, actionable: i === 199,
+  bbox: { y: i === 199 ? 20 : 1200, height: 30 }
+})) };
+const compact = context.compactForPlanner(crowded);
+assert.equal(compact.elements[0].id, 'e_199', 'Visible actionable controls must survive crowded pages');
+assert(compact.omittedElements > 0);
+assert.equal(compact.omittedElements + compact.elements.length, 200);
+assert(JSON.stringify(compact).length <= 10100, 'Serialized planner context must respect its budget including metadata');
+assert(compact.elements.every(e => e.version === 3 && /^e_/.test(e.id)));

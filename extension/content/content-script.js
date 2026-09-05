@@ -55,8 +55,7 @@
 
   const ACTIONABLE_TAGS = new Set(["A", "BUTTON", "INPUT", "TEXTAREA", "SELECT", "OPTION", "SUMMARY"]);
   const TEXT_TAGS = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "P", "LI", "TD", "TH", "LABEL", "LEGEND", "CAPTION"]);
-  const HIGH_RISK = /\b(pay|purchase|place order|buy now|submit|send|delete|remove account|transfer|confirm booking|book now|publish|post|sign|checkout|upload|authorize)\b/i;
-  const DANGEROUS_FIELDS = /\b(card|cvv|cvc|password|otp|aadhaar|pan|bank|account number|upi pin)\b/i;
+  const ActionRisk = self.PrivacyActionRisk;
 
   function now() {
     return typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -153,7 +152,10 @@
       el.getAttribute("type"), el.getAttribute("autocomplete"), el.getAttribute("name"),
       el.id, el.getAttribute("placeholder"), el.getAttribute("aria-label"), label
     ].filter(Boolean).join(" ").toLowerCase();
-    if (/password|passcode|pin\b/.test(haystack)) return "password";
+    // A postal PIN is not a credential. Indian address forms label it "PIN code",
+    // and an address must stay fillable without a confirmation prompt.
+    if (/pin\s*code|pincode|postal\s*code|\bzip\b/.test(haystack)) return "address";
+    if (/password|passcode|(?:upi|atm|card|debit|credit|transaction)\s*pin\b|\bpin\s*number\b/.test(haystack)) return "password";
     if (/e-?mail/.test(haystack)) return "email";
     if (/phone|mobile|telephone|\btel\b/.test(haystack)) return "phone";
     if (/aadhaar|aadhar|uidai/.test(haystack)) return "aadhaar";
@@ -259,12 +261,15 @@
     const actionable = ACTIONABLE_TAGS.has(el.tagName) || el.hasAttribute("role") || el.isContentEditable;
     const relevance = relevanceOf(label, rawValue, actionable);
     const labelResult = safeString(label, "generic", false);
-    const forceSemantic = actionable && rawValue.length > 0 && ["password", "secret", "email", "phone", "aadhaar", "pan", "upi", "card", "person", "address", "otp", "account", "ifsc", "dob", "health"].includes(semanticType);
+    const editableValue = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement || el.isContentEditable;
+    const forceSemantic = editableValue && rawValue.length > 0 && ["password", "secret", "email", "phone", "aadhaar", "pan", "upi", "card", "person", "address", "otp", "account", "ifsc", "dob", "health"].includes(semanticType);
     const valueResult = safeString(rawValue, semanticType, forceSemantic);
     const sensitivity = valueResult.sensitivity !== "none" ? valueResult.sensitivity : labelResult.sensitivity;
     const policy = policyFor(sensitivity, relevance, semanticType);
     const rect = el.getBoundingClientRect();
-    const contentHash = PII.hashText(JSON.stringify({ role, label, rawValue, semanticType, actionable, checked: el.checked, disabled: el.disabled }));
+    const contentHash = PII.hashText(JSON.stringify({ role, label, rawValue, semanticType, actionable, checked: el.checked, disabled: el.disabled,
+      href: el.getAttribute('href'), target: el.getAttribute('target'), type: el.getAttribute('type'),
+      formAction: el.form?.action, formMethod: el.form?.method, formTarget: el.form?.target }));
     const version = previous ? previous.version + Number(previous.contentHash !== contentHash) : 1;
     const rawMetricRecord = { id, role, label, value: rawValue, semanticType };
     const graphMetricRecord = {
@@ -468,7 +473,7 @@
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["aria-label", "aria-labelledby", "aria-hidden", "role", "value", "checked", "disabled", "placeholder", "class", "style"]
+      attributeFilter: ["aria-label", "aria-labelledby", "aria-hidden", "role", "value", "checked", "disabled", "placeholder", "class", "style", "href", "target", "action", "method", "type", "formaction", "formtarget"]
     });
   }
 
@@ -538,7 +543,11 @@
     if (!contextSelectionCache) {
       const all = Array.from(records.values());
       const candidates = all.filter((record) => !["DROP", "BLOCK"].includes(record.policy) && (record.actionable || record.relevance >= 0.12));
-      candidates.sort((a, b) => Number(b.actionable) - Number(a.actionable) || b.relevance - a.relevance || a.id.localeCompare(b.id));
+      const visibleRank = record => {
+        const box = idToElement.get(record.id)?.getBoundingClientRect();
+        return box && box.width > 0 && box.height > 0 && box.top < innerHeight && box.bottom > 0 ? 1 : 0;
+      };
+      candidates.sort((a, b) => visibleRank(b) - visibleRank(a) || Number(b.actionable) - Number(a.actionable) || b.relevance - a.relevance || a.id.localeCompare(b.id));
       contextSelectionCache = {
         selected: candidates.slice(0, 220),
         sensitive: all.filter((record) => record.sensitivity !== "none")
@@ -602,18 +611,53 @@
     return true;
   }
 
+  // Page-derived evidence about the form a control belongs to. Risk decisions read
+  // this and never the planner prose, so an unchanged page classifies the same way
+  // on every run.
+  function formDescriptor(el) {
+    const form = el && el.form ? el.form : null;
+    if (!form) return { inForm: false, formText: "", formIsSearch: false, formHasPaymentField: false };
+    const fields = Array.from(form.querySelectorAll("input, textarea, select"));
+    const hintsOf = (field) => [
+      field.name, field.id, field.placeholder,
+      field.getAttribute("aria-label"), field.getAttribute("autocomplete")
+    ].filter(Boolean).join(" ");
+    const formHasPaymentField = fields.some((field) => {
+      const autocomplete = String(field.getAttribute("autocomplete") || "").toLowerCase();
+      if (field.type === "password" || autocomplete.startsWith("cc-")) return true;
+      return ActionRisk.PAYMENT_FIELD.test(hintsOf(field));
+    });
+    const hasSearchField = form.getAttribute("role") === "search" || fields.some((field) => {
+      if (field.type === "search" || field.name === "q" || field.name === "field-keywords") return true;
+      if (field.getAttribute("role") === "searchbox") return true;
+      return field.type === "text" && /search|query|keyword/i.test(hintsOf(field));
+    });
+    const method = String(form.getAttribute("method") || "get").toLowerCase();
+    return {
+      inForm: true,
+      formText: `${form.getAttribute("action") || ""} ${String(form.innerText || "").slice(0, 4000)}`,
+      formIsSearch: method === "get" && hasSearchField && !formHasPaymentField,
+      formHasPaymentField
+    };
+  }
+
+  function submitControl(el) {
+    const controlType = String((el && el.getAttribute && el.getAttribute("type")) || "").toLowerCase();
+    if (el instanceof HTMLButtonElement) return !controlType || controlType === "submit";
+    return el instanceof HTMLInputElement && controlType === "submit";
+  }
+
   function actionRisk(action, record, el) {
-    const formText = el?.form ? `${el.form.getAttribute("action") || ""} ${el.form.innerText || ""}` : "";
-    const controlType = String(el?.getAttribute?.("type") || "").toLowerCase();
-    const implicitSubmit = Boolean(el?.form && ((el instanceof HTMLButtonElement && (!controlType || controlType === "submit")) || (el instanceof HTMLInputElement && controlType === "submit")));
-    const label = `${record?.rawLabel || ""} ${record?.semanticType || ""} ${action?.reason || ""} ${formText}`;
-    if (implicitSubmit) return "high";
-    if (action.type === "click" && HIGH_RISK.test(label)) return "high";
-    if (action.type === "fill" && DANGEROUS_FIELDS.test(label)) return "high";
-    if (action.type === "press" && String(action.key || "").toLowerCase() === "enter" && HIGH_RISK.test(label)) return "high";
-    if (action.type === "fill" && record?.sensitivity !== "none") return settings.policy?.alwaysConfirmSensitiveFill ? "high" : "medium";
-    if (action.type === "click" && /add to (?:cart|bag)|sign in|log in/i.test(label)) return "medium";
-    return "low";
+    return ActionRisk.classify({
+      actionType: action.type,
+      key: action.key,
+      label: record ? record.rawLabel : "",
+      semanticType: record ? record.semanticType : null,
+      sensitivity: record ? record.sensitivity : "none",
+      isSubmitControl: submitControl(el),
+      alwaysConfirmSensitiveFill: Boolean(settings.policy && settings.policy.alwaysConfirmSensitiveFill),
+      ...formDescriptor(el)
+    });
   }
 
   function resolveActionValue(value, record, consume) {
@@ -631,6 +675,7 @@
     if (["scroll", "wait", "done"].includes(action.type)) return { ok: true, status: "allowed", risk: "low" };
     const el = actionTarget(action);
     if (!el) return { ok: false, status: "blocked", reason: "Target no longer exists" };
+    processElement(el, 'action revalidation');
     const record = records.get(action.targetId);
     if (!record) return { ok: false, status: "blocked", reason: "Target is not in the current privacy graph" };
     if (["click", "press"].includes(action.type) && !record.actionable) {
@@ -645,12 +690,13 @@
       const resolved = resolveActionValue(action.value, record, false);
       if (!resolved.ok) return { ok: false, status: "blocked", reason: resolved.error };
     }
-    const risk = actionRisk(action, record, el);
-    if (risk === "high" && !confirmed) {
+    const assessment = actionRisk(action, record, el);
+    const risk = assessment.risk;
+    if (["high", "critical"].includes(risk) && !confirmed) {
       return {
         ok: false,
         status: "needs_confirmation",
-        reason: "High-risk action requires local user confirmation",
+        reason: assessment.reason,
         risk,
         target: { id: record.id, label: record.label, role: record.role, semanticType: record.semanticType }
       };
@@ -704,6 +750,9 @@
       dispatchInput(el, resolved.value);
       usedToken = resolved.usedToken;
     } else if (action.type === "click") {
+      // Keep observed links in the controlled tab, so the next observation is
+      // the destination rather than the abandoned opener.
+      if (el instanceof HTMLAnchorElement && el.target && el.target !== '_self') el.target = '_self';
       el.click();
     } else if (action.type === "select") {
       const desired = String(action.value || "");
@@ -717,8 +766,13 @@
       el.dispatchEvent(new KeyboardEvent("keydown", { key, code: key === "Enter" ? "Enter" : key, bubbles: true }));
       el.dispatchEvent(new KeyboardEvent("keyup", { key, code: key === "Enter" ? "Enter" : key, bubbles: true }));
       if (key === "Enter" && el.form && typeof el.form.requestSubmit === "function") {
-        const submitRisk = HIGH_RISK.test(`${el.form.innerText || ""} ${record?.rawLabel || ""}`);
-        if (!submitRisk || confirmed) el.form.requestSubmit();
+        const submitAssessment = ActionRisk.classify({
+          actionType: "click",
+          label: "",
+          isSubmitControl: true,
+          ...formDescriptor(el)
+        });
+        if (["low", "medium"].includes(submitAssessment.risk) || confirmed) el.form.requestSubmit();
       }
     } else if (action.type === "focus") {
       // scrollIntoView and focus above are the complete operation.

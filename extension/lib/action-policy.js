@@ -15,6 +15,8 @@
     scroll: new Set(["type", "direction", "amount", "reason"]),
     wait: new Set(["type", "ms", "reason"]),
     back: new Set(["type", "reason"]),
+    navigate: new Set(["type", "url", "reason"]),
+    search_web: new Set(["type", "query", "reason"]),
     visual_scan: new Set(["type", "reason"]),
     done: new Set(["type", "message"])
   };
@@ -37,6 +39,14 @@
       return fail("Action value must be a string no longer than 4000 characters");
     }
     if (action.type === "press" && !ALLOWED_KEYS.has(String(action.key || "Enter"))) return fail("Requested key is not allowed");
+    if (action.type === "navigate") {
+      if (typeof action.url !== "string" || action.url.length > 2000) return fail("Navigation requires a URL under 2000 characters");
+      try {
+        const url = new URL(action.url);
+        if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) return fail("Navigation requires an HTTP(S) URL without credentials");
+      } catch (_) { return fail("Navigation URL is invalid"); }
+    }
+    if (action.type === "search_web" && (typeof action.query !== "string" || !action.query.trim() || action.query.length > 500)) return fail("Search query must contain 1 to 500 characters");
     if (action.type === "scroll") {
       if (!["up", "down"].includes(action.direction)) return fail("Scroll direction must be up or down");
       if (action.amount != null && (!Number.isFinite(action.amount) || action.amount < 1 || action.amount > 5000)) return fail("Scroll amount is outside the allowed range");
