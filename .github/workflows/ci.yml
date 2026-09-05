@@ -19,6 +19,10 @@ jobs:
           node-version: 22
       - run: npm ci
       - name: Install pinned Chromium with extension support
+        if: runner.os != 'Linux'
+        run: npx playwright install chromium
+      - name: Install pinned Chromium with Linux dependencies
+        if: runner.os == 'Linux'
         run: npx playwright install --with-deps chromium
       - run: npm test
       - run: npm run test:ui
