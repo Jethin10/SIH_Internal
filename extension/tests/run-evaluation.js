@@ -38,6 +38,7 @@ function parseLastJson(text, markerKey) {
 }
 
 const pii = parseWholeJson(run("pii-eval.js"));
+const independentPii = parseWholeJson(run("pii-independent.test.js"));
 const e2e = parseWholeJson(run("run-e2e.js"));
 const benchmarkOutput = run("run-benchmarks.js", 240000);
 const benchmarks = parseLastJson(benchmarkOutput, "generatedAt");
@@ -53,6 +54,7 @@ const maxGraphApproxMb = Math.max(...benchmarks.results.map((item) => Number(ite
 
 const gates = {
   syntheticPiiRegression: pii.fp === 0 && pii.fn === 0 && pii.cases >= 1000,
+  independentPiiBaseline: independentPii.recall >= 0.40 && independentPii.cleanNegativeRate >= 0.80,
   adversarialBrowserE2E: e2e.ok === true,
   zeroKnownRawPiiEgress: e2e.egressStatus === "verified_zero",
   dangerousTaskScopeFalseAllows: e2e.adversarialScope === "unrelated cloud action blocked",
@@ -82,18 +84,22 @@ const report = {
     systemMemoryGb: Number((os.totalmem() / 1024 ** 3).toFixed(1))
   },
   scope: {
-    pii: "Generated synthetic regression corpus. Not a real-world accuracy estimate.",
+    pii: "Generated regression corpus plus a separately reported external synthetic test split. Neither is a real-world population estimate.",
     browser: "Local deterministic fixtures in a clean temporary Chromium profile.",
     latency: "Warm runtime-message round trip measured inside the browser with performance.now(). Debugger discovery/result transfer, cold initial scan and OCR are reported separately."
   },
   pii,
+  independentPii,
   e2e,
   benchmarks,
   sihCriteria: {
     piiDetection: {
-      metric: "precision / recall / F1 on generated held-out regression cases",
-      value: { precision: pii.precision, recall: pii.recall, f1: pii.f1, cases: pii.cases },
-      limitation: "Synthetic deterministic corpus; not a real-world population estimate."
+      metric: "generated regression score and external exact entity recall, reported separately",
+      value: {
+        generated: { precision: pii.precision, recall: pii.recall, f1: pii.f1, cases: pii.cases },
+        independent: { recall: independentPii.recall, cleanNegativeRate: independentPii.cleanNegativeRate, cases: independentPii.cases }
+      },
+      limitation: "Both corpora are synthetic. The external score uses only mapped Gretel test labels and exposes current deterministic-rule limits for arbitrary names, addresses, and non-Indian formats."
     },
     visualContextAccuracy: {
       metric: "labelled canvas text targets recovered by local OCR",
@@ -138,11 +144,12 @@ const summary = `# Evaluation summary
 
 Generated: ${report.generatedAt}
 
-This report uses synthetic local fixtures. The PII score is a regression score for the deterministic rules, not a real-world accuracy claim.
+This report uses synthetic data and local browser fixtures. Generated and external PII scores are kept separate; neither is a real-world accuracy claim.
 
 ## Headline results
 
 - Synthetic PII corpus: ${pii.cases.toLocaleString()} cases, ${pii.fp} false positives, ${pii.fn} false negatives.
+- Independent Gretel test subset: ${independentPii.positives} labelled entities plus ${independentPii.negativeDocuments} negative documents; ${(independentPii.recall * 100).toFixed(1)}% exact recall and ${(independentPii.cleanNegativeRate * 100).toFixed(1)}% clean-negative rate.
 - Browser E2E: ${e2e.ok ? "pass" : "fail"}. Known task canaries reached the provider only after local tokenization.
 - Visual context: ${e2e.visualRecoveredTargets}/${e2e.visualExpectedTargets} labelled canvas targets recovered; ${e2e.visualMaskCoveragePct}% of OCR-detected sensitive lines masked locally.
 - Mock-provider task loop: ${e2e.mockTaskLatencyMs} ms; local visual OCR: ${e2e.visualOcrMs} ms.

@@ -1,0 +1,1041 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "dataset": "gretelai/synthetic_pii_finance_multilingual",
+    "url": "https://huggingface.co/datasets/gretelai/synthetic_pii_finance_multilingual",
+    "revision": "7b844d16738527a04264f50214cb426a4cea0897",
+    "config": "default",
+    "split": "test",
+    "license": "Apache-2.0",
+    "authorship": "Created independently by Gretel; no project-generated examples are included.",
+    "selection": "Deterministic scan of source rows 1000-1999; English only; earliest non-empty labelled spans up to fixed per-label quotas. Rows 0-499 were used only to understand source conventions and are excluded from this evaluation fixture.",
+    "transformation": "Each positive is a whitespace-normalized source excerpt with up to 96 Unicode code points of context on either side. Negatives are the first 20 English source rows with no labelled spans, truncated to 240 code points.",
+    "scope": "Labels are mapped only where this detector has a corresponding privacy type. Unmapped dataset labels are excluded. PHONE and PASSPORT retain the project's India-specific validation, and CARD retains Luhn validation, so misses outside those formats remain visible.",
+    "importedAt": "2026-09-05T06:07:50.301Z"
+  },
+  "labelMap": {
+    "name": "PERSON",
+    "first_name": "PERSON",
+    "street_address": "ADDRESS",
+    "email": "EMAIL",
+    "phone_number": "PHONE",
+    "ipv4": "IP",
+    "credit_card_number": "CARD",
+    "passport_number": "PASSPORT"
+  },
+  "quotas": {
+    "name": 20,
+    "first_name": 5,
+    "street_address": 20,
+    "email": 15,
+    "phone_number": 15,
+    "ipv4": 8,
+    "credit_card_number": 8,
+    "passport_number": 8
+  },
+  "counts": {
+    "name": 20,
+    "first_name": 5,
+    "street_address": 20,
+    "email": 15,
+    "phone_number": 15,
+    "ipv4": 8,
+    "credit_card_number": 8,
+    "passport_number": 8
+  },
+  "positives": [
+    {
+      "id": "gretel-test-1000-1",
+      "sourceRow": 1000,
+      "sourceIndex": 43398,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "financial risks faced by XYZ Ltd., a leading provider of digital marketing solutions based in Toronto, Canada. The assessment focuses on legal disputes, regulatory actions, and compliance obligations that",
+      "entity": "Toronto, Canada"
+    },
+    {
+      "id": "gretel-test-1012-0",
+      "sourceRow": 1012,
+      "sourceIndex": 33661,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "processed by our organization, including but not limited to the following PII values:\n\n- IPv4: 53.165.254.212\n- Name: Alessia V. Roccabonella\n- Street Address: 9494 Tammy Forest, 95521, Seanville\n\n3.",
+      "entity": "53.165.254.212"
+    },
+    {
+      "id": "gretel-test-1012-1",
+      "sourceRow": 1012,
+      "sourceIndex": 33661,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "including but not limited to the following PII values:\n\n- IPv4: 53.165.254.212\n- Name: Alessia V. Roccabonella\n- Street Address: 9494 Tammy Forest, 95521, Seanville\n\n3. Privacy by Design\n\nWe will implement",
+      "entity": "Alessia V. Roccabonella"
+    },
+    {
+      "id": "gretel-test-1012-2",
+      "sourceRow": 1012,
+      "sourceIndex": 33661,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "PII values:\n\n- IPv4: 53.165.254.212\n- Name: Alessia V. Roccabonella\n- Street Address: 9494 Tammy Forest, 95521, Seanville\n\n3. Privacy by Design\n\nWe will implement privacy by design principles in all stages of our",
+      "entity": "9494 Tammy Forest, 95521, Seanville"
+    },
+    {
+      "id": "gretel-test-1013-1",
+      "sourceRow": 1013,
+      "sourceIndex": 50096,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "refer to the full safety data sheet.\n\nFirst Aid Measures: Time: 05:57:10, Street Address: 893 Franco Plains, Apt. 277, Name: Giuseppina I. Sforza.\n\nThis Safety Data Sheet was prepared on: 01/01/2023.\n```diff\n-",
+      "entity": "893 Franco Plains, Apt. 277"
+    },
+    {
+      "id": "gretel-test-1013-2",
+      "sourceRow": 1013,
+      "sourceIndex": 50096,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "sheet.\n\nFirst Aid Measures: Time: 05:57:10, Street Address: 893 Franco Plains, Apt. 277, Name: Giuseppina I. Sforza.\n\nThis Safety Data Sheet was prepared on: 01/01/2023.\n```diff\n- Synthetic document generated",
+      "entity": "Giuseppina I. Sforza"
+    },
+    {
+      "id": "gretel-test-1016-0",
+      "sourceRow": 1016,
+      "sourceIndex": 36327,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Claim Form]\n\nPersonal Liability Insurance Claim\n\nClaimant Information:\n\nName: Florencia R. Huertas\nStreet Address: 959 Matthew Forge, Apt. 1676\nCity: [City Name]\nState: [State Name]\nZip Code:",
+      "entity": "Florencia R. Huertas"
+    },
+    {
+      "id": "gretel-test-1016-1",
+      "sourceRow": 1016,
+      "sourceIndex": 36327,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Liability Insurance Claim\n\nClaimant Information:\n\nName: Florencia R. Huertas\nStreet Address: 959 Matthew Forge, Apt. 1676\nCity: [City Name]\nState: [State Name]\nZip Code: [Zip Code]\nPhone Number: 001-397-680-4345",
+      "entity": "959 Matthew Forge, Apt. 1676"
+    },
+    {
+      "id": "gretel-test-1016-2",
+      "sourceRow": 1016,
+      "sourceIndex": 36327,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Forge, Apt. 1676\nCity: [City Name]\nState: [State Name]\nZip Code: [Zip Code]\nPhone Number: 001-397-680-4345 x3930\n\nIncident Details:\n\nDate of Occurrence: [Date]\nTime of Incident: [Time]\nLocation of Incident:",
+      "entity": "001-397-680-4345 x3930"
+    },
+    {
+      "id": "gretel-test-1018-1",
+      "sourceRow": 1018,
+      "sourceIndex": 45087,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Ticket #123456\n----------------------\n\n**Date:** 2022-03-01\n\n**User:** Renée Wagner-Langlois\n\n**Contact Information:**\n- Name: Renée Wagner-Langlois\n- Account PIN: 1780\n- Street Address:",
+      "entity": "Renée Wagner-Langlois"
+    },
+    {
+      "id": "gretel-test-1018-4",
+      "sourceRow": 1018,
+      "sourceIndex": 45087,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "**Contact Information:**\n- Name: Renée Wagner-Langlois\n- Account PIN: 1780\n- Street Address: 6905 Emily Mountain, 24041, Port Jeffrey\n\n**Issue Description:**\nRenée Wagner-Langlois (account PIN 1780) reported that she is",
+      "entity": "6905 Emily Mountain, 24041, Port Jeffrey"
+    },
+    {
+      "id": "gretel-test-1019-0",
+      "sourceRow": 1019,
+      "sourceIndex": 54680,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Access Program Application\n\nFull Name: Lorraine Lagarde-Costa\nMailing Address: 3838 David Ville, [City, State, Zip Code]\nEmail Address: [example@email.com]",
+      "entity": "Lorraine Lagarde-Costa"
+    },
+    {
+      "id": "gretel-test-1019-1",
+      "sourceRow": 1019,
+      "sourceIndex": 54680,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Access Program Application\n\nFull Name: Lorraine Lagarde-Costa\nMailing Address: 3838 David Ville, [City, State, Zip Code]\nEmail Address: [example@email.com]\nPhone Number: [123-456-7890]\nDate",
+      "entity": "3838 David Ville"
+    },
+    {
+      "id": "gretel-test-1019-3",
+      "sourceRow": 1019,
+      "sourceIndex": 54680,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "and I look forward to the opportunity to further discuss my qualifications.\n\nSincerely,\nLorraine Lagarde-Cost",
+      "entity": "Lorraine Lagarde-Cost"
+    },
+    {
+      "id": "gretel-test-1019-4",
+      "sourceRow": 1019,
+      "sourceIndex": 54680,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Lagarde-Costa\nMailing Address: 3838 David Ville, [City, State, Zip Code]\nEmail Address: [example@email.com]\nPhone Number: [123-456-7890]\nDate of Birth: [dd-mm-yyyy]\n\nEducational Background:\n- Highest",
+      "entity": "example@email.com"
+    },
+    {
+      "id": "gretel-test-1020-0",
+      "sourceRow": 1020,
+      "sourceIndex": 20485,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Aid Application\nSponsorship Application\n\nFull Name: Jane Doe\nDate of Birth: 01/01/1998\nContact Address: 45, Baker Street, London, NW1 6XE\nEmail Address:",
+      "entity": "Jane Doe"
+    },
+    {
+      "id": "gretel-test-1020-2",
+      "sourceRow": 1020,
+      "sourceIndex": 20485,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Sponsorship Application\n\nFull Name: Jane Doe\nDate of Birth: 01/01/1998\nContact Address: 45, Baker Street, London, NW1 6XE\nEmail Address: jane.doe@example.com\nPhone Number: 020 1234 5678\n\nEducational Pursuits\n\n1. Name",
+      "entity": "45, Baker Street, London, NW1 6XE"
+    },
+    {
+      "id": "gretel-test-1020-3",
+      "sourceRow": 1020,
+      "sourceIndex": 20485,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Date of Birth: 01/01/1998\nContact Address: 45, Baker Street, London, NW1 6XE\nEmail Address: jane.doe@example.com\nPhone Number: 020 1234 5678\n\nEducational Pursuits\n\n1. Name of Institution: University College",
+      "entity": "jane.doe@example.com"
+    },
+    {
+      "id": "gretel-test-1022-1",
+      "sourceRow": 1022,
+      "sourceIndex": 35155,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "(SPV) established for the purpose of issuing asset-backed securities. The SPV is located at 775 Rodriguez Creek, Brittanyhaven.\n\nII. TERMS OF THE OFFERING\n\nZh-71984 is offering for sale asset-backed securities (ABS)",
+      "entity": "775 Rodriguez Creek, Brittanyhaven"
+    },
+    {
+      "id": "gretel-test-1025-0",
+      "sourceRow": 1025,
+      "sourceIndex": 41172,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Application**\n\n**Loan Repayment Analysis**\n\n**Applicant Details**\n\nFull Name: Johnathan Smith\nDate of Birth: 01/12/1985\nContact Number: +44 77 1234 5678\nEmail Address:",
+      "entity": "Johnathan Smith"
+    },
+    {
+      "id": "gretel-test-1025-2",
+      "sourceRow": 1025,
+      "sourceIndex": 41172,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "**Applicant Details**\n\nFull Name: Johnathan Smith\nDate of Birth: 01/12/1985\nContact Number: +44 77 1234 5678\nEmail Address: johnathan.smith@email.com\nResidential Address: 123, High Street, London, UK",
+      "entity": "+44 77 1234 5678"
+    },
+    {
+      "id": "gretel-test-1025-3",
+      "sourceRow": 1025,
+      "sourceIndex": 41172,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Johnathan Smith\nDate of Birth: 01/12/1985\nContact Number: +44 77 1234 5678\nEmail Address: johnathan.smith@email.com\nResidential Address: 123, High Street, London, UK\n\n**Financial Details**\n\nMonthly Income:",
+      "entity": "johnathan.smith@email.com"
+    },
+    {
+      "id": "gretel-test-1025-4",
+      "sourceRow": 1025,
+      "sourceIndex": 41172,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Contact Number: +44 77 1234 5678\nEmail Address: johnathan.smith@email.com\nResidential Address: 123, High Street, London, UK\n\n**Financial Details**\n\nMonthly Income: £4,500\nMonthly Expenses: £2,000\nCurrent Debts: £10,000",
+      "entity": "123, High Street, London, UK"
+    },
+    {
+      "id": "gretel-test-1026-0",
+      "sourceRow": 1026,
+      "sourceIndex": 51665,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "INSURANCE POLICY\n\nThis Automobile Insurance Policy (the \"Policy\") is entered into between Adélaïde Dupont-Boucher, residing at 15267 Michael Locks, 07193, Fergusonton (\"Policyholder\") and Elite Insurance",
+      "entity": "Adélaïde Dupont-Boucher"
+    },
+    {
+      "id": "gretel-test-1026-1",
+      "sourceRow": 1026,
+      "sourceIndex": 51665,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Insurance Policy (the \"Policy\") is entered into between Adélaïde Dupont-Boucher, residing at 15267 Michael Locks, 07193, Fergusonton (\"Policyholder\") and Elite Insurance Company (\"Insurer\"), and is effective as of 01/01/2023.",
+      "entity": "15267 Michael Locks, 07193, Fergusonton"
+    },
+    {
+      "id": "gretel-test-1026-9",
+      "sourceRow": 1026,
+      "sourceIndex": 51665,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "CONTACT INFORMATION\n\nInsurer:\nElite Insurance Company\n123 Main St.\nAnytown, USA\n12345\nPhone: 1-8",
+      "entity": "1-8"
+    },
+    {
+      "id": "gretel-test-1029-0",
+      "sourceRow": 1029,
+      "sourceIndex": 54567,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Payment Confirmation\n\nPayment Details:\n\nPayment Type: ACH Transfer\n\nPayer Information:\nName: John Doe\nAddress: 123 Maple Street\nCity: Anytown\nState: CA\nZip Code: 12345\n\nPayee Information:\nName:",
+      "entity": "John Doe"
+    },
+    {
+      "id": "gretel-test-1029-6",
+      "sourceRow": 1029,
+      "sourceIndex": 54567,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "confirmation for your records. If you have any questions or concerns, please contact us at (123) 456-7890.\n\nThank you for using our ACH transfer service.\n\nSincerely,\n\n[Your Bank's",
+      "entity": "(123) 456-7890"
+    },
+    {
+      "id": "gretel-test-1029-7",
+      "sourceRow": 1029,
+      "sourceIndex": 54567,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "NY\nZip Code: 67890\n\nAmount: $500.00\n\nDate of Transaction: 01/10/2023\n\nConfirmation Number: 123456789\n\nThis is to confirm that $500.00 has been transferred from the account of John Doe to Acme",
+      "entity": "123456789"
+    },
+    {
+      "id": "gretel-test-1034-1",
+      "sourceRow": 1034,
+      "sourceIndex": 18056,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Invoice\n\nInvoice Number: 001234\nDate: 01/10/2022\n\nSeller:\nSeveriano O. Porcel\n48 Vicolo Segrè, Moio Alcantara\n\nBuyer:\nvan der Spaendonck-Uphaus",
+      "entity": "Severiano O. Porcel"
+    },
+    {
+      "id": "gretel-test-1034-2",
+      "sourceRow": 1034,
+      "sourceIndex": 18056,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Invoice\n\nInvoice Number: 001234\nDate: 01/10/2022\n\nSeller:\nSeveriano O. Porcel\n48 Vicolo Segrè, Moio Alcantara\n\nBuyer:\nvan der Spaendonck-Uphaus\n[23b8:3adf:8e87:51e6:9314:3ed1:1544:4e64]\n\nItemized List:\n1.",
+      "entity": "48 Vicolo Segrè, Moio Alcantara"
+    },
+    {
+      "id": "gretel-test-1038-2",
+      "sourceRow": 1038,
+      "sourceIndex": 39444,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "a company organized and existing under the laws of Canada, with its head office located at 123 Main Street, Toronto, Ontario, Canada (\"ABC\"), and XYZ Manufacturing Ltd., a company organized and existing under the laws of the",
+      "entity": "123 Main Street, Toronto, Ontario, Canada"
+    },
+    {
+      "id": "gretel-test-1038-4",
+      "sourceRow": 1038,
+      "sourceIndex": 39444,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "organized and existing under the laws of the United Kingdom, with its head office located at 456 High Street, London, UK (\"XYZ\").\n\nWHEREAS, ABC desires to purchase certain products and services from XYZ, and XYZ is",
+      "entity": "456 High Street, London, UK"
+    },
+    {
+      "id": "gretel-test-1039-0",
+      "sourceRow": 1039,
+      "sourceIndex": 43348,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Silvestro Mannoia-Scotti’s Adjustable Rate Mortgage (ARM) Amortization Schedule**\n\n| Payment # | Date | Interest Rate |",
+      "entity": "Silvestro Mannoia-Scotti"
+    },
+    {
+      "id": "gretel-test-1044-1",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "of Lading\n\nShipper's Load and Count\n\nShipper: ABC Enterprises Ltd.\nAddress: 123 Main Street, Toronto, ON, Canada, M5J 1E3\nContact: John Doe\nEmail: john.doe@abc-enterprises.com\nPhone: +1-416-555-1212\n\nConsignee: XYZ",
+      "entity": "123 Main Street, Toronto, ON, Canada, M5J 1E3"
+    },
+    {
+      "id": "gretel-test-1044-2",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Shipper: ABC Enterprises Ltd.\nAddress: 123 Main Street, Toronto, ON, Canada, M5J 1E3\nContact: John Doe\nEmail: john.doe@abc-enterprises.com\nPhone: +1-416-555-1212\n\nConsignee: XYZ Corporation",
+      "entity": "John Doe"
+    },
+    {
+      "id": "gretel-test-1044-3",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Ltd.\nAddress: 123 Main Street, Toronto, ON, Canada, M5J 1E3\nContact: John Doe\nEmail: john.doe@abc-enterprises.com\nPhone: +1-416-555-1212\n\nConsignee: XYZ Corporation\nAddress: 456 Park Lane, London, UK, W1A 2AB",
+      "entity": "john.doe@abc-enterprises.com"
+    },
+    {
+      "id": "gretel-test-1044-4",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Toronto, ON, Canada, M5J 1E3\nContact: John Doe\nEmail: john.doe@abc-enterprises.com\nPhone: +1-416-555-1212\n\nConsignee: XYZ Corporation\nAddress: 456 Park Lane, London, UK, W1A 2AB\nContact: Jane Smith",
+      "entity": "+1-416-555-1212"
+    },
+    {
+      "id": "gretel-test-1044-6",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "john.doe@abc-enterprises.com\nPhone: +1-416-555-1212\n\nConsignee: XYZ Corporation\nAddress: 456 Park Lane, London, UK, W1A 2AB\nContact: Jane Smith\nEmail: jane.smith@xyz-corporation.com\nPhone: +44-20-7777-3333\n\nCarrier:",
+      "entity": "456 Park Lane, London, UK, W1A 2AB"
+    },
+    {
+      "id": "gretel-test-1044-7",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Consignee: XYZ Corporation\nAddress: 456 Park Lane, London, UK, W1A 2AB\nContact: Jane Smith\nEmail: jane.smith@xyz-corporation.com\nPhone: +44-20-7777-3333\n\nCarrier: Global Shipping Inc.",
+      "entity": "Jane Smith"
+    },
+    {
+      "id": "gretel-test-1044-8",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "XYZ Corporation\nAddress: 456 Park Lane, London, UK, W1A 2AB\nContact: Jane Smith\nEmail: jane.smith@xyz-corporation.com\nPhone: +44-20-7777-3333\n\nCarrier: Global Shipping Inc.\nVessel: MV Ocean Titan\nVoyage: 123",
+      "entity": "jane.smith@xyz-corporation.com"
+    },
+    {
+      "id": "gretel-test-1044-9",
+      "sourceRow": 1044,
+      "sourceIndex": 43858,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Lane, London, UK, W1A 2AB\nContact: Jane Smith\nEmail: jane.smith@xyz-corporation.com\nPhone: +44-20-7777-3333\n\nCarrier: Global Shipping Inc.\nVessel: MV Ocean Titan\nVoyage: 123\n\nPlace of Receipt: Toronto,",
+      "entity": "+44-20-7777-3333"
+    },
+    {
+      "id": "gretel-test-1045-2",
+      "sourceRow": 1045,
+      "sourceIndex": 37281,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "Transaction: 05/12/2022\nPayer: Thornton2689\nAPI Key: sl.USE4_DO977qOi3gbvofpUXoPmJqA\n\nPaid to: Malena C. Ferrándiz\nAddress: 7404 Burch Pass, 30095, Kimberlyburgh\n\nRedemption Amount: $500.00\n\nWe hope that this",
+      "entity": "Malena C. Ferrándiz"
+    },
+    {
+      "id": "gretel-test-1045-3",
+      "sourceRow": 1045,
+      "sourceIndex": 37281,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "Thornton2689\nAPI Key: sl.USE4_DO977qOi3gbvofpUXoPmJqA\n\nPaid to: Malena C. Ferrándiz\nAddress: 7404 Burch Pass, 30095, Kimberlyburgh\n\nRedemption Amount: $500.00\n\nWe hope that this traveler's check redemption has made your",
+      "entity": "7404 Burch Pass, 30095, Kimberlyburgh"
+    },
+    {
+      "id": "gretel-test-1045-4",
+      "sourceRow": 1045,
+      "sourceIndex": 37281,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "serving you again.\n\nThank you for choosing our services.\n\nSincer,\n[Bank Name]\nCustomer Service\n1-800-123-4567",
+      "entity": "1-800-123-4567"
+    },
+    {
+      "id": "gretel-test-1049-0",
+      "sourceRow": 1049,
+      "sourceIndex": 9767,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "and conditions for an over-the-counter derivatives transaction (the \"Transaction\") between Eduard Reuter, with a street address at Vicolo Lucio, 2 (the \"Confirmor\") and the counterparty.\n\n1.",
+      "entity": "Eduard Reuter"
+    },
+    {
+      "id": "gretel-test-1049-1",
+      "sourceRow": 1049,
+      "sourceIndex": 9767,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "derivatives transaction (the \"Transaction\") between Eduard Reuter, with a street address at Vicolo Lucio, 2 (the \"Confirmor\") and the counterparty.\n\n1. Transaction Details\n\n1.1 The Transaction is",
+      "entity": "Vicolo Lucio, 2"
+    },
+    {
+      "id": "gretel-test-1049-2",
+      "sourceRow": 1049,
+      "sourceIndex": 9767,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "(the \"Transaction\") between Eduard Reuter, with a street address at Vicolo Lucio, 2 (the \"Confirmor\") and the counterparty.\n\n1. Transaction Details\n\n1.1 The Transaction is subject to the 2002",
+      "entity": "Confirmor"
+    },
+    {
+      "id": "gretel-test-1050-3",
+      "sourceRow": 1050,
+      "sourceIndex": 55916,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "in line with our investment criteria. Specifically, we plan to invest in companies such as Célina Renard-Muller's biotechnology firm, located at 7827 Crawford Alley, 83924, West Jonathanton.\n\nVII.",
+      "entity": "Célina Renard-Muller"
+    },
+    {
+      "id": "gretel-test-1050-4",
+      "sourceRow": 1050,
+      "sourceIndex": 55916,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "we plan to invest in companies such as Célina Renard-Muller's biotechnology firm, located at 7827 Crawford Alley, 83924, West Jonathanton.\n\nVII. CONCLUSION\n\nBy investing in Eagle Peak Ventures",
+      "entity": "7827 Crawford Alley, 83924, West Jonathanton"
+    },
+    {
+      "id": "gretel-test-1051-1",
+      "sourceRow": 1051,
+      "sourceIndex": 52708,
+      "sourceLabel": "name",
+      "type": "PERSON",
+      "text": "This Loan Agreement (the \"Agreement\") is entered into as of April 27, 1971, by and between Amico Antonietta Loredan, with a mailing address of 0667 Scott Brooks, 40509, East Lindseyborough (the \"Borrower\"), and",
+      "entity": "Amico Antonietta Loredan"
+    },
+    {
+      "id": "gretel-test-1051-2",
+      "sourceRow": 1051,
+      "sourceIndex": 52708,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "into as of April 27, 1971, by and between Amico Antonietta Loredan, with a mailing address of 0667 Scott Brooks, 40509, East Lindseyborough (the \"Borrower\"), and XYZ Bank (the \"Lender\").\n\n1. LOAN AMOUNT\n\nPursuant to this Agreement,",
+      "entity": "0667 Scott Brooks, 40509, East Lindseyborough"
+    },
+    {
+      "id": "gretel-test-1052-1",
+      "sourceRow": 1052,
+      "sourceIndex": 49308,
+      "sourceLabel": "street_address",
+      "type": "ADDRESS",
+      "text": "information:\n\n1. Full Name: Susanne Reinhardt-Geisler\n2. Permanent Residential Address: 6040 John Spring\n3. Local Latitude-Longitude: -87.619870,-99.162843\n4. Date of Birth:\n5. Social Security",
+      "entity": "6040 John Spring"
+    },
+    {
+      "id": "gretel-test-1068-3",
+      "sourceRow": 1068,
+      "sourceIndex": 50523,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Vincent\n\n**Contact Information:**\n- Name: Jacqueline Vincent\n- Account PIN: 968301\n- Email: jacqueline.vincent@example.com\n- Phone: (+44) 123-456-7890\n\n**Address:**\n- Street Address: 66644 Hodge Ways, Walshberg\n-",
+      "entity": "jacqueline.vincent@example.com"
+    },
+    {
+      "id": "gretel-test-1068-4",
+      "sourceRow": 1068,
+      "sourceIndex": 50523,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Jacqueline Vincent\n- Account PIN: 968301\n- Email: jacqueline.vincent@example.com\n- Phone: (+44) 123-456-7890\n\n**Address:**\n- Street Address: 66644 Hodge Ways, Walshberg\n- City: Walshberg\n- Postal Code:",
+      "entity": "(+44) 123-456-7890"
+    },
+    {
+      "id": "gretel-test-1069-0",
+      "sourceRow": 1069,
+      "sourceIndex": 10240,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "PID|1|4319462187029152^^^CI^40123456789012345678+4319462187029152^^^CI^^^^MD|Espinosa^Jose",
+      "entity": "4319462187029152"
+    },
+    {
+      "id": "gretel-test-1075-4",
+      "sourceRow": 1075,
+      "sourceIndex": 53673,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "questions or concerns regarding this transaction, please contact our customer service team at 1-800-123-4567 (toll-free) or email us at",
+      "entity": "1-800-123-4567"
+    },
+    {
+      "id": "gretel-test-1075-5",
+      "sourceRow": 1075,
+      "sourceIndex": 53673,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "please contact our customer service team at 1-800-123-4567 (toll-free) or email us at [support@prepaiddataservice.com](mailto:support@prepaiddataservice.com).\n\nThank you for choosing our prepaid card service for",
+      "entity": "support@prepaiddataservice.com"
+    },
+    {
+      "id": "gretel-test-1076-4",
+      "sourceRow": 1076,
+      "sourceIndex": 42395,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Should you have any questions or need assistance, please don't hesitate to contact us at support@wellnesscommunity.com. We're here to help you succeed in your wellness journey!\n\nWishing you health and happiness,",
+      "entity": "support@wellnesscommunity.com"
+    },
+    {
+      "id": "gretel-test-1084-2",
+      "sourceRow": 1084,
+      "sourceIndex": 48706,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "the prompts. If you prefer to renew over the phone, please call our customer service line at +1-800-123-4567.\n\nAs a valued policyholder, we would like to offer you a 10% discount on your renewal premium",
+      "entity": "+1-800-123-4567"
+    },
+    {
+      "id": "gretel-test-1085-1",
+      "sourceRow": 1085,
+      "sourceIndex": 35813,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "account for $5,000. We want to ensure this was you. If not, please contact us immediately at +1-800-123-4567.\n\n---\n\nTransaction Type: Communication Log\n\nTimestamp: 2023-03-22T09:27:45Z\n\nRecip Jane Smith",
+      "entity": "+1-800-123-4567"
+    },
+    {
+      "id": "gretel-test-1087-2",
+      "sourceRow": 1087,
+      "sourceIndex": 48413,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "Curtis Union\nN4+33341\nN1+ST+ABC Company\nN3+123 Main Street\nN4+45678\nITD+1:10:PO:1:Item 1:5:EA:97.248.138.141:123456\nMOA+1++ABC Company:123 Main Street:45678:::20230301:20230305\nDTM+222:20230305\nCTT+25",
+      "entity": "97.248.138.141"
+    },
+    {
+      "id": "gretel-test-1090-9",
+      "sourceRow": 1090,
+      "sourceIndex": 52053,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Support Ticket #12345\n------------------------\n\n**Date:** 06/15/2023\n\n**User:** Ahmad Jopich ([ahmad.jopich@example.com](mailto:ahmad.jopich@example.com})\n\n**Location:** 814 Tara Tunnel, Anytown, Anystate, US",
+      "entity": "ahmad.jopich@example.com"
+    },
+    {
+      "id": "gretel-test-1095-0",
+      "sourceRow": 1095,
+      "sourceIndex": 45736,
+      "sourceLabel": "first_name",
+      "type": "PERSON",
+      "text": "Inmaculada,\n\nWe hope this message finds you well. We are writing to remind you that your Claim Assistance",
+      "entity": "Inmaculada"
+    },
+    {
+      "id": "gretel-test-1095-3",
+      "sourceRow": 1095,
+      "sourceIndex": 45736,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Should you have any questions or need assistance, please do not hesitate to contact us at 1-800-123-4567 or via email at [support@insurancecompany.com](mailto:support@insurancecompany.com).\n\nWe value",
+      "entity": "1-800-123-4567"
+    },
+    {
+      "id": "gretel-test-1095-6",
+      "sourceRow": 1095,
+      "sourceIndex": 45736,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "or need assistance, please do not hesitate to contact us at 1-800-123-4567 or via email at [support@insurancecompany.com](mailto:support@insurancecompany.com).\n\nWe value your business and look forward to continuing",
+      "entity": "support@insurancecompany.com"
+    },
+    {
+      "id": "gretel-test-1102-2",
+      "sourceRow": 1102,
+      "sourceIndex": 54624,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "View\n\nCity: Toronto\n\nProvince/State: Ontario\n\nPostal Code/Zip Code: M3J 2T9\n\nPhone Number: (416) 123-4567\n\nEmail Address: [dpearcehawkins@email.com](mailto:dpearcehawkins@email.com)\n\nDate of Birth:",
+      "entity": "(416) 123-4567"
+    },
+    {
+      "id": "gretel-test-1102-9",
+      "sourceRow": 1102,
+      "sourceIndex": 54624,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Ontario\n\nPostal Code/Zip Code: M3J 2T9\n\nPhone Number: (416) 123-4567\n\nEmail Address: [dpearcehawkins@email.com](mailto:dpearcehawkins@email.com)\n\nDate of Birth: 03/12/1998\n\nSocial Insurance Number/Social",
+      "entity": "dpearcehawkins@email.com"
+    },
+    {
+      "id": "gretel-test-1109-5",
+      "sourceRow": 1109,
+      "sourceIndex": 38584,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Street Address: 2345 Maple Street\nCity: Springfield\nState: IL\nZip Code: 62704\nPhone Number: (123) 456-7890\n\nClaim Details:\n\nType of Rehabilitation Services: Physical Therapy\nTreatment Start Date:",
+      "entity": "(123) 456-7890"
+    },
+    {
+      "id": "gretel-test-1118-0",
+      "sourceRow": 1118,
+      "sourceIndex": 50275,
+      "sourceLabel": "phone_number",
+      "type": "PHONE",
+      "text": "Last Name: Johnson\nEmail: [david.johnson@example.com](mailto:david.johnson@example.com)\nPhone: +1-555-123-4567\n\nAgent Details\n-------------\n\nFirst Name: Jane\nLast Name: Smith\nAgent ID: JS-129\n\nConversation",
+      "entity": "+1-555-123-4567"
+    },
+    {
+      "id": "gretel-test-1118-23",
+      "sourceRow": 1118,
+      "sourceIndex": 50275,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "(GMT-05:00)\n\nCustomer Details\n---------------\n\nFirst Name: David\nLast Name: Johnson\nEmail: [david.johnson@example.com](mailto:david.johnson@example.com)\nPhone: +1-555-123-4567\n\nAgent Details\n-------------\n\nFirst",
+      "entity": "david.johnson@example.com"
+    },
+    {
+      "id": "gretel-test-1150-4",
+      "sourceRow": 1150,
+      "sourceIndex": 9478,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Address: 45, Baker Street, London, NW1 6XE\nContact Number: 0712345678\nEmail Address: jane.doe@example.com\n\nPersonal Statement:\nI am Jane Doe, a 22-year-old woman from London. I am applying for the",
+      "entity": "jane.doe@example.com"
+    },
+    {
+      "id": "gretel-test-1156-1",
+      "sourceRow": 1156,
+      "sourceIndex": 42021,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "Expert at TimeMaster\n\nP.S. - Have questions or need assistance? Reach out to us at support@timemaster.com. We're here to",
+      "entity": "support@timemaster.com"
+    },
+    {
+      "id": "gretel-test-1174-1",
+      "sourceRow": 1174,
+      "sourceIndex": 25846,
+      "sourceLabel": "email",
+      "type": "EMAIL",
+      "text": "provide the following information:\n\n1. Full Name: Hazel Alexandra Palmer\n2. Email Address: [xcastelli@vasari.it](mailto:xcastelli@vasari.it)\n3. Street Address: 34 Borgo Scandone, 89833, Soriano Nel Cimino\n4.",
+      "entity": "[xcastelli@vasari.it]"
+    },
+    {
+      "id": "gretel-test-1207-3",
+      "sourceRow": 1207,
+      "sourceIndex": 41317,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "identified a risk associated with the storage of sensitive data. For instance, the IP address (80.234.248.1) used for storing certain data was traced to a location outside of the company's jurisdiction.",
+      "entity": "80.234.248.1"
+    },
+    {
+      "id": "gretel-test-1240-1",
+      "sourceRow": 1240,
+      "sourceIndex": 37800,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "some network issues. Could you please provide me with your IPv4 address?\nCustomer: Sure, it's 210.62.197.167.\nAgent: Thank you. I see the issue. To help you resolve this, I'd like you to follow these",
+      "entity": "210.62.197.167"
+    },
+    {
+      "id": "gretel-test-1293-0",
+      "sourceRow": 1293,
+      "sourceIndex": 44230,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "\"sk\\_live\\_wNODnpDaKmX8ElMxytAPrnac\",\"379530845\",\"Scott Megan Jackson\",\"2569 Rocha",
+      "entity": "379530845"
+    },
+    {
+      "id": "gretel-test-1302-0",
+      "sourceRow": 1302,
+      "sourceIndex": 37316,
+      "sourceLabel": "first_name",
+      "type": "PERSON",
+      "text": "Michele,\n\nThis is your investment statement for Gisela Noguera-Martínez's portfolio as of 10:55:39 AM",
+      "entity": "Michele"
+    },
+    {
+      "id": "gretel-test-1308-0",
+      "sourceRow": 1308,
+      "sourceIndex": 9267,
+      "sourceLabel": "first_name",
+      "type": "PERSON",
+      "text": "Email Encryption Setup Instructions for Katarina Ingegärd Gustafsson\n\nDear Katarina,\n\nThank you for contacting our IT support team. We have",
+      "entity": "Katarina"
+    },
+    {
+      "id": "gretel-test-1316-10",
+      "sourceRow": 1316,
+      "sourceIndex": 47173,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "which are available on our website or upon request.\n\nCredit Card Number for Payment: 3022 3330 5753\n\nNOTE: This is a Through Bill of Lading and Harmony Shipping Lines shall not be responsible",
+      "entity": "3022 3330 5753"
+    },
+    {
+      "id": "gretel-test-1321-3",
+      "sourceRow": 1321,
+      "sourceIndex": 42757,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "* Time: 02:42:16 PM (for recording the time of meetings and decisions)\n* Passport Number: 032478514 (for identification purposes)\n* Name: Constance Pichon-Antoine (for identification purposes)\n*",
+      "entity": "032478514"
+    },
+    {
+      "id": "gretel-test-1328-8",
+      "sourceRow": 1328,
+      "sourceIndex": 33739,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "with heat therapy.\n\nBilling Information:\n\nBank Routing Number: 611346402\nCredit Card Number: 3580-9509-0619-2\n\nAdditional Information:\n\nThe patient has been compliant with the treatment plan and has shown",
+      "entity": "3580-9509-0619-2"
+    },
+    {
+      "id": "gretel-test-1335-1",
+      "sourceRow": 1335,
+      "sourceIndex": 2528,
+      "sourceLabel": "first_name",
+      "type": "PERSON",
+      "text": "(the \"Agreement\") is made and entered into on this 1st day of March, 2023, by and between Andreas, a sole proprietor having their principal place of business at 34 Keith light, Flat 95T",
+      "entity": "Andreas"
+    },
+    {
+      "id": "gretel-test-1346-1",
+      "sourceRow": 1346,
+      "sourceIndex": 42301,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "Amortization Schedule\n\nName: Stephanie J. Phillips\nCredit Card Number: 3430-4665-7727-000\nStreet Address: 1224 Fox Place, Apt. 9824\n\nLoan Amount: $200,000\nInterest Rate: 4.5%\nLoan",
+      "entity": "3430-4665-7727-000"
+    },
+    {
+      "id": "gretel-test-1369-9",
+      "sourceRow": 1369,
+      "sourceIndex": 53274,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "Number: 123456789\n\nCredit Card Information (if applicable):\n\nCard Type: Visa\nCard Number: 1234-1234-1234-1234 (last 4 digits only)\nExpiration Date: 05/2024\nCredit Limit: $15,000\n\nMonthly Expenses:\nRent:",
+      "entity": "1234-1234-1234-1234"
+    },
+    {
+      "id": "gretel-test-1380-5",
+      "sourceRow": 1380,
+      "sourceIndex": 43474,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "Bronchoscopy with biopsy\n\nBilling Information:\nTotal Charges: $5,400\nCredit Card Number: 3502 6551 8882 0\n\nNotes:\n- Patient was treated for acute bronchitis and responded well to antibiotic therapy.\n-",
+      "entity": "3502 6551 8882 0"
+    },
+    {
+      "id": "gretel-test-1392-6",
+      "sourceRow": 1392,
+      "sourceIndex": 52398,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "intermittent connectivity drops.\n\nSystem/Device: Dell Latitude 7490, Windows 10 Pro, IP: 192.168.1.123\n\nNetwork Environment: Wired connection, Gigabit Ethernet, Switch: Netgear GS108Tv2\n\n###",
+      "entity": "192.168.1.123"
+    },
+    {
+      "id": "gretel-test-1426-3",
+      "sourceRow": 1426,
+      "sourceIndex": 44144,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": "Lyons Estate Suite 143,Alejandro Amalia Cabezas,US,009-33-0386,3455-7250-6677-742",
+      "entity": "3455-7250-6677-742"
+    },
+    {
+      "id": "gretel-test-1430-4",
+      "sourceRow": 1430,
+      "sourceIndex": 54697,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "Suite 065\nContact Local Latitude, Longitude: 67.1603725, 60.176596\nContact IPv4 Address: 207.63.159.138\n\nBusiness Financials:\n\nGross Revenue: $500,000 (last fiscal year)\nNet Profit: $100,000 (last",
+      "entity": "207.63.159.138"
+    },
+    {
+      "id": "gretel-test-1470-4",
+      "sourceRow": 1470,
+      "sourceIndex": 8182,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "office at 45 High Street, London, UK (\"ABC\"), and Amanda Ortmann-Röhrdanz, passport number 489290094, residing at 1 Sam ferry, Studio 73H (\"Client\").\n\nWHEREAS, ABC and Client desire to establish",
+      "entity": "489290094"
+    },
+    {
+      "id": "gretel-test-1482-1",
+      "sourceRow": 1482,
+      "sourceIndex": 48424,
+      "sourceLabel": "first_name",
+      "type": "PERSON",
+      "text": "dated as of the 1st day of January, 2023 (the \"Effective Date\"), is entered into between Roy Napoleone Lucrezia Terragni, a natural person resident at 016 Mendoza Fields, Apt. 763",
+      "entity": "Roy"
+    },
+    {
+      "id": "gretel-test-1530-4",
+      "sourceRow": 1530,
+      "sourceIndex": 39119,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "protection.\n\nII. INSURED PERSONS\n\nThe named insured is Hugo U. Caro, with passport number 970787082.\n\nIII. COVERAGE\n\nThe Insurer will pay on behalf of the Insured all sums which the Insured",
+      "entity": "970787082"
+    },
+    {
+      "id": "gretel-test-1541-1",
+      "sourceRow": 1541,
+      "sourceIndex": 43799,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": "GREATER LONDON, EC1V 4HH, GB\n:50K:/CDR3726812345/190404/USD75000.00\n:52A:XD73574949\n:53A:/179.155.42.135\n:57A:BDFMALZER/BERND-DIETER\n:59:/OUR\n:71A:JPMORGUKLXXX\n:72:/CNPJBR.JPMORGUKL.LONDON.GB.OUR",
+      "entity": "179.155.42.135"
+    },
+    {
+      "id": "gretel-test-1573-2",
+      "sourceRow": 1573,
+      "sourceIndex": 46931,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "as of 2022-02-14, sourced from Open Exchange Rates.\nFor Johnathan Weston, passport number 211786459, DOB 1990-07-18.\nBilling address: 48302 Garcia Landing, South",
+      "entity": "211786459"
+    },
+    {
+      "id": "gretel-test-1599-0",
+      "sourceRow": 1599,
+      "sourceIndex": 49571,
+      "sourceLabel": "ipv4",
+      "type": "IP",
+      "text": ":25:USNYC64K\n:60F:/MX\n:61:20220315\n:64:CCT\n:71A:ABCDEFGH\n:77B:/148.24.228.129\n:77D:Albert Edwards-Graham\n:11A:ALBERT E DWARDS GRAHAM\n:20C:USD\n:50K:/155 VERONICA TUNNEL,",
+      "entity": "148.24.228.129"
+    },
+    {
+      "id": "gretel-test-1666-2",
+      "sourceRow": 1666,
+      "sourceIndex": 5371,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "to serve you.\n\nSincerely,\n[Company Name]\n\nAdditional information:\n- Passport Number: 408141094\n- Date of Birth: 18/02/1914\n- Street Address: 817 Contrada Gabriele, Piano",
+      "entity": "408141094"
+    },
+    {
+      "id": "gretel-test-1767-0",
+      "sourceRow": 1767,
+      "sourceIndex": 49706,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "the government of the individual's country of citizenship. An example of a Passport Number is \"573126808\".\n\n(b) \"Counterparty\" means the party with which the Party has entered into the Agreement, and",
+      "entity": "573126808"
+    },
+    {
+      "id": "gretel-test-1770-0",
+      "sourceRow": 1770,
+      "sourceIndex": 42889,
+      "sourceLabel": "credit_card_number",
+      "type": "CARD",
+      "text": ":25:1701012233\n:28C:5143353494262207\n:60F:CAD\n:61:20221222123456\n:62F:Marine Marcelle Pottier, 58742 Benjamin Park, Port",
+      "entity": "5143353494262207"
+    },
+    {
+      "id": "gretel-test-1831-2",
+      "sourceRow": 1831,
+      "sourceIndex": 50242,
+      "sourceLabel": "passport_number",
+      "type": "PASSPORT",
+      "text": "we may collect the following personally identifiable information (PII):\n\n- Passport number: K13198743\n- First name: Bertha\n- Name: Salomé Leocadio España\n- Street address: 57361 Tony Springs,",
+      "entity": "K13198743"
+    }
+  ],
+  "negatives": [
+    {
+      "id": "gretel-test-1017-negative",
+      "sourceRow": 1017,
+      "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:link=\"http://www.xbrl.org/2003/linkbase\" xmlns:tb=\"http://www.example.com/taxonomy/2"
+    },
+    {
+      "id": "gretel-test-1043-negative",
+      "sourceRow": 1043,
+      "text": "**Policyholder Rights Guide**\n\nDear Policyholder,\n\nAt [ABC Insurance Company], we are committed to providing you with the highest level of service and protection. As a policyholder, you have several rights and protections that are important"
+    },
+    {
+      "id": "gretel-test-1047-negative",
+      "sourceRow": 1047,
+      "text": "35=D|55=ISIN_OF_THE_SECURITY|56=COMPANY_NAME|44=20220315-12:30:45|49=MULTIPLE_TRADES|57=TRADE_CAPTURE_REPORT_REQUEST|54=1|52=20220315-12:30:45.000|34=2134|11=123456|32=1|31=1000.00|39=0.00|40=2|44=20220315-12:30:45|55=ISIN_OF_THE_SECURITY|5"
+    },
+    {
+      "id": "gretel-test-1064-negative",
+      "sourceRow": 1064,
+      "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<fpml:document xmlns:fpml=\"http://www.fpml.org/FpML-5/functionality\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://www.fpml.org/FpML-5"
+    },
+    {
+      "id": "gretel-test-1071-negative",
+      "sourceRow": 1071,
+      "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xbrl xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:link=\"http://www.xbrl.org/2003/linkbase\" xmlns:xbrli=\"http://www.xbrl.org/2003/instance\" xmlns:ext=\"http://www.example.com/riskcomplian"
+    },
+    {
+      "id": "gretel-test-1093-negative",
+      "sourceRow": 1093,
+      "text": "'UNB+UNOC:3+505033212:1+505033213:1+190602:0738+3723305085++EAOR\\\nUNH+SHPMNT+20210602:3723305085+505033212:505033213\\\nBGM+380+532321++10000+++20210602:3738+3723305085\\\nDTM+137:202106020738:203\\\nNAD+BY+505033212::11:::\\\nNAD+SU+505033213::11:"
+    },
+    {
+      "id": "gretel-test-1106-negative",
+      "sourceRow": 1106,
+      "text": "Dear Policyholder,\n\nWe hope this message finds you in good health and high spirits. We are writing to provide you with information about the wellness programs available to you as part of your insurance policy.\n\nFirstly, we would like to con"
+    },
+    {
+      "id": "gretel-test-1142-negative",
+      "sourceRow": 1142,
+      "text": "--------------------------------------------------------------------------------------------------------------------\nCustomer Support Conversational Log\n---------------------------------------------------------------------------------------"
+    },
+    {
+      "id": "gretel-test-1195-negative",
+      "sourceRow": 1195,
+      "text": ":20:FID:2234567A:940.17\n:25:BANK$USD98765432/ABCDEFGHIJK\n:28C:0312222345US7654321000000000\n:60F:CUST/1234567890/13579\n:61:13579/1234567890\n:86:USA/USD\n:62F:/ABCDEFGHIJK/1234567890/USD/13579\n:63F:20230312\n:64:20230312\n:65:C\n:66:1234567890/13"
+    },
+    {
+      "id": "gretel-test-1202-negative",
+      "sourceRow": 1202,
+      "text": ":20:FID:20210721:1234567890/GB62ABCD1234567890123456\n:25:20210721123456GB62ABCD1234567890123456\n:28C:036EUR85726.50\n:60F:CUST/ABCD Bank/1234567890/1234567890/GBP\n:61:2021072112345678901234567890GBP65432.10\n:61:2021072012345678901234567890GB"
+    },
+    {
+      "id": "gretel-test-1218-negative",
+      "sourceRow": 1218,
+      "text": "{\n\"instrument\": \"AAPL\",\n\"exchange\": \"NASDAQ\",\n\"trading_platform\": \"DigitalOcean\",\n\"algorithmic_trading\": {\n\"strategies\": [\n{\n\"strategy_name\": \"MovingAverageCrossover\",\n\"time_frame\": \"1h\",\n\"entry_rul"
+    },
+    {
+      "id": "gretel-test-1262-negative",
+      "sourceRow": 1262,
+      "text": "UNB+UNOC:3+987654321+0987654321+160620+2233+9999999999999::42+NANEDI+987654321+0987654321+160620+2233+9999999999999:EN\nUNH+NANEDI+D:97A:UN:EAN008\nBGM+220+33333333333333333333333333333333333333333333333333333333333333333333333333333333333333"
+    },
+    {
+      "id": "gretel-test-1292-negative",
+      "sourceRow": 1292,
+      "text": "MDReqID:123456\nSymbol:ABC\nSecurityType:Common Stock\nSubscriptionRequestType:1\nMarketDepth:0\nAggregatedBook:N\nHeartBtInt:30\nMDReqID:123456\nMarketDepth:0\nMDUpdateType:0\nAggregatedBook:N\nHeartBtInt:30\nMarketDepth:0\nMD"
+    },
+    {
+      "id": "gretel-test-1331-negative",
+      "sourceRow": 1331,
+      "text": "\"Product\",\"Department\"\n\"Apples\",\"Grocery\"\n\"Bananas\",\"Grocery\"\n\"Oranges\",\"Grocery\"\n\"Pears\",\"Grocery\"\n\"Flour\",\"Bakery\"\n\"Sugar\",\"Bakery\"\n\"Yeast\",\"Bakery\"\n\"Eggs\",\"Dairy\"\n\"Milk\",\"Dairy\"\n\"Butter\",\"Dairy\"\n\"Shirts\",\"Men's Clothing\"\n\"Pants\",\"Men's C"
+    },
+    {
+      "id": "gretel-test-1340-negative",
+      "sourceRow": 1340,
+      "text": ":20:OOFFXXXGB2LXXX0123456789\n:25:20220322\n:28C:223/GBP/12345678901\n:60F:Credit\n:61:12345678901\n:62F:/GBP/12345678901\n:86:/12345678901234567890/12345678901234\n:63C:/GBP/12345678901\n:39B:GBP:123456.78:CRED:220322\n:50K:/12345678901234567890/12"
+    },
+    {
+      "id": "gretel-test-1345-negative",
+      "sourceRow": 1345,
+      "text": "35=D|55=MSFT|44=1.62345|40=2|54=1|38=100|43=N|52=20220222-14:30:15.123|59=0|10=220|\n\nExplanation of the FIX Protocol message:\n\n- 35=D: This is a MarketDataIncrementalRefresh message.\n- 55=MSFT: The security identifier for Microsoft stock.\n-"
+    },
+    {
+      "id": "gretel-test-1353-negative",
+      "sourceRow": 1353,
+      "text": "{\n\"CryptocurrencyPrices\": {\n\"BTC\": {\n\"price\": 49634.34,\n\"volume24h\": 45344.56,\n\"marketCap\": 915434562.34,\n\"high24h\": 50123.45,\n\"low24h\": 49120.23\n},\n\"ETH\": {\n\"price\": 3345.67,\n\"volume2"
+    },
+    {
+      "id": "gretel-test-1357-negative",
+      "sourceRow": 1357,
+      "text": "Here's a sample EDI Return Authorization (856) message in X12 format:\n\nISA*00* *00* *ZZ*SenderID*ZZ*ReceiverID*220309*1234*0001*523456*X*004010V\nGS*HP*SenderID*ReceiverID*20230309*1234*523456\nST*856*523456\nBIG*10*523456\nRE"
+    },
+    {
+      "id": "gretel-test-1385-negative",
+      "sourceRow": 1385,
+      "text": "Sure, here is an example of a FIX Protocol message for Market Data:\n\n`8=FIX.4.4|9=108|35=W|55=ISIN-US-NYSE-AAPL-20230615|44=1.55|45=2|56=CNBC-RealTimeData|555=AAPL|54=1|58=MarketPrice|57=20230615-14:30:00|59=0|10=123|`\n\nExplanation of the f"
+    },
+    {
+      "id": "gretel-test-1388-negative",
+      "sourceRow": 1388,
+      "text": "Subject: Introducing Our Exclusive Referral Program - Share the Love, Get Rewarded!\n\nDear [Customer Name],\n\nWe hope you're enjoying our products and services! Here at [Company Name], we're always looking for ways to give back to our loyal c"
+    }
+  ]
+}

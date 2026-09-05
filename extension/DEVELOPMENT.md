@@ -14,11 +14,17 @@ Run `npm run release && npm run test:firefox`. Selenium Manager supplies a stabl
 
 ## Contextual privacy corpus
 
-`npm run test:privacy` evaluates `tests/pii-contextual.json` and writes `artifacts/pii-contextual.json`. These 31 manually authored, synthetic cases include English/Hindi context, grouped phone numbers, multiple entities, harmless numbers, and text representing OCR mistakes. Entity values must be fully recovered; partial matches do not count as true positives. Supported cases gate the test. Every known miss and false positive remains in the total precision/recall, even when it is a documented limitation.
+`npm run test:privacy` evaluates `tests/pii-contextual.json` and writes `artifacts/pii-contextual.json`. These 36 manually authored, synthetic cases include English/Hindi context, grouped and labelled international phone numbers, multiple/repeated entities, harmless numbers, and text representing OCR mistakes. Entity occurrences are compared as a multiset and must be fully recovered; partial matches do not count as true positives. Supported cases gate the test. Every known miss and false positive remains in the total precision/recall, even when it is a documented limitation.
 
-This is separate from the 1,254 generated regression cases. It is not independent, representative field data and is not a claim of real-world accuracy. The OCR-error inputs test the recognizer on corrupted text, not the OCR engine's measured accuracy. Future independently annotated data must not be used to tune the detector before reporting held-out scores.
+This is separate from the 1,254 generated regression cases. It is development data, not representative field data or a claim of real-world accuracy. The OCR-error inputs test the recognizer on corrupted text, not the OCR engine's measured accuracy.
 
-Current gaps include non-ASCII digits, lowercase/fragmented PAN text, OCR-inserted spaces and letter/digit substitutions, unregistered free-text names, and phone-shaped public counts. Grouped ASCII phone numbers are now supported. Keep broad NER and aggressive OCR normalization out of the safety-critical path until their false positives and retained task utility are measured.
+All 36 development cases now pass. The detector normalizes Devanagari digits without changing source offsets, accepts lowercase/fragmented PAN and OCR-spaced email text, repairs at most two OCR phone ambiguities under a strong phone label, recognizes selected contextual person/address/health labels, propagates a contextual value to repeated occurrences, and suppresses phone-shaped values under explicit public-count language. Broad free-text NER remains outside the deterministic safety path.
+
+## Independent privacy corpus
+
+`npm run test:privacy:independent` evaluates the checked-in `tests/pii-independent.json` snapshot and writes detailed results to `artifacts/pii-independent.json`. The snapshot contains 99 mapped labelled entities and 20 negative documents from the independently authored, Apache-2.0 `gretelai/synthetic_pii_finance_multilingual` test split, pinned at revision `7b844d16738527a04264f50214cb426a4cea0897`. Rows 0–499 were used to understand source conventions; the frozen evaluation selection scans rows 1000–1999 and therefore excludes that source-development window.
+
+Run `npm run import:privacy:independent` only when intentionally refreshing the fixture. The importer checks the upstream revision and stops if it changed, uses fixed label quotas, and records source row/index provenance. Normal tests have no network dependency. The current held-out result is 42/99 (42.4%) exact type-and-value recall, with all 20 source-negative documents clean (100%). Email and IPv4 generalize strongly; arbitrary names/addresses and formats outside the project's India-focused rules remain weak. The command gates conservative frozen baselines so later changes cannot silently reduce them.
 
 ## Real-model verification
 
@@ -40,4 +46,4 @@ The portable Node release tool builds Chrome, Firefox, and source archives with 
 
 ## Remaining external evidence
 
-A real hosted/local model run awaits provider configuration. Independent real-world PII/OCR datasets, whole-browser CPU/memory measurements on a second machine, and the presentation-laptop rehearsal are still needed. The CI matrix is configuration until its branch is pushed and GitHub executes it; local Mac results do not prove Windows/Linux results for this branch.
+A real hosted/local model run awaits provider configuration. Representative real-world PII/OCR datasets, whole-browser CPU/memory measurements on a second machine, and the presentation-laptop rehearsal are still needed. The external Gretel evaluation is independent but synthetic. The CI matrix is configuration until its branch is pushed and GitHub executes it; local Mac results do not prove Windows/Linux results for this branch.
