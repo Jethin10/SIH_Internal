@@ -8,7 +8,7 @@ const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
 const { createServer } = require("../server/server.js");
-const { chromePath } = require("./browser-runtime.js");
+const { chromePath, chromeTestArgs } = require("./browser-runtime.js");
 
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "artifacts", "product-ui.png");
@@ -77,7 +77,7 @@ async function main() {
   await new Promise((resolve, reject) => server.once("error", reject).listen(webPort, "127.0.0.1", resolve));
   const fixtureUrl = `http://127.0.0.1:${webPort}/tests/integration.html`;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "strawhats-capture-"));
-  const browser = spawn(executable, ["--headless=new", "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: "ignore" });
+  const browser = spawn(executable, [...chromeTestArgs(), "--headless=new", "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: ["ignore", "ignore", "inherit"] });
   browser.once("error", (error) => console.error(`Browser launch failed: ${error.message}`));
   try {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`);

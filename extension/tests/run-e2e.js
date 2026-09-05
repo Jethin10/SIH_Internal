@@ -4,7 +4,7 @@ const net = require("net");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
-const { chromePath } = require("../scripts/browser-runtime.js");
+const { chromePath, chromeTestArgs } = require("../scripts/browser-runtime.js");
 
 const extensionRoot = path.resolve(__dirname, "..");
 
@@ -89,10 +89,11 @@ async function main() {
   await new Promise((resolve, reject) => server.once("error", reject).listen(webPort, "127.0.0.1", resolve));
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "strawhats-e2e-"));
   const browser = spawn(executable, [
+    ...chromeTestArgs(),
     "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
     `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`,
     `--load-extension=${extensionRoot}`, fixtureUrl
-  ], { stdio: "ignore" });
+  ], { stdio: ["ignore", "ignore", "inherit"] });
   let launchError;
   browser.once("error", (error) => { launchError = error; });
   try {

@@ -15,4 +15,10 @@ function chromePath(env = process.env, bundledPath = () => require("playwright")
   return executable;
 }
 
-module.exports = { chromePath };
+function chromeTestArgs(env = process.env, platform = process.platform) {
+  // Hosted Ubuntu runners restrict user namespaces for downloaded browsers.
+  // Only the disposable CI fixture browser needs this exception.
+  return platform === "linux" && env.GITHUB_ACTIONS === "true" ? ["--no-sandbox"] : [];
+}
+
+module.exports = { chromePath, chromeTestArgs };

@@ -90,7 +90,12 @@ async function getSettings() {
   if (!secretStore.gatewaySecrets && (legacySecrets.apiKey || Object.values(legacySecrets.userProfile).some(Boolean))) {
     await chrome.storage.session.set({ gatewaySecrets: legacySecrets });
   }
-  await chrome.storage.local.set({ gatewaySettings: publicSettings(settings) });
+  const publicValue = publicSettings(settings);
+  // Reads must not rewrite storage: disk writes dominate refresh latency on CI
+  // and can race an explicit SAVE_SETTINGS. Persist only initialization/migration.
+  if (JSON.stringify(stored.gatewaySettings) !== JSON.stringify(publicValue)) {
+    await chrome.storage.local.set({ gatewaySettings: publicValue });
+  }
   return settings;
 }
 
@@ -871,6 +876,7 @@ async function runSession(tabId) {
         : collected.egressInventory;
       broadcast({ type: "CONTEXT", tabId, context: safeContext, localPreview });
       const action = await planAction(session, safeContext, egressInventory);
+      if (session.cancelled || sessions.get(tabId) !== session) return;
       const schema = ActionPolicy.validate(action);
       if (!schema.ok) throw new Error(`Planner returned an invalid action: ${schema.reason}`);
       broadcast({ type: "ACTION_PROPOSED", tabId, action, step: session.step + 1 });
@@ -978,6 +984,13 @@ async function runSession(tabId) {
 async function startTask(task) {
   if (!task) throw new Error("Enter a task before starting the agent");
   const tabId = await activeTabId();
+  const previous = sessions.get(tabId);
+  if (previous) {
+    previous.cancelled = true;
+    // Drain the old planner before changing task capabilities or replacing its
+    // session. Otherwise its cleanup can delete the new task on slower hosts.
+    await previous.completion;
+  }
   const settings = await getSettings();
   const tab = await assertDomainAllowed(tabId, settings);
   const taskScope = crypto.randomUUID();
@@ -999,7 +1012,8 @@ async function startTask(task) {
     elementFrames: new Map()
   });
   broadcast({ type: "TASK_STARTED", tabId, task });
-  runSession(tabId);
+  const session = sessions.get(tabId);
+  session.completion = runSession(tabId);
   return { ok: true, tabId };
 }
 
@@ -1040,7 +1054,7 @@ async function confirmPending(allow) {
     return { ok: true, blocked: true };
   }
   session.step += 1;
-  runSession(tabId);
+  session.completion = runSession(tabId);
   return { ok: true };
   } finally {
     session.confirming = false;
