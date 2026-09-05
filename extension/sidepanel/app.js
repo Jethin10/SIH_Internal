@@ -152,6 +152,7 @@ async function loadSettings() {
   $("alwaysConfirmSensitiveFillInput").checked = Boolean(policy.alwaysConfirmSensitiveFill);
   $("cloudEnabledInput").checked = policy.cloudEnabled !== false;
   $("visualEnabledInput").checked = policy.visualEnabled !== false;
+  $("autonomousActionsInput").checked = Boolean(policy.autonomousActions);
   $("maxStepsInput").value = String(policy.maxSteps || 30);
   setProviderLine();
 }
@@ -176,6 +177,7 @@ async function saveSettings() {
       alwaysConfirmSensitiveFill: $("alwaysConfirmSensitiveFillInput").checked,
       cloudEnabled: $("cloudEnabledInput").checked,
       visualEnabled: $("visualEnabledInput").checked,
+      autonomousActions: $("autonomousActionsInput").checked,
       maxSteps: Number($("maxStepsInput").value)
     }
   };
@@ -254,6 +256,9 @@ chrome.runtime.onMessage.addListener((message) => {
   } else if (message.type === "VISUAL_OCR_PROGRESS") {
     const pct = Math.round(Number(message.progress || 0) * 100);
     $("stepBadge").textContent = `vision ${pct}%`;
+  } else if (message.type === "PLANNER_WAIT") {
+    $("stepBadge").textContent = "provider wait";
+    appendLog(`Provider rate limit. Waiting ${message.seconds} seconds before retrying. Stop remains available.`);
   } else if (message.type === "VISUAL_CONTEXT") {
     appendLog(`<b>Local vision ready.</b> ${Number(message.lineCount || 0)} safe OCR regions · ${Number(message.ocrMs || 0).toFixed(0)} ms.`);
   } else if (message.type === "CONFIRMATION_REQUIRED") {
@@ -372,8 +377,9 @@ $("voiceButton").addEventListener("click", () => {
 window.addEventListener("pagehide", () => { recognition?.abort(); globalThis.speechSynthesis?.cancel(); });
 
 const presets = {
+  gemini: ["https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", ""],
   openrouter: ["https://openrouter.ai/api/v1/chat/completions", "openrouter/free"],
-  groq: ["https://api.groq.com/openai/v1/chat/completions", ""],
+  groq: ["https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-20b"],
   openai: ["https://api.openai.com/v1/chat/completions", ""],
   local: ["http://127.0.0.1:8787/v1/chat/completions", "local-demo"]
 };

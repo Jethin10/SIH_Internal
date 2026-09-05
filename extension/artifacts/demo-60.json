@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "platform": "win32",
+  "executable": "C:\\Users\\jethi\\AppData\\Local\\ms-playwright\\chromium-1208\\chrome-win64\\chrome.exe",
+  "seconds": 1.426,
+  "offline": true,
+  "prewarmed": true,
+  "privateFill": true,
+  "verifiedEgress": true,
+  "blockedOrders": 0,
+  "allowedOrders": 1
+}

@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "mode": "mock-planner",
+  "model": "deterministic test",
+  "platform": "win32",
+  "browser": "145.0.7632.6",
+  "seconds": 1.331,
+  "steps": [
+    "click",
+    "select",
+    "click",
+    "fill",
+    "done"
+  ],
+  "requests": [
+    {
+      "bytes": 4927,
+      "path": "/"
+    },
+    {
+      "bytes": 5421,
+      "path": "/product"
+    },
+    {
+      "bytes": 5607,
+      "path": "/product"
+    },
+    {
+      "bytes": 6145,
+      "path": "/cart"
+    },
+    {
+      "bytes": 6447,
+      "path": "/cart"
+    }
+  ],
+  "privateEmailFilled": true,
+  "orderNotSubmitted": true
+}

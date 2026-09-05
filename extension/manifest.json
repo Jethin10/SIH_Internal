@@ -33,6 +33,7 @@
       "js": [
         "lib/pii.js",
         "lib/action-policy.js",
+        "lib/action-risk.js",
         "content/content-script.js"
       ]
     }

@@ -9,7 +9,7 @@ In Settings, choose a provider preset, enter a model ID and your key, then Save 
 | Provider | Chat completions endpoint | Model |
 | --- | --- | --- |
 | OpenRouter | `https://openrouter.ai/api/v1/chat/completions` | `openrouter/free`, or a model from its catalog |
-| Groq | `https://api.groq.com/openai/v1/chat/completions` | Enter an active model ID from Groq's catalog |
+| Groq | `https://api.groq.com/openai/v1/chat/completions` | `openai/gpt-oss-20b`, or another active Groq model |
 | Other compatible provider | Its full HTTPS chat completions URL | Its model ID |
 | Offline demo | `http://127.0.0.1:8787/v1/chat/completions` | `local-demo`; run `npm run demo` first |
 

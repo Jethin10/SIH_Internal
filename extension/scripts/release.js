@@ -16,10 +16,26 @@ const names = { Chrome: `${stem}-Chrome.zip`, Firefox: `${stem}-Firefox.xpi`, So
 const checksumName = `${stem}-SHA256SUMS.txt`;
 const runtimeDirs = ["background", "content", "lib", "sidepanel", "visual", "vendor"];
 const notices = ["PRIVACY.md", "SECURITY.md", "THIRD-PARTY-NOTICES.md"];
+// Keep release evidence deliberate. Ad hoc live-run screenshots and reports can
+// contain site content and do not belong in a source package by default.
+const sourceArtifacts = new Set([
+  "artifacts/EVALUATION-SUMMARY.md",
+  "artifacts/agent-shopping-harness.json",
+  "artifacts/agent-shopping.png",
+  "artifacts/demo-60.json",
+  "artifacts/evaluation-report.json",
+  "artifacts/firefox-runtime.json",
+  "artifacts/pii-contextual.json",
+  "artifacts/product-ui.png",
+  "artifacts/provider-harness.json",
+  "artifacts/StrawHats_SIH26171_Internal_Presentation_Final.pptx",
+  "artifacts/StrawHats_SIH26171_Internal_Presentation_Ready.pptx"
+]);
 const hash = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex").toUpperCase();
 
 function addTree(zip, relative, browser) {
   const absolute = path.join(root, relative);
+  if (browser === "Source" && relative.startsWith("artifacts/") && !sourceArtifacts.has(relative) && !fs.statSync(absolute).isDirectory()) return;
   if (fs.lstatSync(absolute).isSymbolicLink()) throw new Error(`Release cannot contain symlinks: ${relative}`);
   if (fs.statSync(absolute).isDirectory()) {
     for (const file of fs.readdirSync(absolute).sort()) addTree(zip, `${relative}/${file}`, browser);

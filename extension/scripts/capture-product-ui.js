@@ -12,6 +12,10 @@ const { chromePath, chromeTestArgs } = require("./browser-runtime.js");
 
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "artifacts", "product-ui.png");
+const demo = process.argv.includes("--demo");
+const auto = process.argv.includes("--auto");
+const smoke = process.argv.includes("--smoke");
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function freePort() {
   return new Promise((resolve, reject) => {
@@ -69,6 +73,8 @@ function staticServer() {
 }
 
 async function main() {
+  // Demo fixtures must never inherit an upstream provider or token.
+  if (demo) for (const key of ["UPSTREAM_ENDPOINT", "UPSTREAM_API_KEY", "UPSTREAM_MODEL", "PLANNER_TOKEN"]) delete process.env[key];
   const executable = chromePath();
   const [webPort, debugPort, plannerPort] = await Promise.all([freePort(), freePort(), freePort()]);
   const planner = createServer();
@@ -77,7 +83,7 @@ async function main() {
   await new Promise((resolve, reject) => server.once("error", reject).listen(webPort, "127.0.0.1", resolve));
   const fixtureUrl = `http://127.0.0.1:${webPort}/tests/integration.html`;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "strawhats-capture-"));
-  const browser = spawn(executable, [...chromeTestArgs(), "--headless=new", "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: ["ignore", "ignore", "inherit"] });
+  const browser = spawn(executable, [...chromeTestArgs(), ...(demo ? ["--window-size=1000,900"] : ["--headless=new"]), "--disable-gpu", "--no-first-run", `--remote-debugging-port=${debugPort}`, "--remote-allow-origins=*", `--user-data-dir=${profile}`, `--load-extension=${root}`, fixtureUrl], { stdio: ["ignore", "ignore", "inherit"] });
   browser.once("error", (error) => console.error(`Browser launch failed: ${error.message}`));
   try {
     await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
@@ -132,9 +138,63 @@ async function main() {
 
     await waitPanel("document.readyState === 'complete' && Boolean(document.querySelector('#log'))");
 
+    if (demo) {
+      await panelEval(`document.querySelector('#settingsPanel').open=true;
+        document.querySelector('#endpointInput').value='http://127.0.0.1:${plannerPort}/v1/chat/completions';
+        document.querySelector('#modelInput').value='local-demo';
+        document.querySelector('#apiKeyInput').value='';
+        document.querySelector('#emailInput').value='vault.user@example.com';
+        document.querySelector('#saveSettingsButton').click(); true`);
+      await waitPanel("document.querySelector('#providerLine').textContent === 'Local planner: local-demo'");
+      await panelEval("document.querySelector('#settingsPanel').open=false; document.querySelector('#taskInput').value='fill my email'; true");
+      await fixtureCdp.send("Runtime.evaluate", { expression: "document.querySelector('#opaque').scrollIntoView({block:'center'})" });
+      await panelEval("document.querySelector('#visualButton').click(); true");
+      await waitPanel("document.querySelector('#redactedPreview').src.startsWith('data:image/png;base64,')", 30000);
+      // Keep the fixture active for tab targeting and capture. Show the panel
+      // beside it in its own window, using the same extension UI as the sidebar.
+      await panelEval(`chrome.tabs.getCurrent().then(tab => chrome.windows.create({tabId:tab.id,type:'popup',left:1000,top:0,width:480,height:900,focused:false}))`);
+      await panelCdp.send("Emulation.clearDeviceMetricsOverride");
+      console.log("READY: offline privacy demo. Synthetic data, no cloud model. OCR is pre-warmed.\n0–8s Inspect page; 8–22s Run 'fill my email'; 22–40s Submit order: Block, then Allow once; 40–55s Local visual scan.\nClose the demo or press Ctrl+C to stop. Your personal Chrome profile is untouched.");
+      if (auto || smoke) {
+        const started = Date.now();
+        const beat = async (seconds, label) => { if (!smoke) await pause(Math.max(0, started + seconds * 1000 - Date.now())); console.log(label); };
+        const run = async (task) => panelEval(`document.querySelector('#taskInput').value=${JSON.stringify(task)}; document.querySelector('#runButton').click(); true`);
+        await beat(0, "Inspect: raw values stay local.");
+        await panelEval("document.querySelector('#refreshButton').click(); true");
+        await waitPanel("Number(document.querySelector('#metricNodes').textContent.replace(/,/g,'')) > 0");
+        await beat(8, "Fill: the planner uses an alias.");
+        await run("fill my email");
+        await waitPanel("!document.querySelector('#runButton').disabled");
+        assert.equal((await fixtureCdp.send("Runtime.evaluate", { expression: "document.querySelector('#email').value", returnByValue: true })).result.value, "vault.user@example.com");
+        await panelEval("document.querySelector('#refreshButton').click(); true");
+        await waitPanel("document.querySelector('#metricRawPii').textContent === 'VERIFIED 0'");
+        for (const allow of [false, true]) {
+          await beat(allow ? 31 : 22, allow ? "Allow once: one synthetic order." : "Block: zero orders.");
+          await run("click Submit order");
+          await waitPanel("!document.querySelector('#confirmationBox').classList.contains('hidden')");
+          if (!smoke) await pause(2500);
+          await panelEval(`document.querySelector('#${allow ? "allowButton" : "blockButton"}').click(); true`);
+          await waitPanel("!document.querySelector('#runButton').disabled");
+          assert.equal((await fixtureCdp.send("Runtime.evaluate", { expression: "window.submitClicks", returnByValue: true })).result.value, allow ? 1 : 0);
+        }
+        await beat(42, "Vision: local OCR, masked preview.");
+        await panelEval("document.querySelector('#visualButton').click(); true");
+        await waitPanel("!document.querySelector('#visualButton').disabled", 30000);
+        assert.match(await panelEval("document.querySelector('#visualRedactionCount').textContent"), /^[1-9]/);
+        const report = { ok: true, platform: process.platform, executable, seconds: (Date.now()-started)/1000, offline: true, prewarmed: true, privateFill: true, verifiedEgress: true, blockedOrders: 0, allowedOrders: 1 };
+        fs.mkdirSync(path.join(root, 'artifacts'), { recursive: true });
+        fs.writeFileSync(path.join(root, 'artifacts', 'demo-60.json'), JSON.stringify(report, null, 2));
+        console.log(JSON.stringify(report));
+      }
+      if (!smoke) await new Promise(resolve => { browser.once('exit', resolve); process.once('SIGINT', resolve); process.once('SIGTERM', resolve); });
+      fixtureCdp.ws.close(); panelCdp.ws.close();
+      return;
+    }
+
     // Exercise new setup controls before configuring the offline test planner.
     await panelEval("document.querySelector('#settingsPanel').open=true; document.querySelector('#apiKeyInput').value='test-unsaved-key'; document.querySelector('#providerPreset').value='groq'; document.querySelector('#providerPreset').dispatchEvent(new Event('change')); true");
     assert.equal(await panelEval("document.querySelector('#endpointInput').value"), 'https://api.groq.com/openai/v1/chat/completions');
+    assert.equal(await panelEval("document.querySelector('#modelInput').value"), 'openai/gpt-oss-20b');
     assert.equal(await panelEval("document.querySelector('#apiKeyInput').value"), '', 'Provider switch must clear the previous key');
     await panelEval("document.querySelector('#providerPreset').value='openrouter'; document.querySelector('#providerPreset').dispatchEvent(new Event('change')); true");
     assert.equal(await panelEval("document.querySelector('#modelInput').value"), 'openrouter/free');

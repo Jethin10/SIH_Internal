@@ -43,7 +43,8 @@ async function main() {
     collectContext: async () => ({ safeContext: { page: {}, elements: [] } }), visualCache: new Map(),
     augmentWithVisual: (c) => c, broadcast: () => {},
     planAction: () => new Promise((resolve) => { resolvePlan = resolve; }),
-    chrome: { tabs: { goBack: async () => { navigation++; } } }
+    chrome: { tabs: { goBack: async () => { navigation++; } } },
+    recordAudit: (_tabId, _session, _context, action, result) => ({ reason: result.reason, action: action.type })
   };
   vm.createContext(runner);
   vm.runInContext(source.slice(source.indexOf("async function runSession("), source.indexOf("async function startTask(")), runner);
