@@ -284,6 +284,36 @@
       || /^\s*(?:records?|rows?|entries|items|samples|users)\b/iu.test(after);
   }
 
+  const PERSON_TOKEN = String.raw`(?:[\p{L}]\.|[\p{L}\p{M}]+(?:[.'’\-][\p{L}\p{M}]+)*)`;
+  const PERSON_SEQUENCE = `${PERSON_TOKEN}(?:[ \t]+${PERSON_TOKEN}){0,4}`;
+
+  function addCapturedContextMatch(input, candidates, match, type, priority, labelledOverride) {
+    let value = String(match[1] || "").trim();
+    if (type === "ADDRESS") value = value.replace(/,+$/, "").trim();
+    if (!value) return;
+    if (/^<[A-Z0-9_]+(?::[A-F0-9]{6,})?>/i.test(value)) return;
+    if (type === "ADDRESS" && validIPv4(value)) return;
+    const offset = match[0].lastIndexOf(match[1]);
+    const index = match.index + Math.max(0, offset);
+    candidates.push({ type, value, index, end: index + value.length, priority, labelledOverride });
+  }
+
+  function overlapsEmailValue(input, index, end) {
+    const windowStart = Math.max(0, index - 64);
+    const window = input.slice(windowStart, Math.min(input.length, end + 64));
+    const email = /[A-Z0-9._%+-]+[ \t]*@[ \t]*[A-Z0-9.-]+\.[A-Z]{2,}/giu;
+    let match;
+    while ((match = email.exec(window)) !== null) {
+      const emailStart = windowStart + match.index;
+      const emailEnd = emailStart + match[0].length;
+      if (index < emailEnd && end > emailStart) return true;
+      if (match.index === email.lastIndex) email.lastIndex += 1;
+    }
+    return false;
+  }
+
+  const ADDRESS_BOUNDARY = String.raw`(?=\s*(?:,\s*\[|\n|$|\(|\s+(?:Name|Full\s+Name|City|State|Zip(?:\s+Code)?|Postal(?:\s+Code)?|Email(?:\s+Address)?|Phone(?:\s+Number)?|Contact|Date(?:\s+of\s+Birth)?|Financial|Monthly|Account|Policy|Property|New\s+Loan|Street|Passport|Travel\s+Document)\b\s*:|[.;](?=\s+(?:[A-Z][\p{Ll}\p{M}]+|The|This|It|WHEREAS|II\b)|$)))`;
+
   function addContextualMatches(input, normalizedInput, candidates) {
     const ocrPhone = /(?:phone|mobile|contact|call|tel(?:ephone)?|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)?\s*(?:\+?91[ -]?)?([6-9][0-9ILO]{4}[ -]?[0-9ILO]{5})/giu;
     let match;
@@ -322,7 +352,7 @@
       if (match.index === nanpPhone.lastIndex) nanpPhone.lastIndex += 1;
     }
 
-    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?))?|travel\s+document)\s*(?:is|:|-|\s)\s*["']?\b([A-Z0-9][A-Z0-9-]{5,11})\b["']?/giu;
+    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?))?|travel\s+document|pasaporte|passeport|passaporto|паспорт)\s*(?:is|:|-|\s)\s*["']?\b([A-Z0-9][A-Z0-9-]{5,11})\b["']?/giu;
     while ((match = labelledPassport.exec(input)) !== null) {
       const value = match[1];
       if ((value.match(/\d/g) || []).length >= 3 && (value.match(/[A-Z]/gi) || []).length <= 3) {
@@ -369,6 +399,9 @@
     const NAME_CORE = "[\\p{Lu}][\\p{L}\\p{M}'’-]{1,}";
     const NAME_TAIL = `(?:[ \\t]+(?:[\\p{Lu}]\\.[ \\t]+)?${NAME_CORE}){0,3}`;
     const labelledValues = [
+      ["PERSON", new RegExp(String.raw`(?:Nombre|Nom|Nome|नाम|পূর্ণ\s+নাম|பெயர்)\s*(?:is|:|-|है)\s*(${PERSON_SEQUENCE})`, "giu")],
+      ["PERSON", new RegExp(String.raw`(?:such\s+as|named|account\s+of|belongs\s+to)\s+(${PERSON_TOKEN}(?:[ \t]+${PERSON_TOKEN}){1,4})(?=['’]s\b)`, "giu")],
+      ["ADDRESS", /(?:Indirizzo|Direcci[oó]n|Adresse)\s*:\s*([^.;\n]{5,100})/giu],
       ["PERSON", new RegExp(`(?:[Pp]atient|[Bb]eneficiary|[Rr]ecipient|[Aa]ccount [Hh]older|Full Legal Name|Full Name|Applicant Name|Provider Name|Account Name|Cardholder Name|Customer Name|[Bb]orrower|[Ss]hipper|[Cc]onsignee|[Ss]eller|[Bb]uyer|[Cc]laimant|[Ii]nsured|[Pp]aid to|[Cc]ontact|[Uu]ser|[Ss]ignature|(?<![A-Za-z])[Nn]ame)\\s*(?:name\\s*)?(?:is|:|-)\\s*((?:Dr\\.?[ \\t]+)?${NAME_CORE}${NAME_TAIL})(?=[ \\t]+(?:Date|Address|Phone|Email|Account|Policy|Street|Property|New Loan)\\b\\s*:|[.,;|\\n]|$)`, "gu")],
       ["PERSON", /\bmy\s+name\s+is\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})/giu],
       ["PERSON", /\bDear\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})(?=,)/gu],
