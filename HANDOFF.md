@@ -1,5 +1,7 @@
 # General browser agent handoff
 
+Current direction, 2026-09-09: the user explicitly pivoted to an agent-agnostic privacy runtime. Read [the migration plan](docs/privacy-runtime/PLAN.md) and [progress checkpoint](docs/privacy-runtime/PROGRESS.md) first. The older notes below are preserved as historical demo/reproduction context. Browser Use must receive sanitized observations only; it must not own a raw browser connection. Continue from the progress document rather than the older next-work list.
+
 Latest update: see **Amazon shopping follow-up** at the end of this file. The new Enter/search, document-readiness, Gemini schema, and session-key fallback fixes are tested. The live browser is waiting at Amazon sign-in; real cart and delivery completion are still unverified. All personal data and provider keys are held only in the demo browser session. The current interactive runner is `node tests/run-web-agent.js --keep` (tool session 1310); do not close it while the user signs in.
 
 Updated 2026-09-05, approximately 13:14 Asia/Calcutta. Work resumed at the user's request. The requested product is unfinished. Continue implementation from this working tree.
@@ -125,3 +127,12 @@ This section supersedes older verification/status notes below.
 - Final `npm test`, `npm run test:agent`, `npm run test:demo`, release generation and release verification passed. A test fixture initially assumed exactly two chat messages; shopping instructions now stay within the existing system message to preserve that contract. These runs use bundled Chromium 145 on Windows, not installed Google Chrome.
 - User supplied an incomplete delivery address. Never invent the building/flat, postal code, city/state components, or login credentials. The live test is in an isolated browser session.
 - Branch is codex/voice-live-agent, PR #2. This follow-up builds on 00994e4. Existing untracked live captures stay local; check Git history for the publication commit.
+
+## Signed-in Chrome checkout verification — 2026-09-05
+
+- User subsequently requested choosing an item, adding it to cart, and booking it. Regular signed-in Chrome was available through browser UI tools; this is separate from the isolated extension test browser.
+- Direct Chrome UI actions searched Amazon, selected Boldfit Blue Neon running shoes (UK 9, ASIN B0DGXHSZCV), and verified Amazon's Added to cart confirmation for quantity one at INR 1,099.
+- There were already 14 other units in the cart. All items were deselected, then only the new pair selected. Checkout confirms cartItemCount=1 and shows INR 1,104 order total before payment selection.
+- No order placed. Checkout is waiting for a payment method. The saved delivery destination differs from the user's earlier incomplete address; confirmation is required before ordering. Do not record full delivery details or keys here.
+- This proves the merchant flow works through direct Chrome UI control; it does NOT prove the extension autonomously completed cart addition or protected this live checkout's model payloads. Extension end-to-end verification remains outstanding.
+- Browser tab 1971886424 in Chrome browser 2 is at the single-item checkout. Preserve the user's existing cart items and do not submit a bulk order. The selected size and budget originated in the demo scenario and need the user's confirmation for a real purchase.

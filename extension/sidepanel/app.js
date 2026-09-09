@@ -13,7 +13,7 @@ function setRunning(running) {
   state.running = running;
   $("runButton").disabled = running;
   $("flightButton").disabled = running;
-  $("voiceButton").disabled = running || !SpeechRecognitionAPI;
+  $("voiceButton").disabled = running || !SpeechRecognitionAPI || state.settings?.agent?.kind === "browser-use";
   if (running && recognition) recognition.abort();
   $("stopButton").classList.toggle("hidden", !running);
   $("stepBadge").textContent = running ? "running" : "idle";
@@ -28,6 +28,11 @@ function setProviderLine() {
     ? `${localEndpoint ? "Local planner" : "Cloud reasoning"}: ${provider.model}`
     : "Local fallback planner. Add a model in Settings for general tasks.";
   $("statusPill").querySelector("b").textContent = cloudActive && !localEndpoint ? "SAFE CLOUD" : "LOCAL";
+  if (state.settings?.agent?.kind === "browser-use") {
+    $("providerLine").textContent = `Browser Use · ${provider.model || "configure a model in Settings"} · local privacy`;
+    $("voiceButton").disabled = true;
+    $("voiceStatus").textContent = "Type your task. Browser speech services are outside the local privacy boundary.";
+  }
 }
 
 function renderRedactedPreview(visual) {
@@ -139,6 +144,9 @@ async function loadSettings() {
   const provider = response.settings.provider || {};
   const profile = response.settings.userProfile || {};
   const policy = response.settings.policy || {};
+  $("agentKindInput").value = response.settings.agent?.kind || "legacy";
+  $("agentEndpointInput").value = response.settings.agent?.endpoint || "http://127.0.0.1:8788";
+  $("agentTokenInput").value = response.settings.agent?.token || "";
   $("endpointInput").value = provider.endpoint || "";
   $("modelInput").value = provider.model || "";
   $("apiKeyInput").value = provider.apiKey || "";
@@ -160,6 +168,7 @@ async function loadSettings() {
 
 async function saveSettings() {
   const settings = {
+    agent: {kind:$("agentKindInput").value,endpoint:$("agentEndpointInput").value.trim(),token:$("agentTokenInput").value.trim()},
     provider: {
       endpoint: $("endpointInput").value.trim(),
       model: $("modelInput").value.trim(),
@@ -244,6 +253,8 @@ chrome.runtime.onMessage.addListener((message) => {
     state.tabId = message.tabId;
     setRunning(true);
     $("stepBadge").textContent = "step 1";
+  } else if (message.type === "AGENT_OBSERVATION") {
+    $("agentObservation").textContent = JSON.stringify(message.observation, null, 2);
   } else if (message.type === "CONTEXT") {
     renderContext(message.context, message.localPreview);
   } else if (message.type === "ACTION_PROPOSED") {
@@ -345,6 +356,7 @@ let recognition = null;
 $("voiceButton").disabled = !SpeechRecognitionAPI;
 if (!SpeechRecognitionAPI) $("voiceStatus").textContent = "Speech recognition is unavailable in this browser. Type your task instead.";
 $("voiceButton").addEventListener("click", () => {
+  if (state.settings?.agent?.kind === "browser-use") return;
   if (recognition) { recognition.stop(); return; }
   if (!SpeechRecognitionAPI || state.running) return;
   const current = new SpeechRecognitionAPI();

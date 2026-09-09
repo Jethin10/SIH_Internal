@@ -538,6 +538,23 @@
     return opaqueRegionCache;
   }
 
+  function egressInventoryFor(sensitive) {
+    const inventory = [];
+    for (const record of sensitive) {
+      // Only values that were actually withheld (tokenized or dropped) are
+      // secrets. A label-flagged record keeps its clean value visible; listing
+      // that value here would block every outbound request on false positives.
+      const candidates = [];
+      if (record.value !== record.rawValue) candidates.push(["value", record.rawValue]);
+      if (PII.findPII(String(record.rawLabel || "")).length) candidates.push(["label", record.rawLabel]);
+      for (const [field, value] of candidates) {
+        const raw = String(value || "").trim();
+        if (raw.length >= 3) inventory.push({ id: record.id, field, type: record.semanticType, value: raw });
+      }
+    }
+    return inventory;
+  }
+
   function buildContext() {
     const started = now();
     if (!contextSelectionCache) {
@@ -584,15 +601,7 @@
       type: record.semanticType,
       sensitivity: record.sensitivity
     }));
-    const egressInventory = [];
-    for (const record of sensitive) {
-      const candidates = [["value", record.rawValue]];
-      if (PII.findPII(String(record.rawLabel || "")).length) candidates.push(["label", record.rawLabel]);
-      for (const [field, value] of candidates) {
-        const raw = String(value || "").trim();
-        if (raw.length >= 3) egressInventory.push({ id: record.id, field, type: record.semanticType, value: raw });
-      }
-    }
+    const egressInventory = egressInventoryFor(sensitive);
     return { context, localPreview, egressInventory };
   }
 

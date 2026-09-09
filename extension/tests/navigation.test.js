@@ -15,4 +15,8 @@ assert.equal(context.taskAllowsAction('Open https://example.com/ and search shoe
 assert.equal(context.taskAllowsAction('Open https://example.com/', {type:'navigate',url:'https://evil.example/steal'}), false);
 assert.equal(context.taskAllowsAction('Read this page', {type:'navigate',url:'https://example.com/steal'}), false);
 assert.equal(context.taskAllowsAction('Open https://example.com/', {type:'navigate',url:'https://example.com/?secret=value'}), false);
+// Same-origin deep links are allowed once the session origin is known; cross-origin stays blocked.
+assert.equal(context.taskAllowsAction('Read this page', {type:'navigate',url:'https://example.com/steal'}, {page:{origin:'https://example.com'}}), true);
+assert.equal(context.taskAllowsAction('Read this page', {type:'navigate',url:'http://example.com/steal'}, {page:{origin:'https://example.com'}}), false);
+assert.equal(context.taskAllowsAction('Read this page', {type:'navigate',url:'https://evil.example/steal'}, {page:{origin:'https://example.com'}}), false);
 console.log('Navigation URL validation and task scope passed');

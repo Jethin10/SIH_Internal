@@ -1,0 +1,15 @@
+{
+  "name": "strawhats",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Browser Use with a local browser privacy gateway",
+  "engines": { "node": ">=22.13.0 <23" },
+  "scripts": {
+    "setup": "npm --prefix extension ci && npm --prefix extension run setup:browsers && npm --prefix extension run setup:browser-use",
+    "start": "node extension/scripts/start.js",
+    "demo": "npm --prefix extension run demo:browser-use",
+    "test": "npm --prefix extension test",
+    "test:agent": "npm --prefix extension run test:browser-use",
+    "release": "npm --prefix extension run release"
+  }
+}

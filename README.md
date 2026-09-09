@@ -1,5 +1,7 @@
 # StrawHats SIH 26171
 
+The product is pivoting to an agent-agnostic local privacy runtime, with Browser Use planned as the first external adapter. Read the [migration plan](docs/privacy-runtime/PLAN.md), [architecture inspection](docs/privacy-runtime/ARCHITECTURE.md), and [current progress](docs/privacy-runtime/PROGRESS.md) before implementation. The existing custom agent remains the working demo during migration.
+
 This repository contains the StrawHats Privacy Gateway browser extension, its offline demo and evaluation suite, plus the internal team knowledge hub.
 
 ## Judge demo

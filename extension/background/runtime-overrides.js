@@ -25,21 +25,8 @@ if (typeof importScripts === "function") {
     return Runtime.compactPlannerContext(safeContext, 6500);
   };
 
-  // Groq's free/on-demand tier can have a small per-minute token allowance.
-  // Add only provider execution options here; task/context content has already
-  // crossed the existing local egress barrier in remotePlan.
-  const nativeFetch = global.fetch.bind(global);
-  global.fetch = async function providerAwareFetch(input, init) {
-    const url = typeof input === "string" ? input : input?.url;
-    if (init?.body && typeof init.body === "string") {
-      try {
-        const body = JSON.parse(init.body);
-        const tuned = Runtime.tuneProviderBody(url, body);
-        if (tuned !== body) init = { ...init, body: JSON.stringify(tuned) };
-      } catch (_) {}
-    }
-    return nativeFetch(input, init);
-  };
+  // Provider options are applied in remotePlan before the final egress check.
+  // The checked serialization reaches fetch unchanged.
 
   global.startFlightDemo = async function startFlightDemoFast(input) {
     const from = String(input.from || "").trim();

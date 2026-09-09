@@ -68,7 +68,12 @@ fs.mkdirSync(artifacts, { recursive: true });
 fs.writeFileSync(path.join(artifacts, "pii-independent.json"), `${JSON.stringify(report, null, 2)}\n`);
 console.log(JSON.stringify(report, null, 2));
 
-assert(recall >= 0.40, `Independent exact recall regressed below frozen baseline: ${recall}`);
-assert(cleanNegativeRate >= 0.80, `Independent clean-negative rate regressed below frozen baseline: ${cleanNegativeRate}`);
+assert(recall >= 0.80, `Independent exact recall regressed below baseline: ${recall}`);
+assert(cleanNegativeRate >= 0.90, `Independent clean-negative rate regressed below baseline: ${cleanNegativeRate}`);
 assert(perType.EMAIL.detected >= 14, "Independent email recall regressed");
 assert(perType.IP.detected === perType.IP.expected, "Independent IPv4 recall regressed");
+assert(perType.ADDRESS.detected >= 18, "Independent address recall regressed");
+assert(perType.PERSON.detected >= 20, "Independent person recall regressed");
+assert(perType.PHONE.detected >= 14, "Independent phone recall regressed");
+assert(perType.PASSPORT.detected >= 7, "Independent passport recall regressed");
+assert(perType.CARD.detected >= 7, "Independent card recall regressed");

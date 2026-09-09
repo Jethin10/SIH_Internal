@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 const PII = require("../lib/pii.js");
 const source = fs.readFileSync(require.resolve("../background/service-worker.js"), "utf8");
-const context = { PII };
+const context = { PII, PrivacyEgress: require("../lib/privacy-egress.js") };
 vm.createContext(context);
 vm.runInContext(source.slice(source.indexOf("function compactForPlanner("), source.indexOf("function updateEgressState(")), context);
 const safe = { page: { epoch: 1 }, elements: [], vaultCapabilities: [], visual: { scanned: true, epoch: 1, lineCount: 7, confidence: 98.9876543219, ocrMs: 715 } };

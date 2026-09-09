@@ -14,6 +14,71 @@
     { type: "AADHAAR", regex: /(?<!\d)(?:\d[ -]?){11}\d(?!\d)/g },
     { type: "CARD", regex: /(?<!\d)(?:\d[ -]?){13,19}(?!\d)/g }
   ];
+  // Bracketed emails that are not markdown links keep their brackets in the span.
+  const EMAIL_BRACKETED = /\[[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\](?!\()/gi;
+
+  // Cue that must immediately precede a default-country (Indian) phone
+  // candidate from the vendored matcher; bare digit runs stay untouched.
+  const PHONE_CUE_TAIL = /(?:(?:phone(?:\s+number)?|mobile(?:\s+number)?|telephone|contact(?:\s+(?:number|us))?|call(?:\s+us)?|dial|tel(?:ephone)?|whatsapp|fax|reach(?:able)?(?:\s+(?:me|us))?)(?:\s+(?:at|on))?\s*(?::|is|-)?\s*|फोन|मोबाइल|संपर्क)\s*$/iu;
+  const LIBPHONENUMBER_MAX_TEXT = 20000;
+  let libphonenumberModule;
+
+  function loadLibphonenumber() {
+    if (libphonenumberModule !== undefined) return libphonenumberModule;
+    libphonenumberModule = null;
+    try {
+      const globalCandidate = globalThis.libphonenumber;
+      if (globalCandidate && typeof globalCandidate.findPhoneNumbersInText === "function") {
+        libphonenumberModule = globalCandidate;
+        return libphonenumberModule;
+      }
+    } catch (_) { /* content-script worlds differ; fall through */ }
+    try {
+      if (typeof require === "function") {
+        const required = require("./vendor/libphonenumber.js");
+        if (required && typeof required.findPhoneNumbersInText === "function") libphonenumberModule = required;
+      }
+    } catch (_) { /* Node tests without the vendor file keep the base detector */ }
+    return libphonenumberModule;
+  }
+
+  // libphonenumber-js adds international (+country-code) recall and cued
+  // Indian landlines. Candidates never overlap existing PHONE findings, so
+  // this stage can only add matches, never remove or rewrite them.
+  function addLibphonenumberMatches(input, candidates) {
+    if (input.length > LIBPHONENUMBER_MAX_TEXT) return;
+    const lib = loadLibphonenumber();
+    if (!lib) return;
+    const collect = (defaultCountry, priority) => {
+      let found;
+      try { found = lib.findPhoneNumbersInText(input, defaultCountry); } catch (_) { return; }
+      for (const item of found || []) {
+        if (!item || !item.number) continue;
+        let valid = false;
+        try { valid = item.number.isValid(); } catch (_) { continue; }
+        if (!valid) continue;
+        const index = item.startsAt;
+        const end = item.endsAt;
+        if (!Number.isInteger(index) || !Number.isInteger(end) || end <= index) continue;
+        if (defaultCountry && !PHONE_CUE_TAIL.test(input.slice(Math.max(0, index - 48), index))) continue;
+        const value = input.slice(index, end);
+        if (!value.trim()) continue;
+        // International spans must be formatted like human-written numbers
+        // (a separator inside the span). Machine data (EDIFACT, logs) glues
+        // +country-code to an unbroken digit run, which libphonenumber still
+        // accepts as a valid number; bare +91 runs stay covered by the base
+        // Indian mobile rule.
+        if (!defaultCountry && !/[\s()\-./]/.test(value)) continue;
+        candidates.push({ type: "PHONE", value, index, end, priority });
+      }
+    };
+    // Without a default country only +country-code forms match, which are
+    // self-identifying: order numbers, dates, and IPs never carry one.
+    // Priority 6 ties the NANP rule so the fuller +code span wins by length.
+    if (input.includes("+")) collect(undefined, 6);
+    // Indian-context pass adds cued landlines like "Call 080-4123-4567".
+    collect("IN", 4);
+  }
 
   const VERHOEFF_D = [
     [0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],
@@ -97,7 +162,7 @@
     if (globalThis.crypto && typeof globalThis.crypto.getRandomValues === "function") {
       globalThis.crypto.getRandomValues(bytes);
     } else {
-      for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+      throw new Error("Secure randomness is required for privacy capabilities");
     }
     return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("").toUpperCase();
   }
@@ -232,55 +297,98 @@
       if (match.index === ocrPhone.lastIndex) ocrPhone.lastIndex += 1;
     }
 
-    const labelledPhone = /(?:phone(?:\s+number)?|mobile(?:\s+number)?|telephone|contact(?:\s+number)?|tel|whatsapp|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)\s*(\+?(?:\(\d{2,4}\)|\d)[\d(). -]{4,}\d)/giu;
+    // Label form: the separator follows the cue immediately (no filler words),
+    // so "Contact IPv4 Address:" can never pose as a phone label.
+    const labelledPhone = /(?:phone(?:\s+number)?|mobile(?:\s+number)?|telephone|contact(?:\s+(?:number|us))?|tel(?:ephone)?|whatsapp|fax|फोन|मोबाइल|संपर्क)\s*(?::|is|at|-)[ \t]*(\+?[+(\d][\d(). +-]{4,}\d(?:[ \t]*(?:x|ext\.?|extension)[ \t]*[\d-]+)?)|\b(?:call|contact|reach|dial|ring)\b(?:[ \t]+\w+){0,4}?[ \t]+at[ \t]+(\+?[+(\d][\d(). +-]{4,}\d)/giu;
     while ((match = labelledPhone.exec(normalizedInput)) !== null) {
-      const value = match[1].trim();
-      const digits = value.replace(/\D/g, "");
+      const value = (match[1] || match[2]).trim();
+      // Extension digits are part of the value but not of the phone-length gate.
+      const base = value.replace(/\s*(?:x|ext\.?|extension)\s*[\d-]+$/i, "");
+      const digits = base.replace(/\D/g, "");
       if (digits.length >= 7 && digits.length <= 15) {
-        const index = match.index + match[0].lastIndexOf(match[1]) + match[1].indexOf(value);
-        candidates.push({ type: "PHONE", value: input.slice(index, index + value.length), index, end: index + value.length, priority: 7 });
+        const index = match.index + match[0].lastIndexOf(value);
+        candidates.push({ type: "PHONE", value: input.slice(index, index + value.length), index, end: index + value.length, priority: 7, labelledOverride: true });
       }
       if (match.index === labelledPhone.lastIndex) labelledPhone.lastIndex += 1;
     }
 
-    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?))?|travel\s+document)\s*(?::|is|-)\s*([A-Z0-9][A-Z0-9-]{5,11})\b/giu;
+    // Distinctive NANP/toll-free shapes need no cue; dates and IDs cannot match them.
+    const nanpPhone = /(?<![\d-])(?:1[ -])?\(\d{3}\)[ -]?\d{3}[ -]?\d{4}(?!\d)|\b1[ -](?:800|888|877|866|855|844)[ -]\d{3}[ -]\d{4}\b/g;
+    while ((match = nanpPhone.exec(normalizedInput)) !== null) {
+      const digits = match[0].replace(/\D/g, "");
+      if (digits.length >= 10 && digits.length <= 11) {
+        candidates.push({ type: "PHONE", value: input.slice(match.index, match.index + match[0].length), index: match.index, end: match.index + match[0].length, priority: 6, labelledOverride: true });
+      }
+      if (match.index === nanpPhone.lastIndex) nanpPhone.lastIndex += 1;
+    }
+
+    const labelledPassport = /(?:passport(?:\s+(?:number|no\.?))?|travel\s+document)\s*(?:is|:|-|\s)\s*["']?\b([A-Z0-9][A-Z0-9-]{5,11})\b["']?/giu;
     while ((match = labelledPassport.exec(input)) !== null) {
       const value = match[1];
-      const index = match.index + match[0].lastIndexOf(value);
-      candidates.push({ type: "PASSPORT", value, index, end: index + value.length, priority: 7 });
+      if ((value.match(/\d/g) || []).length >= 3 && (value.match(/[A-Z]/gi) || []).length <= 3) {
+        const index = match.index + match[0].lastIndexOf(value);
+        candidates.push({ type: "PASSPORT", value, index, end: index + value.length, priority: 7, labelledOverride: true });
+      }
       if (match.index === labelledPassport.lastIndex) labelledPassport.lastIndex += 1;
     }
 
-    const labelledCard = /(?:credit\s+card|payment\s+card|card)(?:\s+(?:number|no\.?))?\s*(?::|is|-)\s*((?:\d[ -]?){11,18}\d)/giu;
+    const labelledCard = /(?:credit\s+card|payment\s+card|debit\s+card|card)(?:\s+(?:number|no\.?))?(?:[ \t]+\w+){0,3}[ \t]*(?::|is|-)[ \t]*((?:\d[ -]?){11,18}\d)/giu;
     while ((match = labelledCard.exec(input)) !== null) {
       const value = match[1].trim();
-      const index = match.index + match[0].lastIndexOf(match[1]);
-      candidates.push({ type: "CARD", value, index, end: index + value.length, priority: 7, labelledOverride: true });
+      const digits = value.replace(/\D/g, "");
+      if (digits.length >= 12 && digits.length <= 19) {
+        const index = match.index + match[0].lastIndexOf(match[1]);
+        candidates.push({ type: "CARD", value, index, end: index + value.length, priority: 7, labelledOverride: true });
+      }
       if (match.index === labelledCard.lastIndex) labelledCard.lastIndex += 1;
     }
 
-    const streetAddress = /\b\d{1,6}\s+[\p{L}\p{M}0-9.'’/-]+(?:\s+[\p{L}\p{M}0-9.'’/-]+){0,5}\s+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Terrace|Way|Boulevard|Blvd|Highway|Hwy|Motorway|Bypass|Lodge|Lakes|Villages|Parkways|Throughway|Tunnel|Path|Trafficway|Valley|Plains|Mission|Pines|Forks?|Circles?|Drives?|Union|Hill|Crest|Course|Extensions?|Gardens?|Groves?|Manor|Meadows|Junctions?|Centers?|Trace|Summit|Trail|Turnpike|Station|Plaza|Square|Key|Cape|Isle|Locks?|Shoals?|Ports?|Views?|Heights?|Corners?|Club)(?:,?\s+(?:Apt|Apartment|Suite|Unit)\.?\s*[A-Z0-9-]+)?(?:,\s*[\p{L}\p{M}.'’ -]{2,32}){0,2}\b/giu;
+    const streetAddress = /\b\d{1,6}[ \t]*,?[ \t]+[\p{L}\p{M}0-9.'’/-]+(?:[ \t]+[\p{L}\p{M}0-9.'’/-]+){0,5}[ \t]+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Terrace|Way|Boulevard|Blvd|Highway|Hwy|Motorway|Bypass|Lodge|Lakes|Lake|Villages|Village|Parkways|Throughway|Tunnel|Path|Trafficway|Valley|Plains|Mission|Pines|Forks?|Circles?|Circle|Drives?|Union|Hill|Hills|Crest|Course|Extensions?|Gardens?|Garden|Groves?|Grove|Manor|Meadows?|Junctions?|Centers?|Trace|Summit|Trail|Turnpike|Station|Plaza|Square|Key|Cape|Isle|Locks?|Shoals?|Ports?|Views?|Heights?|Corners?|Corner|Club|Forest|Creek|Spring|Springs|Alley|Ville|Mountain|Mount|Brooks|Forge|Landing|Ferry|Ways|Hollow|Ridge|Wells|Mills|Knolls|Crossing|Green|Point|Rest|Gap|Prairie|Bend|Row|Run|Branch|Loop|Court|Ct|Island|Parkway|Gate|Pike|Vista|Woods|Wynd|Common)(?![ \t]+[\p{Lu}][\p{L}\p{M}])(?:,?[ \t]+(?:Apt|Apartment|Suite|Unit|Studio|Flat)\.?[ \t]*[A-Z0-9-]+)?(?:,(?![ \t]*(?:Name|City|State|Zip|Postal|Email|Phone|Tel|Contact|Date|Account)\b)[ \t]*[\p{L}\p{M}0-9.'’ -]{2,32}){0,4}\b/giu;
     while ((match = streetAddress.exec(input)) !== null) {
       candidates.push({ type: "ADDRESS", value: match[0], index: match.index, end: match.index + match[0].length, priority: 6 });
       if (match.index === streetAddress.lastIndex) streetAddress.lastIndex += 1;
     }
 
+    // Cue-gated addresses may omit the street-suffix word ("street address at
+    // Vicolo Lucio, 2"). Captured text is validated in JS: it must contain a
+    // house number or postcode digit, or end with a street suffix.
+    const SUFFIX_TAIL = /(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Boulevard|Blvd|Highway|Hwy|Valley|Plains|Pines|Gardens?|Manor|Meadows?|Court|Terrace|Way|Lane|Drive|Park|Close|Walk|Row|View|Place|Loke|Gate|Wharf|Quay|Street|Gardens)$/i;
+    const cueAddress = /\b(?:street[ \t]+address|mailing[ \t]+address|residential[ \t]+address|billing[ \t]+address|address|residing[ \t]+at|located[ \t]+at)[ \t]*(?:of|is|:|-|at)?[ \t]*((?:\d{1,6}[ \t]*,?[ \t]*)?[A-Z0-9][\p{L}\p{M}0-9.'’-]*(?:[ \t]+[\p{L}\p{M}0-9.'’-]+){0,6}(?:,[ \t]*[\p{L}\p{M}0-9.'’ -]{2,32}){0,3})/giu;
+    while ((match = cueAddress.exec(input)) !== null) {
+      const value = match[1].trim();
+      const plausible = /\d/.test(value) || SUFFIX_TAIL.test(value);
+      // Letterless values are identifiers (IPv4, coordinates), not addresses.
+      const letterless = !/[A-Za-z\u00C0-\u024F\u0370-\u04FF]{2}/.test(value);
+      if (plausible && !letterless && !/^[<\[]/.test(value)) {
+        const index = match.index + match[0].lastIndexOf(match[1]) + match[1].indexOf(value);
+        candidates.push({ type: "ADDRESS", value, index, end: index + value.length, priority: 5 });
+      }
+      if (match.index === cueAddress.lastIndex) cueAddress.lastIndex += 1;
+    }
+
+    const NAME_CORE = "[\\p{Lu}][\\p{L}\\p{M}'’-]{1,}";
+    const NAME_TAIL = `(?:[ \\t]+(?:[\\p{Lu}]\\.[ \\t]+)?${NAME_CORE}){0,3}`;
     const labelledValues = [
-      ["PERSON", /(?:[Pp]atient|[Bb]eneficiary|[Rr]ecipient|[Aa]ccount [Hh]older|Full Legal Name|Full Name|Applicant Name|Provider Name|Account Name|Cardholder Name|Customer Name|[Bb]orrower|[Ss]hipper|[Uu]ser|[Ss]ignature)\s*(?:name\s*)?(?:is|:|-)\s*((?:Dr\.?\s+)?[\p{Lu}][\p{L}\p{M}'’-]{1,}(?:[ \t]+[\p{Lu}][\p{L}\p{M}'’-]{1,}){0,3}?)(?=[ \t]+(?:Date|Address|Phone|Email|Account|Policy|Street|Property|New Loan)\b\s*:|[.,;|\n]|$)/gu],
+      ["PERSON", new RegExp(`(?:[Pp]atient|[Bb]eneficiary|[Rr]ecipient|[Aa]ccount [Hh]older|Full Legal Name|Full Name|Applicant Name|Provider Name|Account Name|Cardholder Name|Customer Name|[Bb]orrower|[Ss]hipper|[Cc]onsignee|[Ss]eller|[Bb]uyer|[Cc]laimant|[Ii]nsured|[Pp]aid to|[Cc]ontact|[Uu]ser|[Ss]ignature|(?<![A-Za-z])[Nn]ame)\\s*(?:name\\s*)?(?:is|:|-)\\s*((?:Dr\\.?[ \\t]+)?${NAME_CORE}${NAME_TAIL})(?=[ \\t]+(?:Date|Address|Phone|Email|Account|Policy|Street|Property|New Loan)\\b\\s*:|[.,;|\\n]|$)`, "gu")],
       ["PERSON", /\bmy\s+name\s+is\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})/giu],
       ["PERSON", /\bDear\s+([A-Z][\p{L}\p{M}'’-]{1,}(?:\s+[A-Z][\p{L}\p{M}'’-]{1,}){0,3})(?=,)/gu],
+      ["PERSON", /\bbetween\s+((?:Dr\.?[ \t]+)?[\p{Lu}][\p{L}\p{M}'’-]{1,}(?:[ \t]+[\p{Lu}][\p{L}\p{M}'’-]{1,}){0,3})(?=[ \t]*[,.;\n])/gu],
+      ["PERSON", /\bSincerely,?[ \t\n]+((?:Dr\.?[ \t]+)?[\p{Lu}][\p{L}\p{M}'’-]{1,}(?:[ \t]+[\p{Lu}][\p{L}\p{M}'’-]{1,}){0,3})(?=[.,;\n]|$)/giu],
+      ["PERSON", /(?:^|\n)[ \t]*((?:Dr\.?[ \t]+)?[\p{Lu}][\p{L}\p{M}'’-]{2,})[ \t]*,(?=\n)/gmu],
       ["PERSON", /(?:मरीज|रोगी|लाभार्थी|प्राप्तकर्ता)\s*(?:का नाम\s*)?(?:है|:|-)\s*([\p{L}\p{M}'’-]{2,}(?:\s+[\p{L}\p{M}'’-]{2,}){1,3})/gu],
       ["ADDRESS", /(?:Residential address|residential address|Delivery address|delivery address|Home address|home address)\s*(?:is|:|-)\s*([^.;\n]{8,100})/gu],
       ["ADDRESS", /(?:घर का पता|डिलीवरी पता|आवासीय पता)\s*(?:है|:|-)?\s*([^.;\n]{5,100})/gu],
       ["HEALTH", /(?:Diagnosis|diagnosis|Medical condition|medical condition|Health condition|health condition|Allergy|allergy)\s*(?:is|:|-)\s*([^.;\n]{3,100})/gu],
       ["HEALTH", /(?:बीमारी|रोग|स्वास्थ्य स्थिति|एलर्जी)\s*(?:है|:|-)?\s*([^.;\n]{3,100})/gu]
     ];
+    const greetingBlocklist = /^(?:Hello|Hi|Hey|Thanks|Thank|Regards|Best|Kind|Please|Note|Warning|Subject|Date|From|To|OK|Okay|Done|Yes|No|Dear|Sincerely|Welcome|Sorry|Congratulations|Greetings)$/i;
     for (const [type, regex] of labelledValues) {
       regex.lastIndex = 0;
       while ((match = regex.exec(input)) !== null) {
         const value = match[1].trim();
         if (/^<[A-Z0-9_]+(?::[A-F0-9]{6,})?>/i.test(value)) continue;
         if (type === "PERSON" && /^(?:policyholder|borrower|customer|applicant|recipient|beneficiary|patient|user)$/i.test(value)) continue;
+        if (type === "PERSON" && greetingBlocklist.test(value)) continue;
         const index = match.index + match[0].lastIndexOf(match[1]) + match[1].indexOf(value);
         candidates.push({ type, value, index, end: index + value.length, priority: 6 });
         if (match.index === regex.lastIndex) regex.lastIndex += 1;
@@ -311,7 +419,14 @@
         if (match.index === def.regex.lastIndex) def.regex.lastIndex += 1;
       }
     }
+    EMAIL_BRACKETED.lastIndex = 0;
+    let bracketed;
+    while ((bracketed = EMAIL_BRACKETED.exec(normalizedInput)) !== null) {
+      // Below structured spans: a plain email detection wins overlaps.
+      candidates.push({ type: "EMAIL", value: input.slice(bracketed.index, bracketed.index + bracketed[0].length), index: bracketed.index, end: bracketed.index + bracketed[0].length, priority: 2 });
+    }
     addContextualMatches(input, normalizedInput, candidates);
+    addLibphonenumberMatches(input, candidates);
 
     const contextualValues = candidates.filter((item) => item.priority >= 6 && ["PERSON", "ADDRESS", "HEALTH"].includes(item.type));
     const lowerInput = input.toLocaleLowerCase();
@@ -322,7 +437,9 @@
       while (from < lowerInput.length) {
         const index = lowerInput.indexOf(lowerValue, from);
         if (index === -1) break;
-        candidates.push({ ...item, value: input.slice(index, index + item.value.length), index, end: index + item.value.length });
+        // Repeat copies stay below structured detections so a person name
+        // repeated inside an email/URL never erases that email detection.
+        candidates.push({ ...item, priority: 2, value: input.slice(index, index + item.value.length), index, end: index + item.value.length });
         from = index + item.value.length;
       }
     }
@@ -399,7 +516,7 @@
     return { safe, entities, sensitivity };
   }
 
-  const api = { AliasVault, findPII, redactText, luhn, verhoeff, hashText, normalizeType };
+  const api = { AliasVault, findPII, redactText, luhn, verhoeff, hashText, normalizeType, libphonenumberActive: () => loadLibphonenumber() !== null };
   root.PrivacyPII = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

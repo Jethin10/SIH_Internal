@@ -1,14 +1,19 @@
 "use strict";
 
 if (typeof importScripts === "function") {
+  importScripts("../lib/vendor/libphonenumber.js");
   importScripts("../lib/pii.js");
+  importScripts("../lib/privacy-egress.js");
   importScripts("../lib/action-policy.js");
+  importScripts("../lib/agent-protocol.js");
+  importScripts("../lib/browser-use-client.js");
   importScripts("../lib/action-risk.js");
   importScripts("../lib/domain-policy.js");
   importScripts("../lib/capture-queue.js");
   importScripts("chrome-adapter.js");
 }
 const PII = globalThis.PrivacyPII;
+const PrivacyEgress = globalThis.PrivacyEgress;
 const ActionPolicy = globalThis.PrivacyActionPolicy;
 const ActionRisk = globalThis.PrivacyActionRisk;
 const DomainPolicy = globalThis.PrivacyDomainPolicy;
@@ -30,6 +35,7 @@ const auditByTab = new Map();
 const egressByTab = new Map();
 const DEFAULT_SETTINGS = {
   aliasSeed: "",
+  agent: { kind: "legacy", endpoint: "http://127.0.0.1:8788", token: "" },
   provider: {
     endpoint: "https://openrouter.ai/api/v1/chat/completions",
     apiKey: "",
@@ -89,6 +95,7 @@ async function getSettings() {
   const settings = mergeSettings({
     ...persisted,
     provider: { ...persisted.provider, apiKey: secrets.apiKey || "", fallbackApiKeys: secrets.fallbackApiKeys || [] },
+    agent: { ...persisted.agent, token: secrets.agentToken || "" },
     userProfile: { ...DEFAULT_SETTINGS.userProfile, ...(secrets.userProfile || {}) }
   });
   if (!settings.aliasSeed) {
@@ -109,6 +116,7 @@ async function getSettings() {
 function mergeSettings(next) {
   return {
     aliasSeed: next?.aliasSeed || "",
+    agent: { ...DEFAULT_SETTINGS.agent, ...(next?.agent || {}) },
     provider: { ...DEFAULT_SETTINGS.provider, ...(next?.provider || {}) },
     userProfile: { ...DEFAULT_SETTINGS.userProfile, ...(next?.userProfile || {}) },
     policy: { ...DEFAULT_SETTINGS.policy, ...(next?.policy || {}) }
@@ -119,6 +127,7 @@ function publicSettings(settings) {
   const merged = mergeSettings(settings);
   return {
     aliasSeed: merged.aliasSeed,
+    agent: { kind: merged.agent.kind, endpoint: merged.agent.endpoint, token: "" },
     provider: { endpoint: merged.provider.endpoint, model: merged.provider.model, apiKey: "" },
     userProfile: { ...DEFAULT_SETTINGS.userProfile },
     policy: { ...merged.policy }
@@ -129,7 +138,7 @@ async function saveSettings(settings) {
   const merged = mergeSettings(settings);
   await Promise.all([
     chrome.storage.local.set({ gatewaySettings: publicSettings(merged) }),
-    chrome.storage.session.set({ gatewaySecrets: { apiKey: merged.provider.apiKey, fallbackApiKeys: merged.provider.fallbackApiKeys || [], userProfile: { ...merged.userProfile } } })
+    chrome.storage.session.set({ gatewaySecrets: { apiKey: merged.provider.apiKey, fallbackApiKeys: merged.provider.fallbackApiKeys || [], agentToken: merged.agent.token, userProfile: { ...merged.userProfile } } })
   ]);
   return merged;
 }
@@ -180,6 +189,10 @@ async function framesForTab(tabId) {
 }
 
 async function sendFrame(tabId, frameId, message) {
+  if (message.type === "SYNC_SETTINGS") {
+    const { aliasSeed, userProfile, policy } = message.settings;
+    message = { ...message, settings: { aliasSeed, userProfile, policy } };
+  }
   return chrome.tabs.sendMessage(tabId, message, { frameId });
 }
 
@@ -503,6 +516,8 @@ async function collectContext(tabId) {
     initialScanMs: 0,
     lastMutationMs: 0,
     framesObserved: pieces.length,
+    topFrameObserved: pieces.some(piece => piece.frameId === 0),
+    unavailableFrames: frames.length - pieces.length,
     rawPiiSent: null,
     graphComplete: true,
     pendingScanNodes: 0,
@@ -647,40 +662,7 @@ function compactPlannerHistory(history) {
 function assertEgressSafe(safeContext, egressInventory, settings, safeTask, history) {
   const payload = compactForPlanner(safeContext);
   const outbound = { task: safeTask, context: payload, history: compactPlannerHistory(history) };
-  const serialized = JSON.stringify(outbound).toLocaleLowerCase();
-  function locateExactValue(value, node, path) {
-    if (typeof node === "string") return node.toLocaleLowerCase().includes(value.toLocaleLowerCase()) ? path : null;
-    if (Array.isArray(node)) {
-      for (let index = 0; index < node.length; index += 1) {
-        const hit = locateExactValue(value, node[index], `${path}[${index}]`);
-        if (hit) return hit;
-      }
-      return null;
-    }
-    if (node && typeof node === "object") {
-      for (const [key, child] of Object.entries(node)) {
-        const hit = locateExactValue(value, child, path ? `${path}.${key}` : key);
-        if (hit) return hit;
-      }
-    }
-    return null;
-  }
-  const privateValues = [
-    ...(egressInventory || []).map((item) => ({ source: `graph:${item.type || "private"}:${item.field || "value"}`, value: item.value })),
-    ...Object.entries(settings.userProfile || {}).map(([key, value]) => ({ source: `profile:${key}`, value }))
-  ].map((item) => ({ ...item, value: String(item.value || "").trim() })).filter((item) => item.value.length >= 3);
-  for (const item of privateValues) {
-    if (serialized.includes(item.value.toLocaleLowerCase())) {
-      const path = locateExactValue(item.value, outbound, "outbound") || "serialized-payload";
-      throw new Error(`Egress barrier blocked a raw private value from ${item.source} at ${path}`);
-    }
-  }
-  const withoutCapabilities = (value) => String(value || "").replace(/<[A-Z0-9_]+:[A-F0-9]{24}>/g, "<PRIVATE_TOKEN>");
-  for (const element of payload.elements || []) {
-    const visibleText = withoutCapabilities(`${element.label || ""} ${element.value || ""}`);
-    if (PII.findPII(visibleText).length) throw new Error("Egress barrier found unclassified PII in safe context");
-  }
-  if (PII.findPII(withoutCapabilities(JSON.stringify(outbound))).length) throw new Error("Egress barrier found raw PII in the outbound request");
+  PrivacyEgress.inspectSerialized(JSON.stringify(outbound), PrivacyEgress.privateValues(settings, egressInventory));
   return payload;
 }
 
@@ -700,7 +682,7 @@ function extractJSON(text) {
   throw new Error("Agent response must contain exactly one JSON object");
 }
 
-async function remotePlan(tabId, task, safeContext, history, settings, egressInventory) {
+async function remotePlan(tabId, task, safeContext, history, settings, egressInventory, modelRequest = null) {
   // Receipts and measurement data stay local; only action outcomes help planning.
   history = compactPlannerHistory(history);
   const endpoint = settings.provider.endpoint.trim();
@@ -746,14 +728,18 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
   };
 
   body.messages[0].content += '\nShopping: after filling search, click Search/Go or press Enter and verify results. Compare products against the budget, open a suitable option, select required variants, add to cart when requested, and verify the cart item. On a product detail page, use its size/variant and Add to cart controls; scroll to find them instead of restarting search. Do not add bundles or extra products. Fill contact/delivery fields only with matching saved capabilities. Never invent missing details or put a complete address into separate address components. Scroll to expose omitted controls.';
-  const bodyText = JSON.stringify(body);
-  const knownPrivateValues = [
-    ...(egressInventory || []).map((item) => item.value),
-    ...Object.values(settings.userProfile || {})
-  ].map((value) => String(value || "").trim()).filter((value) => value.length >= 3);
-  const leakedKnown = knownPrivateValues.find((value) => bodyText.toLocaleLowerCase().includes(value.toLocaleLowerCase()));
-  const inspectedBodyText = bodyText.replace(/<[A-Z0-9_]+:[A-F0-9]{24}>/g, "<PRIVATE_TOKEN>");
-  if (leakedKnown || PII.findPII(inspectedBodyText).length) {
+  if (modelRequest) {
+    body.messages = modelRequest.messages;
+    body.response_format = {type:"json_schema",json_schema:{name:"browser_use_action",schema:modelRequest.responseSchema}};
+    body.max_tokens = 1800;
+  }
+  const providerBody = globalThis.StrawHatsAgentRuntime
+    ? globalThis.StrawHatsAgentRuntime.tuneProviderBody(endpoint, body)
+    : body;
+  const bodyText = JSON.stringify(providerBody);
+  try {
+    PrivacyEgress.inspectSerialized(bodyText, PrivacyEgress.privateValues(settings, egressInventory));
+  } catch (_) {
     const current = egressByTab.get(tabId) || {};
     updateEgressState(tabId, {
       status: "blocked_leak",
@@ -776,7 +762,9 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
   for (let attempt = 0; attempt < Math.max(3, keys.length); attempt++) {
   const controller = new AbortController();
   if (planningSession) planningSession.requestController = controller;
-  const timeoutId = setTimeout(() => controller.abort(), 30_000);
+  // Browser Use planning round-trips through the local bridge (up to 240s job
+  // lifetime), so allow slow free-tier models more time on that path only.
+  const timeoutId = setTimeout(() => controller.abort(), modelRequest ? 150_000 : 30_000);
   try {
     const headers = { "Content-Type": "application/json", "Accept": "application/json" };
     if (keys[keyIndex]) headers.Authorization = `Bearer ${keys[keyIndex]}`;
@@ -784,6 +772,7 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
       method: "POST",
       headers,
       body: bodyText,
+      redirect: "error",
       signal: controller.signal
     });
     const contentLength = Number(response.headers.get("content-length") || 0);
@@ -793,7 +782,7 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
     responseText = await response.text();
     if (new TextEncoder().encode(responseText).byteLength > 1_000_000) throw new Error("Agent API response exceeded the 1 MB safety limit");
   } catch (error) {
-    if (error?.name === "AbortError") throw new Error("Agent API timed out after 30 seconds");
+    if (error?.name === "AbortError") throw new Error(`Agent API timed out after ${modelRequest ? 150 : 30} seconds`);
     throw error;
   } finally {
     clearTimeout(timeoutId);
@@ -804,12 +793,14 @@ async function remotePlan(tabId, task, safeContext, history, settings, egressInv
     broadcast({type:'PLANNER_WAIT',tabId,message:'Trying the next locally saved provider key'});
     continue;
   }
-  if (response.status !== 429 || attempt >= 2) break;
+  const transient = response.status === 429 || [500,502,503,504].includes(response.status);
+  if (!transient || attempt >= 2) break;
   const retryHeader = response.headers.get("retry-after");
-  const seconds = retryHeader == null ? 60 : Number.isFinite(Number(retryHeader)) ? Number(retryHeader) : (Date.parse(retryHeader) - Date.now()) / 1000;
+  let seconds = retryHeader == null ? NaN : Number.isFinite(Number(retryHeader)) ? Number(retryHeader) : (Date.parse(retryHeader) - Date.now()) / 1000;
+  if (response.status !== 429) seconds = 2 + attempt * 2;
   if (!Number.isFinite(seconds) || seconds > 60) break;
   const waitMs = Math.max(1000, Math.ceil(seconds * 1000));
-  broadcast({ type: "PLANNER_WAIT", tabId, seconds: Math.ceil(waitMs / 1000) });
+  broadcast({ type: "PLANNER_WAIT", tabId, seconds: Math.ceil(waitMs / 1000), message: response.status === 429 ? undefined : `Provider returned ${response.status}. Retrying.` });
   const retryAt = Date.now() + waitMs;
   while (Date.now() < retryAt) {
     if (planningSession && (planningSession.cancelled || sessions.get(tabId) !== planningSession)) throw new Error("Task stopped during provider wait");
@@ -912,6 +903,12 @@ async function planAction(session, safeContext, egressInventory) {
   let localEndpoint = false;
   try { localEndpoint = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(endpoint).hostname); } catch (_) {}
   const hasRemote = settings.policy.cloudEnabled && Boolean(endpoint && settings.provider.model.trim() && (settings.provider.apiKey.trim() || localEndpoint));
+  if (settings.agent?.kind === "browser-use") {
+    if (!hasRemote) throw new Error("Configure and enable a model endpoint for Browser Use in Settings.");
+    return globalThis.PrivacyBrowserUseClient.plan({session,settings,safeContext,history:session.history,inventory:egressInventory,
+      requestModel: request => remotePlan(session.tabId,session.safeTask,safeContext,session.history,settings,egressInventory,request),
+      onObservation: observation => broadcast({type:"AGENT_OBSERVATION",tabId:session.tabId,observation})});
+  }
   if (hasRemote) return remotePlan(session.tabId, session.safeTask, safeContext, session.history, settings, egressInventory);
   return localPlan(session.task, safeContext, session.history);
 }
@@ -929,9 +926,16 @@ function taskAllowsAction(task, action, safeContext) {
   if (action.type === "navigate") {
     try {
       const url = new URL(action.url);
-      if (url.protocol === "https:" && url.pathname === "/" && !url.search && !url.hash && !url.username && !url.password) return true;
-      const destination = url.href;
-      return (String(task || "").match(/https?:\/\/[^\s<>"']+/g) || []).some(value => new URL(value).href === destination);
+      if (url.protocol !== "https:" && url.protocol !== "http:") return false;
+      if (url.username || url.password) return false;
+      // A model can choose a site's homepage or a URL explicitly supplied by the
+      // user. Same-origin deep links are equivalent to following a locally
+      // checked link on the site the agent is already working; cross-origin
+      // navigation stays outside task scope.
+      if (url.protocol === "https:" && url.pathname === "/" && !url.search && !url.hash) return true;
+      const taskUrls = String(task || "").match(/https?:\/\/[^\s<>"']+/g) || [];
+      if (taskUrls.some(value => { try { return new URL(value).href === url.href; } catch (_) { return false; } })) return true;
+      return Boolean(safeContext?.page?.origin) && url.origin === safeContext.page.origin;
     } catch (_) { return false; }
   }
   if (["done", "wait", "scroll", "visual_scan"].includes(action.type)) return true;
@@ -974,6 +978,12 @@ async function runSession(tabId) {
         if (session.cancelled || sessions.get(tabId) !== session) return;
         try {
           collected = await collectContext(tabId);
+          if (settings.agent?.kind === "browser-use" && (!collected.safeContext.metrics.topFrameObserved || !collected.safeContext.metrics.graphComplete || collected.safeContext.metrics.pendingScanNodes > 0)) {
+            if (Date.now() >= collectionDeadline) throw new Error("Privacy scan is incomplete. Wait for the page to settle, then try again.");
+            collected = null;
+            await new Promise(resolve => setTimeout(resolve,150));
+            continue;
+          }
           if (collected.safeContext.page?.origin && !collected.safeContext.elements.length && Date.now() < collectionDeadline) {
             collected = null;
             await new Promise(resolve => setTimeout(resolve,250));
@@ -1038,7 +1048,17 @@ async function runSession(tabId) {
           session.history.push({action, result:{status:"blocked",reason:"Local vision is disabled. Use the supplied structured controls and text."}});
           continue;
         }
-        const captured = await captureVisualContext(tabId, collected.safeContext, collected.egressInventory);
+        let captured;
+        try {
+          captured = await captureVisualContext(tabId, collected.safeContext, collected.egressInventory);
+        } catch (error) {
+          // A failed capture is not fatal: replan from the structured context.
+          const result = { status: "blocked", risk: "low", reason: `Visual scan unavailable. ${error.message}` };
+          result.receipt = recordAudit(tabId, session, safeContext, action, result);
+          session.history.push({ action, result });
+          broadcast({ type: "ACTION_RESULT", tabId, action, result });
+          continue;
+        }
         session.history.push({
           action,
           result: { status: "executed", localOnly: true, visualLines: captured.elements.length, ocrMs: captured.ocrMs }
@@ -1284,6 +1304,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         ...current,
         ...message.settings,
         provider: { ...current.provider, ...(message.settings?.provider || {}) },
+        agent: { ...current.agent, ...(message.settings?.agent || {}) },
         userProfile: { ...current.userProfile, ...(message.settings?.userProfile || {}) },
         policy: { ...current.policy, ...(message.settings?.policy || {}) }
       });

@@ -1,0 +1,208 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "sessionId",
+    "observationId",
+    "safeTask",
+    "page",
+    "elements",
+    "capabilities",
+    "history",
+    "supportedActions",
+    "omittedElements",
+    "unavailableFrames"
+  ],
+  "properties": {
+    "protocolVersion": {
+      "const": 1
+    },
+    "sessionId": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "observationId": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "safeTask": {
+      "type": "string",
+      "maxLength": 8000
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "path",
+        "title",
+        "epoch"
+      ],
+      "properties": {
+        "origin": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "frameId",
+          "version",
+          "role",
+          "label",
+          "value",
+          "semanticType",
+          "actionable",
+          "disabled",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "frameId": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "role": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "semanticType": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "actionable": {
+            "type": "boolean"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "structure",
+              "vision"
+            ]
+          }
+        }
+      },
+      "maxItems": 260
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "type",
+          "source"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "pattern": "^<[A-Z0-9_]+:[A-F0-9]{24}>$"
+          },
+          "type": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "source": {
+            "enum": [
+              "user",
+              "task"
+            ]
+          }
+        }
+      },
+      "maxItems": 100
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "status",
+          "reason"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
+      },
+      "maxItems": 8
+    },
+    "supportedActions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "click",
+          "fill",
+          "select",
+          "press",
+          "focus",
+          "scroll",
+          "wait",
+          "back",
+          "navigate",
+          "search_web",
+          "visual_scan",
+          "done"
+        ]
+      },
+      "maxItems": 20
+    },
+    "omittedElements": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unavailableFrames": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

@@ -40,6 +40,7 @@
       "match_about_blank": true,
       "run_at": "document_idle",
       "js": [
+        "lib/vendor/libphonenumber.js",
         "lib/pii.js",
         "lib/action-policy.js",
         "lib/action-risk.js",

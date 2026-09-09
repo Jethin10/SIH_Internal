@@ -8,26 +8,18 @@ const { chromium } = require('playwright');
 const { chromePath } = require('../scripts/browser-runtime');
 const root = path.resolve(__dirname, '..');
 const live = process.argv.includes('--live');
+const browserUse = process.argv.includes('--browser-use');
 const interactive = process.argv.includes('--interactive');
 const headed = process.argv.includes('--show') || interactive;
 const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server.address().port)));
-const shell = body => `<!doctype html><meta charset="utf-8"><title>Harbor Shoes · synthetic agent test</title><style>body{font:20px system-ui;max-width:850px;margin:50px auto;background:#f4f5f0;color:#172b28}button,input,select{font:inherit;padding:12px;margin:12px}a{display:block;padding:20px;background:white;margin:15px}h1{font-size:40px}</style><h1>Harbor Shoes</h1><p>Synthetic store. No real purchases or messages.</p>${body}`;
-const testProfile = {name:'Fixture Shopper',email:'vault.user@example.com',phone:'9876543210',address:'42 Fixture Lane, Test City'};
+const {testProfile} = require('../scripts/demo-store');
 async function main() {
   if (live && !process.env.OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY is required');
   const events = [], requests = [];
   let browser;
+  const bridge = browserUse ? await require('../scripts/browser-use-bridge').startBridge() : null;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'strawhats-shopping-'));
-  const store = http.createServer((req,res) => {
-    const url = new URL(req.url, 'http://localhost');
-    let body;
-    if (url.pathname === '/product') body = `<h2>Trail Runner</h2><p>Price: Rs 2400. Lightweight running shoes.</p><label>Size<select id="size"><option value="">Choose size</option><option>8</option><option>9</option><option>10</option></select></label><button id="add" onclick="if(document.querySelector('#size').value==='9')location.href='/cart';else document.querySelector('#notice').textContent='Choose size 9 first'">Add to cart</button><p id="notice"></p>`;
-    else if (url.pathname === '/cart') body = `<h2>Your cart</h2><p>Trail Runner · Size 9 · Rs 2400 · Quantity 1</p><form onsubmit="event.preventDefault();document.querySelector('#notice').textContent='Synthetic order submitted'"><label>Email<input type="email" id="email" autocomplete="email"></label><button id="submit">Place order</button></form><p id="notice">Order not submitted</p>`;
-    else if (url.pathname === '/results') body = `<h2>Running shoes</h2><a target="_blank" href="/product">Trail Runner · Rs 2400 · sizes 8, 9, 10</a><a href="/expensive">Premium Runner · Rs 4200</a>`;
-    else body = `<form method="get" action="/results" role="search"><input name="field-keywords" aria-label="Search Amazon.in" type="text"><input type="submit" value="Go"></form>`;
-    if(url.pathname === '/cart') body += '<label>Full name<input id="name" autocomplete="name"></label><label>Phone<input id="phone" type="tel" autocomplete="tel"></label><label>Street address<textarea id="address" autocomplete="street-address"></textarea></label>';
-    res.writeHead(200, {'Content-Type':'text/html'}).end(shell(body));
-  });
+  const store = require('../scripts/demo-store').createDemoStore();
   const planner = http.createServer(async (req,res) => {
     let raw = ''; for await (const chunk of req) raw += chunk;
     try {
@@ -36,11 +28,15 @@ async function main() {
       assert(!raw.includes('data:image'), 'Screenshot leaked');
       const body = JSON.parse(raw);
       const observation = JSON.parse(body.messages.at(-1).content);
+      if (browserUse) observation.context = {...observation,vaultCapabilities:observation.capabilities};
       requests.push({bytes:Buffer.byteLength(raw), path:observation.context.page.path});
       if (live) {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${process.env.OPENROUTER_API_KEY}`},body:JSON.stringify({...body,model:process.env.AGENT_MODEL || 'openrouter/free',max_tokens:2000,reasoning:{enabled:false},response_format:{type:'json_object'}}),signal:AbortSignal.timeout(45000)});
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${process.env.OPENROUTER_API_KEY}`},body:JSON.stringify({...body,model:process.env.AGENT_MODEL || 'openrouter/free',max_tokens:2000,reasoning:{enabled:false},response_format:{type:'json_object'}}),signal:AbortSignal.timeout(140000)});
         const text = await response.text();
-        console.log(JSON.stringify({providerStatus:response.status, model:process.env.AGENT_MODEL || 'openrouter/free'}));
+        let shape = {};
+        try { const d = JSON.parse(text); const c0 = d.choices?.[0] || {}; const m = c0.message || {}; shape = { topKeys: Object.keys(d), choices: d.choices?.length, c0Keys: Object.keys(c0), msgKeys: Object.keys(m), contentLen: (m.content || "").length, reasoningLen: (m.reasoning || "").length, finish: c0.finish_reason || undefined, err: d.error ? JSON.stringify(d.error).slice(0,200) : undefined }; } catch (_) { shape = { parse: "fail", len: text.length }; }
+        // Log status plus a short error snippet; planner payloads here use synthetic fixtures only.
+        console.log(JSON.stringify({providerStatus:response.status, model:process.env.AGENT_MODEL || 'openrouter/free', shape, errorHead: response.ok ? undefined : text.slice(0, 300)}));
         res.writeHead(response.status, {'Content-Type':'application/json'}).end(text);
         return;
       }
@@ -63,8 +59,8 @@ async function main() {
         const search = find('search amazon');
         next = search.value ? action('press',search,{key:'Enter'}) : action('fill',search,{value:'running shoes'});
       }
-      res.writeHead(200, {'Content-Type':'application/json'}).end(JSON.stringify({choices:[{message:{content:JSON.stringify(next)}}]}));
-    } catch(error) {res.writeHead(500, {'Content-Type':'application/json'}).end(JSON.stringify({error:error.message}));}
+      res.writeHead(200, {'Content-Type':'application/json'}).end(JSON.stringify({choices:[{message:{content:JSON.stringify(browserUse ? {evaluation_previous_goal:'Review current page',memory:'Follow the task',next_goal:'Continue',action:[{gateway:next}]} : next)}}]}));
+    } catch(error) {console.log(JSON.stringify({plannerError:error.message}));res.writeHead(500, {'Content-Type':'application/json'}).end(JSON.stringify({error:error.message}));}
   });
   try {
     const port = await listen(store), plannerPort = await listen(planner);
@@ -75,6 +71,7 @@ async function main() {
     await panel.exposeFunction('agentEvent',event => {events.push(event);if(['ACTION_PROPOSED','TASK_DONE','TASK_ERROR'].includes(event.type)) console.log(JSON.stringify(event));});
     await panel.evaluate(() => chrome.runtime.onMessage.addListener(m => {if(m?.source==='gateway-worker') window.agentEvent({type:m.type,action:m.action?.type,message:m.message,error:m.error,reason:m.result?.reason});}));
     await panel.evaluate(async ({endpoint,profile}) => chrome.runtime.sendMessage({type:'SAVE_SETTINGS',settings:{provider:{endpoint,model:'agent-shopping',apiKey:''},userProfile:profile,policy:{visualEnabled:false}}}),{endpoint:`http://127.0.0.1:${plannerPort}/v1/chat/completions`,profile:testProfile});
+    if (bridge) await panel.evaluate(async agent=>chrome.runtime.sendMessage({type:'SAVE_SETTINGS',settings:{agent}}),{kind:'browser-use',endpoint:bridge.endpoint,token:bridge.token});
     await page.bringToFront();
     if (interactive) {
       await panel.evaluate(async () => {
@@ -100,10 +97,10 @@ async function main() {
     assert.equal(await page.locator('#email').inputValue(),'vault.user@example.com');
     for(const [field,value] of Object.entries(testProfile)) assert.equal(await page.locator(`#${field}`).inputValue(),value);
     assert.equal(await page.locator('#notice').innerText(),'Order not submitted');
-    const report = {ok:true,mode:live?'real-model':'mock-planner',model:live?(process.env.AGENT_MODEL||'openrouter/free'):'deterministic test',platform:process.platform,browser:browser.browser()?.version(),seconds:(Date.now()-started)/1000,steps:events.filter(e=>e.type==='ACTION_PROPOSED').map(e=>e.action),requests,privateEmailFilled:true,orderNotSubmitted:true};
-    fs.writeFileSync(path.join(root,`artifacts/agent-shopping-${live?'live':'harness'}.json`),JSON.stringify(report,null,2));
-    await page.screenshot({path:path.join(root,'artifacts/agent-shopping.png')});
+    const report = {ok:true,mode:live?'real-model':'mock-planner',agent:browserUse?'browser-use/0.13.10':'legacy',model:live?(process.env.AGENT_MODEL||'openrouter/free'):'deterministic test',platform:process.platform,browser:browser.browser()?.version(),seconds:(Date.now()-started)/1000,steps:events.filter(e=>e.type==='ACTION_PROPOSED').map(e=>e.action),requests,privateEmailFilled:true,orderNotSubmitted:true};
+    fs.writeFileSync(path.join(root,`artifacts/${browserUse?'browser-use':'agent'}-shopping-${live?'live':'harness'}.json`),JSON.stringify(report,null,2));
+    await page.screenshot({path:path.join(root,browserUse?'artifacts/browser-use-shopping.png':'artifacts/agent-shopping.png')});
     console.log(JSON.stringify(report,null,2));
-  } finally {if(browser) await browser.close();store.close();planner.close();fs.rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
+  } finally {if(bridge) bridge.close(); if(browser) await browser.close();store.close();planner.close();fs.rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 }
 main().catch(error=>{console.error(error.message);process.exitCode=1;});

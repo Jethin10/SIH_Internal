@@ -82,6 +82,13 @@
       </section>
 
       <section class="agent-log">
+        <details>
+          <summary>What the agent received</summary>
+          <pre id="agentObservation" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto">No Browser Use observation sent yet.</pre>
+        </details>
+      </section>
+
+      <section class="agent-log">
         <div class="section-heading">
           <h2>Agent + local firewall</h2>
           <span id="stepBadge">idle</span>
@@ -111,6 +118,11 @@
       <details class="settings" id="settingsPanel">
         <summary>Settings</summary>
         <div class="settings-body">
+          <h3>Browser agent</h3>
+          <label>Agent<select id="agentKindInput"><option value="browser-use">Browser Use + local privacy</option><option value="legacy">Legacy demo agent</option></select></label>
+          <label>Local bridge<input id="agentEndpointInput" placeholder="http://127.0.0.1:8788" /></label>
+          <label>Session pairing token<input id="agentTokenInput" type="password" placeholder="Filled by the demo launcher" /></label>
+          <p class="hint">Browser Use receives sanitized text and proposes actions. Browser access, private values and approvals stay here.</p>
           <h3>OpenAI-compatible reasoning endpoint</h3>
           <label>Provider preset<select id="providerPreset"><option value="custom">Custom / existing settings</option><option value="openrouter">OpenRouter free router</option><option value="gemini">Google Gemini</option><option value="groq">Groq</option><option value="openai">OpenAI</option><option value="local">Local offline demo</option></select></label>
           <label>Endpoint<input id="endpointInput" placeholder="https://openrouter.ai/api/v1/chat/completions" /></label>
