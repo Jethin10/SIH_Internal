@@ -189,10 +189,24 @@ async function framesForTab(tabId) {
 }
 
 async function sendFrame(tabId, frameId, message) {
+  // Resolve the current frame at delivery time. A frame may navigate after the
+  // frame list was collected; unknown and opaque origins receive no profile.
+  let privateFrame = frameId === 0;
+  if (!privateFrame && ["SYNC_SETTINGS", "REGISTER_TASK_VALUES", "SET_TASK"].includes(message.type)) {
+    try {
+      const [tab, frame] = await Promise.all([
+        chrome.tabs.get(tabId), chrome.webNavigation.getFrame({ tabId, frameId })
+      ]);
+      const origin = new URL(frame.url).origin;
+      privateFrame = origin !== "null" && origin === new URL(tab.url).origin;
+    } catch (_) { privateFrame = false; }
+  }
   if (message.type === "SYNC_SETTINGS") {
     const { aliasSeed, userProfile, policy } = message.settings;
-    message = { ...message, settings: { aliasSeed, userProfile, policy } };
+    message = { ...message, settings: { aliasSeed, userProfile: privateFrame ? userProfile : {}, policy } };
   }
+  if (!privateFrame && message.type === "REGISTER_TASK_VALUES") message = { ...message, entities: [] };
+  if (!privateFrame && message.type === "SET_TASK") message = { ...message, task: "" };
   return chrome.tabs.sendMessage(tabId, message, { frameId });
 }
 
@@ -535,7 +549,7 @@ async function collectContext(tabId) {
     for (const element of piece.context.elements || []) {
       elements.push({ ...element, frameId: piece.frameId });
     }
-    for (const capability of piece.context.vaultCapabilities || []) vaultCapabilities.set(capability.token, capability);
+    for (const capability of piece.context.vaultCapabilities || []) vaultCapabilities.set(capability.token, { ...capability, frameId: piece.frameId });
     for (const preview of piece.localPreview || []) localPreview.push({ ...preview, frameId: piece.frameId });
     for (const item of piece.egressInventory || []) egressInventory.push({ ...item, frameId: piece.frameId });
     const m = piece.context.metrics || {};
@@ -885,8 +899,9 @@ function localPlan(task, safeContext, history) {
   if (/fill|enter|type|use my/.test(lower)) {
     for (const [word, capabilityType] of requestedTypes) {
       if (!lower.includes(word)) continue;
-      const capability = safeContext.vaultCapabilities.find((item) => item.type === capabilityType);
-      const target = bestElement(elements, (element) => element.role === "textbox" && (element.semanticType === word || element.label.toLowerCase().includes(word)));
+      const available = safeContext.vaultCapabilities.filter((item) => item.type === capabilityType);
+      const target = bestElement(elements, (element) => element.role === "textbox" && (element.semanticType === word || element.label.toLowerCase().includes(word)) && available.some(item => (item.frameId || 0) === (element.frameId || 0)));
+      const capability = target && available.find(item => (item.frameId || 0) === (target.frameId || 0));
       if (capability && target) return { type: "fill", targetId: target.id, expectedVersion: target.version, value: capability.token, reason: `Use local ${word} capability` };
     }
   }

@@ -7,6 +7,7 @@
 tmp/
 vendor-cache/
 dist/
+.runtime/
 *.zip
 *.xpi
 *-SHA256SUMS.txt

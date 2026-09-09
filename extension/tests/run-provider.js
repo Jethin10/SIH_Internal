@@ -71,7 +71,7 @@ async function main() {
     }
     assert(receipts.some((item) => item.localDecision === "done"), "Provider task did not complete within 90 seconds");
     assert.equal(await page.locator("#email").inputValue(), "vault.user@example.com", "Provider did not fill the private capability");
-    assert(requests.length > 0 && requests.every((item) => item.status === 200), "Provider requests did not succeed");
+    assert(requests.length > 0 && requests.every((item) => item.status === 200), `Provider requests did not succeed (statuses: ${requests.map(item => item.status).join(",") || "none"})`);
     for (const request of requests) {
       for (const raw of ["vault.user@example.com", "fixture.user@example.com"]) assert(!request.body.includes(raw), "Synthetic private value escaped tokenization");
       assert(!request.body.includes("data:image"), "Screenshot was sent to planner");

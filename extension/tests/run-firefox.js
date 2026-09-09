@@ -32,7 +32,7 @@ async function main() {
     const plannerPort = await listen(planner);
     await driver.manage().setTimeouts({ script: 45000 });
     await driver.manage().window().setRect({ width: 1200, height: 1000 });
-    const xpi = path.join(process.env.RELEASE_DIR || path.join(root, ".."), `StrawHats_Privacy_Gateway_v${manifest.version}-Firefox.xpi`);
+    const xpi = path.join(process.env.RELEASE_DIR || path.join(root, "../dist"), `StrawHats_Privacy_Gateway_v${manifest.version}-Firefox.xpi`);
     await driver.installAddon(xpi, true);
     await driver.get(`http://127.0.0.1:${port}/tests/integration.html`);
     const fixtureHandle = await driver.getWindowHandle();

@@ -1,5 +1,7 @@
 # StrawHats Privacy Gateway
 
+For the current Browser Use app and Windows installation, start with the [root README](../README.md). Run `npm start` from the repository root for a clean task and profile. The commands below also document the legacy offline agent. Current release evidence and limits are in [status](../docs/STATUS.md).
+
 Hackathon-ready Chrome and Firefox Manifest V3 prototype for SIH 26171. It is a generic browser privacy layer that mediates what an AI browser agent can see and do.
 
 ## What is implemented

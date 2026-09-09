@@ -1,4 +1,4 @@
-name: Demo verification
+name: Verification
 on: [push, pull_request]
 permissions:
   contents: read
@@ -25,6 +25,9 @@ jobs:
         if: runner.os == 'Linux'
         run: npx playwright install --with-deps chromium
       - run: npm test
+      - uses: astral-sh/setup-uv@v6
+      - run: npm run setup:browser-use
+      - run: npm run test:browser-use
       - run: npm run test:ui
       - run: npm run test:provider:harness
       - run: npm run evaluate

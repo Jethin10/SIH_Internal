@@ -54,7 +54,7 @@ const maxGraphApproxMb = Math.max(...benchmarks.results.map((item) => Number(ite
 
 const gates = {
   syntheticPiiRegression: pii.fp === 0 && pii.fn === 0 && pii.cases >= 1000,
-  independentPiiBaseline: independentPii.recall >= 0.40 && independentPii.cleanNegativeRate >= 0.80,
+  independentPiiBaseline: independentPii.tp >= 89 && independentPii.cleanNegativeRate === 1,
   adversarialBrowserE2E: e2e.ok === true,
   zeroKnownRawPiiEgress: e2e.egressStatus === "verified_zero",
   dangerousTaskScopeFalseAllows: e2e.adversarialScope === "unrelated cloud action blocked",

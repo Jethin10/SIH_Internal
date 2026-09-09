@@ -1,0 +1,65 @@
+{
+  "ok": true,
+  "mode": "mock-planner",
+  "agent": "browser-use/0.13.10",
+  "model": "deterministic test",
+  "platform": "win32",
+  "browser": "145.0.7632.6",
+  "seconds": 3.946,
+  "steps": [
+    "fill",
+    "press",
+    "click",
+    "select",
+    "click",
+    "fill",
+    "fill",
+    "fill",
+    "fill",
+    "done"
+  ],
+  "requests": [
+    {
+      "bytes": 33448,
+      "path": "/"
+    },
+    {
+      "bytes": 33527,
+      "path": "/"
+    },
+    {
+      "bytes": 33894,
+      "path": "/results"
+    },
+    {
+      "bytes": 34325,
+      "path": "/product"
+    },
+    {
+      "bytes": 34396,
+      "path": "/product"
+    },
+    {
+      "bytes": 35774,
+      "path": "/cart"
+    },
+    {
+      "bytes": 35807,
+      "path": "/cart"
+    },
+    {
+      "bytes": 35838,
+      "path": "/cart"
+    },
+    {
+      "bytes": 35772,
+      "path": "/cart"
+    },
+    {
+      "bytes": 35803,
+      "path": "/cart"
+    }
+  ],
+  "privateEmailFilled": true,
+  "orderNotSubmitted": true
+}

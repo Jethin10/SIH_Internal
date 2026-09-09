@@ -177,6 +177,10 @@ async function main() {
     expression: "document.querySelector('#email').value",
     returnByValue: true
   });
+  if (profileValue.result?.value !== "vault.user@example.com") {
+    const diagnostic = await cdp.send("Runtime.evaluate", {contextId: extensionContext.id, expression: "chrome.runtime.sendMessage({type: 'GET_AUDIT'})", awaitPromise: true, returnByValue: true});
+    console.error(JSON.stringify(diagnostic.result?.value));
+  }
   assert.strictEqual(profileValue.result?.value, "vault.user@example.com", "private email capability was not resolved locally into the matching field");
   await cdp.send("Runtime.evaluate", {
     contextId: mainContext.id,

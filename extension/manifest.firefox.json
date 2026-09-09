@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "StrawHats Privacy Gateway",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Local-first privacy mediation and action control for browser agents.",
   "permissions": [
     "storage",
@@ -9,7 +9,9 @@
     "activeTab",
     "webNavigation"
   ],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "page": "background/firefox-page.html"
   },
@@ -18,7 +20,10 @@
       "id": "privacy-gateway@strawhats.sih",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
-        "required": ["websiteContent", "searchTerms"]
+        "required": [
+          "websiteContent",
+          "searchTerms"
+        ]
       }
     }
   },
@@ -35,7 +40,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>"
+      ],
       "all_frames": true,
       "match_about_blank": true,
       "run_at": "document_idle",
@@ -55,7 +62,9 @@
         "vendor/tesseract-core/*",
         "vendor/lang/*"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

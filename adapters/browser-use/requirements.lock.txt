@@ -78,7 +78,7 @@ python-dateutil==2.9.0.post0
 python-docx==1.2.0
 python-dotenv==1.2.2
 python-multipart==0.0.32
-pywin32==312
+pywin32==312 ; sys_platform == "win32"
 referencing==0.37.0
 reportlab==4.4.9
 requests==2.33.0

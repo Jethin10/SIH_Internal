@@ -34,3 +34,6 @@ Local branch verification now includes macOS Apple Silicon with Node 22 LTS and 
 ## Boundaries that must remain explicit
 
 This is a defensible hackathon MVP, not a production security certification. Firefox runtime evidence is limited to the recorded macOS version and synthetic fixture. The team has not completed broad real-world PII/vision benchmarks, whole-browser resource measurements on multiple machines, privileged browser surfaces, browser-store signing/review, enterprise administration, or an independent security review. The new independent PII corpus is external but still synthetic and is not representative field data. Node 22 is the supported tooling runtime; Mozilla's linter crashes under Node 25 on this Mac. The pinned Mozilla linter also has transitive development-only audit advisories; no linter dependencies are shipped in the browser runtime archives.
+# Current release
+
+See [current project status](../docs/STATUS.md) for version 1.1.0. The material below records earlier demo milestones and is not the current release checklist.

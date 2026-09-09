@@ -1,5 +1,7 @@
 # Third-party notices
 
+The extension bundles libphonenumber-js 1.11.19 by catamphetamine under the MIT license. Its license is included at `lib/vendor/libphonenumber-LICENSE.txt`. The local planner installs Browser Use 0.13.10 and its locked dependencies through uv; their license metadata remains in the installed Python packages. Playwright and Chromium are downloaded during setup, not embedded in the source ZIP. Node is downloaded from nodejs.org with its upstream license intact.
+
 The visual OCR feature bundles Tesseract.js runtime files, Tesseract Core WebAssembly, English trained data, and regenerator-runtime components. Their original notices are retained beside the distributed files:
 
 - `vendor/tesseract/*.LICENSE.txt`

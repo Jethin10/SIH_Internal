@@ -1,48 +1,60 @@
-# StrawHats SIH 26171
+# StrawHats
 
-The product is pivoting to an agent-agnostic local privacy runtime, with Browser Use planned as the first external adapter. Read the [migration plan](docs/privacy-runtime/PLAN.md), [architecture inspection](docs/privacy-runtime/ARCHITECTURE.md), and [current progress](docs/privacy-runtime/PROGRESS.md) before implementation. The existing custom agent remains the working demo during migration.
+Type a browsing task. Browser Use plans the steps, and the local privacy gateway checks what it can see and do. Websites look and behave normally. Detected private values become opaque tokens; the browser resolves them locally when an allowed action needs them.
 
-This repository contains the StrawHats Privacy Gateway browser extension, its offline demo and evaluation suite, plus the internal team knowledge hub.
+## Install on Windows
 
-## Judge demo
+Download [StrawHats-Windows.zip](https://github.com/Jethin10/SIH_Internal/releases/latest/download/StrawHats-Windows.zip), extract it, then double-click **Setup.cmd**. Setup installs into your user folder and creates desktop and Start menu shortcuts. It downloads a private Node 22 runtime, Chromium, and the pinned Python planner. First installation needs internet access and several hundred MB of disk space. Windows x64 is the packaged target.
 
-Use Node **22 LTS** (22.13 or newer in the 22.x line). `.nvmrc` is provided; with nvm installed, run `nvm install` and `nvm use` from this directory. The Mozilla linter can crash under Node 25 on macOS.
+Open **StrawHats**, choose your provider in Settings, enter its model ID and your own API key, and save. Open a website in the main browser window, type your task in the privacy panel, then click **Run task** or press **Ctrl+Enter**. Use **Stop** to cancel. Consequential actions pause for confirmation.
+
+The browser starts with a fresh profile. Keys, private profile values, logins and task state are session-only. Close the whole browser to end the session. The launcher terminal remains open while the app runs. This release uses a ZIP setup script, not a signed EXE or browser-store installer.
+
+For an existing Chrome profile, load `extension/` using **chrome://extensions → Developer mode → Load unpacked**. The full Browser Use experience is easiest through the shortcut, which pairs the local planner automatically. Loading the extension alone does not start that planner.
+
+## Run from source
+
+Install Node **22.13 or newer in the 22.x line** and [uv](https://docs.astral.sh/uv/getting-started/installation/), then run from the repository root:
 
 ```sh
-cd extension
-npm ci
-npm run setup:browsers
-npm run demo
+npm run setup
+npm start
 ```
 
-Keep that terminal open, then follow [extension/DEMO.md](extension/DEMO.md). The command starts an offline OpenAI-compatible planner at `http://127.0.0.1:8787` and a synthetic checkout at `http://127.0.0.1:8765`. No provider key or internet connection is needed for the demo.
+`npm start` opens the real agent with an empty task and profile. `npm run demo` starts the separate synthetic shopping rehearsal. For the legacy offline demo, run `npm --prefix extension run demo`.
 
-## Verify the project
+## How privacy works
+
+```text
+Webpage → local detection and tokenization → sanitized observation
+        → Browser Use proposal → local action checks → browser
+```
+
+The Python adapter has no browser session or debugging connection. The extension owns model transport, provider credentials, local OCR, private capabilities and execution. External observations use the versioned protocol in `extension/lib/agent-protocol.js`. The planner can be replaced without changing the detector.
+
+Aliases are **tokenization, not encryption**. Private values remain in memory or browser session storage during use. Unknown PII can be missed. The current independent synthetic fixture measures **89/99 exact matches**, with no findings in its 20 clean documents. The separate generated regression corpus passes 1,000 positive cases and 254 negatives. These are test results, not a guarantee for arbitrary websites.
+
+Read [privacy](extension/PRIVACY.md), [security](extension/SECURITY.md), and [current status](docs/STATUS.md). Login, CAPTCHA, inaccessible browser pages, model errors and unsupported actions can require user intervention. Browser Use voice input is disabled because browser speech services bypass local transcript filtering.
+
+## Develop and verify
 
 ```sh
-cd extension
-npm ci
-npm run setup:browsers
 npm test
-npm run test:ui
-npm run test:provider:harness
-npm run evaluate
+npm run test:agent
+npm --prefix extension run test:ui
 npm run release
-npm run verify:release
-npm run lint:firefox
-npm run test:firefox
-
-cd ../strawhats-team-hub
-npm ci
-npm run build
+npm --prefix extension run verify:release
 ```
 
-The extension CI matrix is configured for Windows, macOS, and Linux. Browser tests use the pinned Playwright Chromium; regular Chrome is still supported for manually loading the extension, but no longer supports the automated side-loading flags. Firefox runtime checks use Selenium Manager to download a browser and driver into its test cache. Current measured results and their limits are in [extension/artifacts/EVALUATION-SUMMARY.md](extension/artifacts/EVALUATION-SUMMARY.md). See [extension/DEVELOPMENT.md](extension/DEVELOPMENT.md) for provider verification and platform details.
+The Browser Use journey uses the actual pinned Python planner with deterministic model responses on a local store. Live-model checks are separate and require a locally supplied key. See [development](extension/DEVELOPMENT.md) and [distribution](docs/DISTRIBUTION.md).
 
-## Main folders
+| Folder | Purpose |
+| --- | --- |
+| `extension/` | Browser integration, privacy core, panel, tests and legacy planner |
+| `adapters/browser-use/` | Restricted Browser Use planner and protocol schemas |
+| `scripts/` | Windows installation |
+| `docs/` | Current status, distribution, original intent and historical notes |
+| `strawhats-team-hub/` | Optional internal team website, not needed to run the agent |
+| `dist/` | Generated release files, ignored by Git |
 
-- `extension/` contains the Chrome and Firefox privacy gateway, local planner, tests, evidence, and release scripts.
-- `strawhats-team-hub/` contains the React/Vinext team knowledge map.
-- The root architecture document, presentations, and release archives preserve supporting project material.
-
-This is a hackathon prototype, not a production security certification. Read [extension/README.md](extension/README.md), [extension/SECURITY.md](extension/SECURITY.md), and [extension/PRIVACY.md](extension/PRIVACY.md) before reuse or distribution.
+Generated caches, browser profiles and release archives do not belong in source control. Publish downloadable files through GitHub Releases. The [original plan](docs/privacy-runtime/PLAN.md) remains the design record; [current status](docs/STATUS.md) describes this release.

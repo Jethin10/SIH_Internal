@@ -1,19 +1,18 @@
 {
   "name": "strawhats-privacy-gateway",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0 <23"
   },
   "devDependencies": {
     "adm-zip": "0.6.0",
-    "playwright": "1.58.2",
     "selenium-webdriver": "4.48.0",
     "web-ext": "10.6.0"
   },
   "description": "Local-first privacy mediation and action control for browser agents.",
   "scripts": {
-    "test": "node tests/agent-protocol.test.js && node tests/privacy-egress.test.js && node tests/egress-inventory.test.js && node tests/navigation.test.js && node tests/agent-features.test.js && node tests/agent-runtime.test.js && node tests/tooling.test.js && node tests/session-settings.test.js && node tests/capture-queue.test.js && node tests/planner-egress.test.js && node tests/visual-privacy.test.js && node tests/field-label.test.js && node tests/pii.test.js && node tests/pii-contextual.test.js && node tests/pii-independent.test.js && node tests/pii-libphonenumber.test.js && node tests/action-policy.test.js && node tests/action-risk.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
+    "test": "node tests/frame-privacy.test.js && node tests/agent-protocol.test.js && node tests/privacy-egress.test.js && node tests/egress-inventory.test.js && node tests/navigation.test.js && node tests/agent-features.test.js && node tests/agent-runtime.test.js && node tests/tooling.test.js && node tests/session-settings.test.js && node tests/capture-queue.test.js && node tests/planner-egress.test.js && node tests/visual-privacy.test.js && node tests/field-label.test.js && node tests/pii.test.js && node tests/pii-contextual.test.js && node tests/pii-independent.test.js && node tests/pii-libphonenumber.test.js && node tests/action-policy.test.js && node tests/action-risk.test.js && node tests/domain-policy.test.js && node tests/pii-eval.js && node tests/browser-packaging.test.js && node tests/server.test.js && node tests/server-security.test.js && node tests/run-e2e.js",
     "demo": "node scripts/demo.js",
     "demo:agent": "node tests/run-agent-shopping.js --interactive",
     "test:agent": "node tests/enter-action.test.js && node tests/shopping-runtime.test.js && node tests/run-agent-shopping.js",
@@ -37,10 +36,12 @@
     "lint:firefox": "node scripts/release.js lint",
     "capture:ui": "node scripts/capture-product-ui.js",
     "setup:browser-use": "node scripts/setup-browser-use.js",
-    "test:browser-use": "node tests/agent-protocol.test.js && node tests/run-agent-shopping.js --browser-use",
-    "demo:browser-use": "node scripts/browser-use-demo.js"
+    "test:browser-use": "node tests/browser-use-bridge.test.js && node tests/run-agent-shopping.js --browser-use",
+    "demo:browser-use": "node scripts/browser-use-demo.js",
+    "start": "node scripts/start.js"
   },
   "dependencies": {
-    "libphonenumber-js": "1.11.19"
+    "libphonenumber-js": "1.11.19",
+    "playwright": "1.58.2"
   }
 }

@@ -100,8 +100,9 @@ function localPlan(payload) {
     const kinds = [["email", "EMAIL"], ["phone", "PHONE"], ["name", "PERSON"], ["address", "ADDRESS"], ["upi", "UPI"]];
     for (const [word, type] of kinds) {
       if (!lower.includes(word)) continue;
-      const capability = (context.vaultCapabilities || []).find((item) => item.type === type);
-      const target = actionable(elements, (element) => element.role === "textbox" && (element.semanticType === word || String(element.label || "").toLowerCase().includes(word)));
+      const available = (context.vaultCapabilities || []).filter((item) => item.type === type);
+      const target = actionable(elements, (element) => element.role === "textbox" && (element.semanticType === word || String(element.label || "").toLowerCase().includes(word)) && available.some(item => (item.frameId || 0) === (element.frameId || 0)));
+      const capability = target && available.find(item => (item.frameId || 0) === (target.frameId || 0));
       if (capability && target) return { type: "fill", targetId: target.id, expectedVersion: target.version, value: capability.token, reason: `Use the local ${word} capability` };
     }
   }

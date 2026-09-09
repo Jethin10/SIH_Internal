@@ -892,7 +892,7 @@
     const merged = {
       ...settings,
       ...(nextSettings || {}),
-      userProfile: { ...(settings.userProfile || {}), ...(nextSettings?.userProfile || {}) },
+      userProfile: { ...(nextSettings?.userProfile ?? settings.userProfile ?? {}) },
       policy: { ...(settings.policy || {}), ...(nextSettings?.policy || {}) }
     };
     const fingerprint = JSON.stringify(merged);

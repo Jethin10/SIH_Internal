@@ -4,6 +4,10 @@ StrawHats Privacy Gateway processes webpage structure, screenshots, detected pri
 
 ## Data handling
 
+Browser Use receives only sanitized, versioned observations through an authenticated loopback adapter. The adapter has no browser session, raw DOM or screenshots, and receives no provider key. The extension owns outbound model requests and checks the serialized request before sending it. Foreign or unresolved child frames receive no saved profile or raw task values.
+
+Private aliases are random tokens, not encrypted storage. Original values remain in local memory and browser session storage while in use. Unknown PII may be missed by the detector. Current measurements and open work are recorded in [current status](../docs/STATUS.md).
+
 - Screenshots used for visual OCR remain inside the extension and are not placed in planner requests.
 - API keys and private-profile values are stored only in browser session storage and are cleared when the browser session ends or the user selects **Clear session secrets now**.
 - Persistent extension storage contains the alias seed, endpoint, model name, and policy preferences, but not the API key or private profile.
@@ -23,5 +27,7 @@ Cloud reasoning and visual processing can each be disabled in Settings. Users ca
 This hackathon release is not an independently certified security product. Detector and OCR limitations are documented in `PROJECT-STATUS.md` and `SIH-EVALUATION.md`.
 
 ## Optional voice input
+
+Voice input is disabled when Browser Use is selected. The following applies only to the legacy agent.
 
 Speak task uses the browser's speech recognition service, which may transmit audio to a browser-vendor service. Audio does not pass through this extension's model-context redaction. Recognition starts only when requested; transcripts require Run task before execution. Optional spoken completion uses browser or OS speech synthesis and reads a fixed status message. No audio recording is stored by the extension.

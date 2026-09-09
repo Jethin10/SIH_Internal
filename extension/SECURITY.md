@@ -11,6 +11,8 @@
 
 ## Implemented controls
 
+The Browser Use launcher creates a random pairing token for each local bridge and a disposable Chromium profile. The bridge binds to loopback, authenticates requests, checks origins, expires pending work, and rejects replayed or mismatched proposals. The extension checks final outbound payloads, observation completeness, target versions and action policy. These controls do not sandbox malicious software running as the same OS user.
+
 The server limits request and response bodies, enforces JSON, applies timeouts, rejects redirects, checks extension origins, and compares configured bearer tokens using a timing-safe operation. The extension validates planner output against a strict action schema and revalidates the page target immediately before execution.
 
 ## Reporting
