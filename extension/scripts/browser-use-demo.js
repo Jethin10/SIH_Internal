@@ -9,6 +9,38 @@ const { createDemoStore, testProfile } = require("./demo-store");
 const root = path.resolve(__dirname, "..");
 const task =
   "Find running shoes under Rs 3000 in size 9. Compare the options, add the affordable pair to the cart, fill all my saved contact fields, and stop before placing an order.";
+
+// Optional local provider file outside the repository, e.g.
+// %USERPROFILE%\.strawhats\provider.json with {endpoint, model, apiKey}.
+// It is preloaded into the session so users do not have to open Settings.
+function loadLocalProvider() {
+  const candidates = [
+    path.join(os.homedir(), ".strawhats", "provider.json"),
+    path.join(root, "..", "provider.local.json"),
+  ];
+  for (const file of candidates) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (
+        typeof parsed.apiKey === "string" &&
+        parsed.apiKey &&
+        typeof parsed.model === "string" &&
+        parsed.model
+      )
+        return {
+          endpoint:
+            typeof parsed.endpoint === "string" && parsed.endpoint
+              ? parsed.endpoint
+              : "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+          model: parsed.model,
+          apiKey: parsed.apiKey,
+        };
+    } catch (_) {
+      // Missing or invalid file is fine; the user can still use Settings.
+    }
+  }
+  return null;
+}
 async function main({ demo = true } = {}) {
   const executablePath = chromePath();
   const bridge = await startBridge();
@@ -44,19 +76,15 @@ async function main({ demo = true } = {}) {
     await panel.goto(
       `chrome-extension://${new URL(worker.url()).hostname}/sidepanel/index.html`,
     );
+    const localProvider = loadLocalProvider();
     await panel.evaluate(
-      async ({ agent, userProfile }) =>
+      async ({ agent, userProfile, provider }) =>
         chrome.runtime.sendMessage({
           type: "SAVE_SETTINGS",
           settings: {
             agent,
             userProfile,
-            provider: {
-              endpoint:
-                "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-              model: "",
-              apiKey: "",
-            },
+            provider,
             policy: { visualEnabled: true, maxSteps: 30 },
           },
         }),
@@ -67,6 +95,14 @@ async function main({ demo = true } = {}) {
           token: bridge.token,
         },
         userProfile: demo ? testProfile : {},
+        provider:
+          localProvider ||
+          {
+            endpoint:
+              "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+            model: "",
+            apiKey: "",
+          },
       },
     );
     await page.bringToFront();
@@ -84,11 +120,18 @@ async function main({ demo = true } = {}) {
     });
     await panel.reload();
     await panel.locator("#taskInput").fill(demo ? task : "");
-    await panel.locator("#settingsPanel").evaluate((el) => (el.open = true));
-    await panel.locator("#modelInput").scrollIntoViewIfNeeded();
-    console.log(
-      "StrawHats is ready. Save your provider, model and key in Settings, open a website in the main browser window, then type a task and press Ctrl+Enter. Close the browser or press Ctrl+C here to quit. Keys and private profile values last only for this session.",
-    );
+    if (localProvider) {
+      await panel.locator("#settingsPanel").evaluate((el) => (el.open = false));
+      console.log(
+        `StrawHats is ready with ${localProvider.model} preloaded from your local provider file. Open a website in the main browser window, type a task, and press Ctrl+Enter. Close the browser or press Ctrl+C here to quit. Keys and private profile values last only for this session.`,
+      );
+    } else {
+      await panel.locator("#settingsPanel").evaluate((el) => (el.open = true));
+      await panel.locator("#modelInput").scrollIntoViewIfNeeded();
+      console.log(
+        "StrawHats is ready. Save your provider, model and key in Settings, open a website in the main browser window, then type a task and press Ctrl+Enter. Close the browser or press Ctrl+C here to quit. Keys and private profile values last only for this session.",
+      );
+    }
     if (demo)
       console.log("Demo mode: the store and saved profile are synthetic.");
     let stopped = false;
